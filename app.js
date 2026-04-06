@@ -20,6 +20,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Routes
+app.use('/api/v1/auth', require('./routes/auth'));
+
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI);
 mongoose.connection.on('connected', function () {
