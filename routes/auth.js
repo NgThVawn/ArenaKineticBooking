@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 
 var { checkLogin } = require('../utils/authHandler');
 var { ChangePasswordValidator } = require('../utils/validator');
-var { sendPasswordResetMail } = require('../utils/mailHandler');
+var mailHandler = require('../utils/mailHandler');
 var { RegisterValidator, LoginValidator, ChangePasswordValidator, validatedResult } = require('../utils/validator');
 
 var userController = require('../controllers/users');
@@ -184,8 +184,10 @@ router.post('/forgot-password', async function (req, res) {
       var token = await userController.GenerateForgotPasswordToken(user._id);
       var resetUrl = (process.env.CLIENT_URL || 'http://localhost:5173') + '/reset-password/' + token;
       try {
-        await sendPasswordResetMail(user.email, resetUrl);
-      } catch (_) {}
+        await mailHandler.sendPasswordResetMail(user.email, resetUrl);
+      } catch (mailErr) {
+        console.error('Failed to send reset email:', mailErr.message);
+      }
     }
 
     // Luôn trả về success để tránh lộ email
