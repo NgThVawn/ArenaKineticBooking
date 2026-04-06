@@ -78,5 +78,27 @@ module.exports = {
     body('pricePerHour').notEmpty().withMessage('Giá thuê không được để trống')
       .bail().isFloat({ min: 0 }).withMessage('Giá thuê phải là số dương')
   ],
+  PriceRuleValidator: [
+    body('name').notEmpty().withMessage('Tên quy tắc giá không được để trống'),
+    body('dayType').notEmpty().withMessage('Loại ngày không được để trống')
+      .bail().isIn(['ALL', 'WEEKDAY', 'WEEKEND']).withMessage('Loại ngày không hợp lệ'),
+    body('startTime').notEmpty().withMessage('Giờ bắt đầu không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ bắt đầu phải có định dạng HH:mm'),
+    body('endTime').notEmpty().withMessage('Giờ kết thúc không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ kết thúc phải có định dạng HH:mm'),
+    body('pricePerHour').notEmpty().withMessage('Giá mỗi giờ không được để trống')
+      .bail().isFloat({ min: 0 }).withMessage('Giá phải là số dương'),
+    body('fieldId').notEmpty().withMessage('ID sân không được để trống')
+      .bail().isMongoId().withMessage('ID sân không hợp lệ')
+  ],
+
+  PriceQueryValidator: [
+    query('date').notEmpty().withMessage('Ngày không được để trống')
+      .bail().matches(DATE_REGEX).withMessage('Ngày phải có định dạng YYYY-MM-DD'),
+    query('start').notEmpty().withMessage('Giờ bắt đầu không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ bắt đầu phải có định dạng HH:mm'),
+    query('end').notEmpty().withMessage('Giờ kết thúc không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ kết thúc phải có định dạng HH:mm')
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
