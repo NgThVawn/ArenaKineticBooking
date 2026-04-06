@@ -6,6 +6,9 @@ var { FacilityValidator, validatedResult } = require('../utils/validator');
 var { uploadImage } = require('../utils/uploadHandler');
 
 var facilityController = require('../controllers/facilities');
+var { FacilityValidator, AvailabilityValidator, validatedResult } = require('../utils/validator');
+var fieldController = require('../controllers/fields');
+var blockedTimeController = require('../controllers/blockedTimes');
 
 // GET /api/v1/facilities  (public)
 router.get('/', optionalLogin, async function (req, res) {
@@ -131,6 +134,51 @@ router.delete('/:id/images/:imageId', checkLogin, checkRole('OWNER', 'ADMIN', 'S
   try {
     await facilityController.DeleteImage(req.params.imageId);
     return res.json({ success: true, message: 'Xóa ảnh thành công' });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
+// GET /api/v1/facilities/:facilityId/availability?date=YYYY-MM-DD  (public)
+router.get('/:facilityId/availability', AvailabilityValidator, validatedResult, async function (req, res) {
+  try {
+    var { date, fieldId } = req.query;
+    var { facilityId } = req.params;
+
+    var result = await facilityController.FindById(facilityId);
+    if (!result) return res.status(404).json({ success: false, message: 'Không tìm thấy cơ sở' });
+    var { facility } = result;
+
+    var fields = fieldId
+      ? [await fieldController.FindById(fieldId)]
+      : await fieldController.FindByFacility(facilityId);
+
+    var bookingModel = require('../schemas/bookings');
+    var availabilityByField = {};
+
+    for (var field of fields) {
+      if (!field) continue;
+      var bookings = await bookingModel.find({
+        field: field._id,
+        bookingDate: date,
+        status: { $in: ['PENDING', 'CONFIRMED'] },
+        isDeleted: false
+      }).select('startTime endTime status');
+
+      var blocked = await blockedTimeController.FindByField(field._id, date);
+
+      availabilityByField[field._id] = {
+        fieldName: field.name,
+        sportType: field.sportType,
+        openTime: facility.openTime,
+        closeTime: facility.closeTime,
+        occupied: [
+          ...bookings.map(function (b) { return { startTime: b.startTime, endTime: b.endTime, type: 'BOOKED' }; }),
+          ...blocked.map(function (b) { return { startTime: b.startTime, endTime: b.endTime, type: 'BLOCKED', reason: b.reason }; })
+        ]
+      };
+    }
+
+    return res.json({ success: true, data: availabilityByField });
   } catch (error) {
     return res.status(400).json({ success: false, message: error.message });
   }

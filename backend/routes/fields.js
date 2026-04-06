@@ -4,6 +4,8 @@ var router = express.Router();
 var { checkLogin, checkRole } = require('../utils/authHandler');
 var { FieldValidator, validatedResult } = require('../utils/validator');
 var { FieldValidator, PriceQueryValidator, validatedResult } = require('../utils/validator');
+var { FieldValidator, AvailabilityValidator, PriceQueryValidator, validatedResult } = require('../utils/validator');
+var blockedTimeController = require('../controllers/blockedTimes');
 
 var fieldController = require('../controllers/fields');
 var facilityController = require('../controllers/facilities');
@@ -119,6 +121,38 @@ router.get('/:fieldId/services', async function (req, res) {
     );
 
     return res.json({ success: true, data: services });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
+// GET /api/v1/fields/:fieldId/availability?date=YYYY-MM-DD  (public)
+router.get('/:fieldId/availability', AvailabilityValidator, validatedResult, async function (req, res) {
+  try {
+    var { date } = req.query;
+    var field = await fieldController.FindById(req.params.fieldId);
+    if (!field) return res.status(404).json({ success: false, message: 'Không tìm thấy sân' });
+
+    var bookingModel = require('../schemas/bookings');
+    var bookings = await bookingModel.find({
+      field: req.params.fieldId,
+      bookingDate: date,
+      status: { $in: ['PENDING', 'CONFIRMED'] },
+      isDeleted: false
+    }).select('startTime endTime status');
+
+    var blocked = await blockedTimeController.FindByField(req.params.fieldId, date);
+
+    return res.json({
+      success: true,
+      data: {
+        openTime: field.facility.openTime,
+        closeTime: field.facility.closeTime,
+        occupied: [
+          ...bookings.map(function (b) { return { startTime: b.startTime, endTime: b.endTime, type: 'BOOKED' }; }),
+          ...blocked.map(function (b) { return { startTime: b.startTime, endTime: b.endTime, type: 'BLOCKED', reason: b.reason }; })
+        ]
+      }
+    });
   } catch (error) {
     return res.status(400).json({ success: false, message: error.message });
   }
