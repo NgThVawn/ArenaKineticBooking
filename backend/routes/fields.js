@@ -3,6 +3,7 @@ var router = express.Router();
 
 var { checkLogin, checkRole } = require('../utils/authHandler');
 var { FieldValidator, validatedResult } = require('../utils/validator');
+var { FieldValidator, PriceQueryValidator, validatedResult } = require('../utils/validator');
 
 var fieldController = require('../controllers/fields');
 var facilityController = require('../controllers/facilities');
@@ -90,6 +91,17 @@ router.delete('/:id', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), as
 
     await fieldController.SoftDelete(req.params.id);
     return res.json({ success: true, message: 'Xóa sân thành công' });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
+// GET /api/v1/fields/:fieldId/price?date=...&start=...&end=...  (public)
+router.get('/:fieldId/price', PriceQueryValidator, validatedResult, async function (req, res) {
+  try {
+    var { date, start, end } = req.query;
+    var priceRuleController = require('../controllers/priceRules');
+    var result = await priceRuleController.CalculatePrice(req.params.fieldId, date, start, end);
+    return res.json({ success: true, data: result });
   } catch (error) {
     return res.status(400).json({ success: false, message: error.message });
   }
