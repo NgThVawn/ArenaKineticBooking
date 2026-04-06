@@ -100,5 +100,12 @@ module.exports = {
     query('end').notEmpty().withMessage('Giờ kết thúc không được để trống')
       .bail().matches(TIME_REGEX).withMessage('Giờ kết thúc phải có định dạng HH:mm')
   ],
+  ExtraServiceValidator: [
+    body('name').notEmpty().withMessage('Tên dịch vụ không được để trống'),
+    body('price').notEmpty().withMessage('Giá dịch vụ không được để trống')
+      .bail().isFloat({ min: 0 }).withMessage('Giá phải là số dương'),
+    body('facilityId').notEmpty().withMessage('ID cơ sở không được để trống')
+      .bail().isMongoId().withMessage('ID cơ sở không hợp lệ')
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };

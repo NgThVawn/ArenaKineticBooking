@@ -106,5 +106,22 @@ router.get('/:fieldId/price', PriceQueryValidator, validatedResult, async functi
     return res.status(400).json({ success: false, message: error.message });
   }
 });
+// GET /api/v1/fields/:fieldId/services  (public)
+router.get('/:fieldId/services', async function (req, res) {
+  try {
+    var extraServiceController = require('../controllers/extraServices');
+    var field = await fieldController.FindById(req.params.fieldId);
+    if (!field) return res.status(404).json({ success: false, message: 'Không tìm thấy sân' });
 
+    var services = await extraServiceController.FindByFieldSportType(
+      field.facility._id,
+      field.sportType
+    );
+
+    return res.json({ success: true, data: services });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 module.exports = router;
+
