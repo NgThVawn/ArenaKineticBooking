@@ -26,6 +26,8 @@ app.use('/api/v1/users', require('./routes/users'));
 app.use('/api/v1/facilities', require('./routes/facilities'));
 app.use('/api/v1/fields', require('./routes/fields'));
 app.use('/api/v1/price-rules', require('./routes/priceRules'));
+app.use('/api/v1/extra-services', require('./routes/extraServices'));
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI);
