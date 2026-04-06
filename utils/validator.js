@@ -55,6 +55,9 @@ module.exports = {
         return true;
       })
   ],
-
+  UpdateProfileValidator: [
+    body('fullName').optional().notEmpty().withMessage('Họ tên không được để trống'),
+    body('phone').optional()
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
