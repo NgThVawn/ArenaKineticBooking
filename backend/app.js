@@ -28,6 +28,7 @@ app.use('/api/v1/fields', require('./routes/fields'));
 app.use('/api/v1/price-rules', require('./routes/priceRules'));
 app.use('/api/v1/extra-services', require('./routes/extraServices'));
 app.use('/api/v1/blocked-times', require('./routes/blockedTimes'));
+app.use('/api/v1/bookings', require('./routes/bookings'));
 
 
 // MongoDB connection

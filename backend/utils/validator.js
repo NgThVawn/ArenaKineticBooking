@@ -117,5 +117,19 @@ module.exports = {
     body('endTime').notEmpty().withMessage('Giờ kết thúc không được để trống')
       .bail().matches(TIME_REGEX).withMessage('Giờ kết thúc phải có định dạng HH:mm')
   ],
+  BookingValidator: [
+    body('fieldId').notEmpty().withMessage('ID sân không được để trống')
+      .bail().isMongoId().withMessage('ID sân không hợp lệ'),
+    body('bookingDate').notEmpty().withMessage('Ngày đặt không được để trống')
+      .bail().matches(DATE_REGEX).withMessage('Ngày đặt phải có định dạng YYYY-MM-DD'),
+    body('startTime').notEmpty().withMessage('Giờ bắt đầu không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ bắt đầu phải có định dạng HH:mm'),
+    body('endTime').notEmpty().withMessage('Giờ kết thúc không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ kết thúc phải có định dạng HH:mm')
+      .bail().custom(function (value, { req }) {
+        if (value <= req.body.startTime) throw new Error('Giờ kết thúc phải sau giờ bắt đầu');
+        return true;
+      })
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };

@@ -1,3 +1,5 @@
+var blockedTimeModel = require('../schemas/blockedTimes');
+
 module.exports = {
   Create: async function (data) {
     var blocked = new blockedTimeModel(data);
