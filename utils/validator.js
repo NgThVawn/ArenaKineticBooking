@@ -44,5 +44,17 @@ module.exports = {
     body('password').notEmpty().withMessage('Mật khẩu không được để trống')
   ],
 
+  ChangePasswordValidator: [
+    body('oldPassword').notEmpty().withMessage('Mật khẩu cũ không được để trống'),
+    body('newPassword').notEmpty().withMessage('Mật khẩu mới không được để trống')
+      .bail().isStrongPassword(STRONG_PASSWORD_OPTIONS)
+      .withMessage('Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt'),
+    body('confirmPassword').notEmpty().withMessage('Xác nhận mật khẩu không được để trống')
+      .bail().custom(function (value, { req }) {
+        if (value !== req.body.newPassword) throw new Error('Mật khẩu xác nhận không khớp');
+        return true;
+      })
+  ],
+
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
