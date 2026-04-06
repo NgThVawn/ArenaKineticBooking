@@ -107,5 +107,15 @@ module.exports = {
     body('facilityId').notEmpty().withMessage('ID cơ sở không được để trống')
       .bail().isMongoId().withMessage('ID cơ sở không hợp lệ')
   ],
+   BlockedTimeValidator: [
+    body('fieldId').notEmpty().withMessage('ID sân không được để trống')
+      .bail().isMongoId().withMessage('ID sân không hợp lệ'),
+    body('date').notEmpty().withMessage('Ngày không được để trống')
+      .bail().matches(DATE_REGEX).withMessage('Ngày phải có định dạng YYYY-MM-DD'),
+    body('startTime').notEmpty().withMessage('Giờ bắt đầu không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ bắt đầu phải có định dạng HH:mm'),
+    body('endTime').notEmpty().withMessage('Giờ kết thúc không được để trống')
+      .bail().matches(TIME_REGEX).withMessage('Giờ kết thúc phải có định dạng HH:mm')
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
