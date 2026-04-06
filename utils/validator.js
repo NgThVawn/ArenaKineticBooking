@@ -70,5 +70,13 @@ module.exports = {
     query('date').notEmpty().withMessage('Ngày không được để trống')
       .bail().matches(DATE_REGEX).withMessage('Ngày phải có định dạng YYYY-MM-DD')
   ],
+   FieldValidator: [
+    body('name').notEmpty().withMessage('Tên sân không được để trống'),
+    body('sportType').notEmpty().withMessage('Loại thể thao không được để trống')
+      .bail().isIn(['FOOTBALL', 'TENNIS', 'BADMINTON', 'BASKETBALL', 'VOLLEYBALL', 'PICKLEBALL'])
+      .withMessage('Loại thể thao không hợp lệ'),
+    body('pricePerHour').notEmpty().withMessage('Giá thuê không được để trống')
+      .bail().isFloat({ min: 0 }).withMessage('Giá thuê phải là số dương')
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
