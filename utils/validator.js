@@ -59,5 +59,16 @@ module.exports = {
     body('fullName').optional().notEmpty().withMessage('Họ tên không được để trống'),
     body('phone').optional()
   ],
+  FacilityValidator: [
+    body('name').notEmpty().withMessage('Tên cơ sở không được để trống'),
+    body('address').notEmpty().withMessage('Địa chỉ không được để trống'),
+    body('city').notEmpty().withMessage('Thành phố không được để trống'),
+    body('openTime').optional().matches(TIME_REGEX).withMessage('Giờ mở cửa phải có định dạng HH:mm'),
+    body('closeTime').optional().matches(TIME_REGEX).withMessage('Giờ đóng cửa phải có định dạng HH:mm')
+  ],
+  AvailabilityValidator: [
+    query('date').notEmpty().withMessage('Ngày không được để trống')
+      .bail().matches(DATE_REGEX).withMessage('Ngày phải có định dạng YYYY-MM-DD')
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
