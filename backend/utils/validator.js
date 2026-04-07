@@ -131,5 +131,14 @@ module.exports = {
         return true;
       })
   ],
+   ReviewValidator: [
+    body('facilityId').notEmpty().withMessage('ID cơ sở không được để trống')
+      .bail().isMongoId().withMessage('ID cơ sở không hợp lệ'),
+    body('bookingId').notEmpty().withMessage('ID đặt sân không được để trống')
+      .bail().isMongoId().withMessage('ID đặt sân không hợp lệ'),
+    body('rating').notEmpty().withMessage('Đánh giá không được để trống')
+      .bail().isInt({ min: 1, max: 5 }).withMessage('Đánh giá phải từ 1 đến 5'),
+    body('comment').optional().isLength({ max: 1000 }).withMessage('Nhận xét không được vượt quá 1000 ký tự')
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
