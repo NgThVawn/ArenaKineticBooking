@@ -6,8 +6,17 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var cors = require('cors');
+var http = require('http');
+var { Server } = require('socket.io');
 
 var app = express();
+var server = http.createServer(app);
+var io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true
+  }
+});
 
 // Middleware
 app.use(cors({
@@ -32,6 +41,7 @@ app.use('/api/v1/bookings', require('./routes/bookings'));
 app.use('/api/v1/payments', require('./routes/payments'));
 app.use('/api/v1/reviews', require('./routes/reviews'));
 app.use('/api/v1/favorites', require('./routes/favorites'));
+app.use('/api/v1/notifications',  require('./routes/notifications'));
 
 
 
@@ -43,6 +53,9 @@ mongoose.connection.on('connected', function () {
 mongoose.connection.on('error', function (err) {
   console.error('MongoDB connection error:', err);
 });
+
+// Socket.io setup
+require('./utils/socketHandler')(io);
 
 // 404 handler
 app.use(function (req, res, next) {
@@ -57,4 +70,4 @@ app.use(function (err, req, res, next) {
   });
 });
 
-module.exports = app;
+module.exports = { app, server, io };
