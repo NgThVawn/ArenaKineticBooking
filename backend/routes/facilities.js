@@ -34,7 +34,25 @@ router.get('/:id', optionalLogin, async function (req, res) {
     if (!result) return res.status(404).json({ success: false, message: 'Không tìm thấy cơ sở' });
 
     var { facility, images } = result;
-    return res.json({ success: true, data: { facility, images } });
+
+    // Lấy danh sách sân
+    var fields = await fieldController.FindByFacility(req.params.id);
+
+    // Lấy đánh giá
+    var reviewController = require('../controllers/reviews');
+    var favoriteController = require('../controllers/favorites');
+    var reviewResult = await reviewController.FindByFacility(req.params.id, 1, 10);
+
+    // Kiểm tra user đã yêu thích chưa
+    var isFavorite = false;
+    if (req.user) {
+      isFavorite = await favoriteController.IsFavorite(req.user._id, req.params.id);
+    }
+
+    return res.json({
+      success: true,
+      data: { facility, images, fields, reviews: reviewResult, isFavorite }
+    });
   } catch (error) {
     return res.status(400).json({ success: false, message: error.message });
   }

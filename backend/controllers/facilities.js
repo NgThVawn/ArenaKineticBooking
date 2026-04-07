@@ -1,5 +1,6 @@
 var facilityModel = require('../schemas/facilities');
 var facilityImageModel = require('../schemas/facilityImages');
+var reviewModel = require('../schemas/reviews');
 
 
 module.exports = {
