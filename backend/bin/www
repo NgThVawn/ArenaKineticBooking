@@ -9,6 +9,27 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+var bookingController = require('../controllers/bookings');
+
+// Scheduler: tự động hoàn thành booking đã hết giờ (mỗi 5 phút)
+setInterval(async function () {
+  try {
+    await bookingController.CompleteExpiredBookings();
+  } catch (err) {
+    console.error('Scheduler error (CompleteExpiredBookings):', err.message);
+  }
+}, 5 * 60 * 1000);
+
+// Scheduler: tự động hủy booking PENDING quá hạn (mỗi 2 phút)
+setInterval(async function () {
+  try {
+    var timeout = parseInt(process.env.PAYMENT_TIMEOUT_MINUTES) || 10;
+    await bookingController.CancelExpiredPending(timeout);
+  } catch (err) {
+    console.error('Scheduler error (CancelExpiredPending):', err.message);
+  }
+}, 2 * 60 * 1000);
+
 function normalizePort(val) {
   var port = parseInt(val, 10);
   if (isNaN(port)) return val;
