@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản lý Người Dùng - Admin</title>
+
+    <!-- Fonts + Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#101827",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f5f7fb",
+                        "primary": "#b02f00",
+                        "surface": "#f3f6fb",
+                    },
+                    fontFamily: {
+                        headline: ["Epilogue"],
+                        body: ["Inter"],
+                        label: ["Lexend"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-surface font-body text-on-surface">
+
+<div id="sidebar-container"></div>
+
+<main class="ml-64 min-h-screen">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 flex justify-between items-center px-8 h-16 bg-surface/80 backdrop-blur border-b">
+        <div>
+            <h2 class="font-headline font-bold text-xl">Quản lý Tài Khoản</h2>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-label">Admin Dashboard</p>
+        </div>
+
+        <div class="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-700 rounded-full text-sm font-semibold">
+            <span class="material-symbols-outlined text-[18px]">group</span>
+            <span id="userCountBadge">0 người dùng</span>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="p-8 space-y-6">
+        <div id="messageBox" class="hidden px-4 py-3 rounded-xl text-sm font-semibold"></div>
+
+        <!-- TABLE -->
+        <section class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase text-slate-600">
+                    <tr>
+                        <th class="px-5 py-4 text-left">ID</th>
+                        <th class="px-5 py-4 text-left">Họ Tên</th>
+                        <th class="px-5 py-4 text-left">Email</th>
+                        <th class="px-5 py-4 text-left">SĐT</th>
+                        <th class="px-5 py-4 text-left">Quyền hạn</th>
+                        <th class="px-5 py-4 text-left">Trạng thái</th>
+                        <th class="px-5 py-4 text-left">Thao tác</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="usersTable" class="divide-y">
+                        <tr>
+                            <td colspan="7" class="text-center py-6 text-slate-500">Đang tải...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div id="paginationContainer" class="hidden px-6 py-4 border-t flex justify-between items-center bg-slate-50/30">
+                <span class="text-sm text-slate-500">
+                    Đang hiển thị <span id="pageInfo" class="font-bold text-slate-800"></span>
+                </span>
+
+                <div class="flex gap-1">
+                    <button id="prevBtn" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-200 rounded-lg">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+
+                    <div id="pageNumbers" class="flex gap-1"></div>
+
+                    <button id="nextBtn" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-200 rounded-lg">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+const BASE_URL = 'http://localhost:3000/api/v1';
+const token = localStorage.getItem('token');
+const SIDEBAR_CACHE_KEY = 'admin_sidebar_html_v1';
+const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+let currentPage = 1;
+let totalPages = 1;
+let allUsers = [];
+
+function normalizeRoles(roles) {
+    return (roles || []).map(r => (typeof r === 'string' ? r : r?.name)).filter(Boolean).map(r => String(r).toUpperCase());
+}
+
+const currentRoles = normalizeRoles(currentUser.roles);
+const isCurrentSuperAdmin = currentRoles.includes('SUPER_ADMIN');
+
+function showMessage(message, type = 'success') {
+    const box = document.getElementById('messageBox');
+    box.textContent = message;
+    box.className = `px-4 py-3 rounded-xl text-sm font-semibold ${type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`;
+    box.classList.remove('hidden');
+    setTimeout(() => box.classList.add('hidden'), 2500);
+}
+
+async function loadSidebar() {
+    const container = document.getElementById('sidebar-container');
+    let html = sessionStorage.getItem(SIDEBAR_CACHE_KEY);
+
+    if (!html) {
+        const candidates = ['./sidebar/sidebar.html', '/admin/sidebar/sidebar.html'];
+        for (const url of candidates) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) continue;
+                const content = await response.text();
+                if (!content.includes('sidebar-link')) continue;
+                html = content;
+                sessionStorage.setItem(SIDEBAR_CACHE_KEY, html);
+                break;
+            } catch (_) {}
+        }
+    }
+
+    if (!html) {
+        console.error('Không tải được sidebar');
+        return;
+    }
+
+    container.innerHTML = html;
+
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        const page = link.getAttribute('data-page');
+        if (page === 'users') {
+            link.classList.add('active', 'bg-orange-600', 'text-white');
+        }
+        link.addEventListener('click', () => {
+            sessionStorage.setItem('admin_sidebar_active', page || '');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active', 'bg-orange-600', 'text-white'));
+            link.classList.add('active', 'bg-orange-600', 'text-white');
+        });
+    });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '../auth/login.html';
+        });
+    }
+}
+
+async function authFetch(path, options = {}) {
+    const res = await fetch(BASE_URL + path, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+            ...(options.headers || {})
+        }
+    });
+
+    if (res.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '../auth/login.html';
+        return null;
+    }
+
+    return res.json();
+}
+
+async function loadUsers() {
+    const data = await authFetch(`/admin/users?page=${currentPage}&limit=5`);
+    if (!data?.success) {
+        showMessage(data?.message || 'Không tải được danh sách người dùng', 'error');
+        return;
+    }
+    allUsers = data.data.users;
+
+    document.getElementById('userCountBadge').textContent = `${data.data.total} người dùng`;
+
+    renderTable();
+    totalPages = Math.ceil(data.data.total / 5);
+    updatePagination(data.data.total);
+}
+
+function renderTable() {
+    const table = document.getElementById('usersTable');
+
+    table.innerHTML = allUsers.map(u => {
+        const roles = normalizeRoles(u.roles);
+        const isAdmin = roles.includes('ADMIN');
+        const isSuperAdmin = roles.includes('SUPER_ADMIN');
+        const isOwnerOrUser = roles.includes('OWNER') || roles.includes('FACILITY_OWNER') || roles.includes('USER');
+        const isSelf = String(u._id) === String(currentUser._id);
+
+        let actionButtons = '';
+
+        // Admin và SuperAdmin có thể khóa/mở khóa nhóm USER/OWNER.
+        if (!isSelf && !isSuperAdmin && isOwnerOrUser) {
+            actionButtons += u.isBanned
+                ? `<button class="action-btn bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs" data-action="unban" data-id="${u._id}">Mở khóa</button>`
+                : `<button class="action-btn bg-orange-600 text-white px-3 py-1 rounded-lg text-xs" data-action="ban" data-id="${u._id}">Khóa</button>`;
+        }
+
+        // Chỉ SuperAdmin mới thấy nút nâng/hạ quyền ADMIN.
+        if (isCurrentSuperAdmin && !isSelf && !isSuperAdmin) {
+            actionButtons += isAdmin
+                ? ` <button class="action-btn bg-amber-500 text-white px-3 py-1 rounded-lg text-xs" data-action="demote" data-id="${u._id}">Hạ quyền</button>`
+                : ` <button class="action-btn bg-slate-900 text-white px-3 py-1 rounded-lg text-xs" data-action="promote" data-id="${u._id}">Lên Admin</button>`;
+        }
+
+        return `
+        <tr class="hover:bg-slate-50">
+            <td class="px-5 py-4 text-slate-500 font-semibold">${u._id}</td>
+            <td class="px-5 py-4 font-semibold">${u.fullName}</td>
+            <td class="px-5 py-4 text-slate-600">${u.email}</td>
+            <td class="px-5 py-4 text-slate-600">${u.phone || ''}</td>
+
+            <td class="px-5 py-4">
+                <div class="flex gap-2 flex-wrap">
+                    ${roles.map(r => `
+                        <span class="bg-orange-50 text-orange-700 px-2 py-1 rounded-full text-xs font-semibold uppercase">${r}</span>
+                    `).join('')}
+                </div>
+            </td>
+
+            <td class="px-5 py-4">
+                ${u.isBanned ? `
+                    <span class="bg-slate-900 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">Bị khóa</span>
+                ` : `
+                    <span class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">Hoạt động</span>
+                `}
+            </td>
+
+            <td class="px-5 py-4">
+                <div class="flex gap-2 flex-wrap">
+                    ${actionButtons || '<span class="text-xs text-slate-400">Không khả dụng</span>'}
+                </div>
+            </td>
+        </tr>
+        `;
+    }).join('');
+
+    bindActionEvents();
+}
+
+function bindActionEvents() {
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const action = btn.getAttribute('data-action');
+            const id = btn.getAttribute('data-id');
+            if (!action || !id) return;
+
+            try {
+                let result = null;
+
+                if (action === 'ban') {
+                    const reason = prompt('Nhập lý do khóa tài khoản:', 'Vi phạm quy định');
+                    if (!reason || reason.trim().length < 3) return;
+                    result = await authFetch(`/admin/users/${id}/ban`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ reason: reason.trim() })
+                    });
+                }
+
+                if (action === 'unban') {
+                    result = await authFetch(`/admin/users/${id}/unban`, { method: 'PUT' });
+                }
+
+                if (action === 'promote') {
+                    const ok = confirm('Xác nhận nâng quyền người dùng này lên ADMIN?');
+                    if (!ok) return;
+                    result = await authFetch(`/admin/users/${id}/promote`, { method: 'PUT' });
+                }
+
+                if (action === 'demote') {
+                    const ok = confirm('Xác nhận hạ quyền ADMIN của người dùng này?');
+                    if (!ok) return;
+                    result = await authFetch(`/admin/users/${id}/demote`, { method: 'PUT' });
+                }
+
+                if (!result?.success) {
+                    showMessage(result?.message || 'Thao tác thất bại', 'error');
+                    return;
+                }
+
+                showMessage(result.message || 'Thao tác thành công');
+                await loadUsers();
+            } catch (error) {
+                showMessage(error?.message || 'Có lỗi xảy ra', 'error');
+            }
+        });
+    });
+}
+
+function updatePagination(total) {
+    const container = document.getElementById('paginationContainer');
+    const pageInfo = document.getElementById('pageInfo');
+    const pageNumbers = document.getElementById('pageNumbers');
+
+    if (totalPages <= 1) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    container.classList.remove('hidden');
+
+    const start = (currentPage - 1) * 5 + 1;
+    const end = Math.min(currentPage * 5, total);
+
+    pageInfo.innerHTML = `${start} - ${end} trong <span class="text-primary">${total}</span> người dùng`;
+
+    pageNumbers.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = i === currentPage
+            ? 'w-8 h-8 bg-primary text-white rounded-lg'
+            : 'w-8 h-8 hover:bg-slate-200 rounded-lg';
+
+        btn.onclick = () => {
+            currentPage = i;
+            loadUsers();
+        };
+
+        pageNumbers.appendChild(btn);
+    }
+
+    document.getElementById('prevBtn').onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadUsers();
+        }
+    };
+
+    document.getElementById('nextBtn').onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadUsers();
+        }
+    };
+}
+
+async function init() {
+    if (!token) {
+        window.location.href = '../auth/login.html';
+        return;
+    }
+
+    await loadSidebar();
+    await loadUsers();
+}
+
+init();
+</script>
+
+</body>
+</html>

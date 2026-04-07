@@ -31,6 +31,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve static files from frontend folder
+app.use(express.static(path.join(__dirname, '../frontend'), {
+  index: ['index.html'],
+  dotfiles: 'ignore'
+}));
+
 // Routes
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/users', require('./routes/users'));
@@ -50,7 +56,14 @@ app.use('/api/v1/owner', require('./routes/owner'));
 
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI);
+function connectMongo() {
+  return mongoose.connect(process.env.MONGODB_URI)
+    .catch(function (err) {
+      console.error('MongoDB initial connect failed:', err.message);
+      setTimeout(connectMongo, 5000);
+    });
+}
+connectMongo();
 mongoose.connection.on('connected', function () {
   console.log('MongoDB connected');
 });
@@ -60,6 +73,11 @@ mongoose.connection.on('error', function (err) {
 
 // Socket.io setup
 require('./utils/socketHandler')(io);
+
+// Fallback route: serve index.html for all non-API routes (for client-side routing)
+app.get('/{*path}', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
 
 // 404 handler
 app.use(function (req, res, next) {
