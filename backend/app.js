@@ -31,6 +31,8 @@ app.use('/api/v1/blocked-times', require('./routes/blockedTimes'));
 app.use('/api/v1/bookings', require('./routes/bookings'));
 app.use('/api/v1/payments', require('./routes/payments'));
 app.use('/api/v1/reviews', require('./routes/reviews'));
+app.use('/api/v1/favorites', require('./routes/favorites'));
+
 
 
 // MongoDB connection
