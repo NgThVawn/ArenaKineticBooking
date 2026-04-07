@@ -42,7 +42,7 @@ app.use('/api/v1/payments', require('./routes/payments'));
 app.use('/api/v1/reviews', require('./routes/reviews'));
 app.use('/api/v1/favorites', require('./routes/favorites'));
 app.use('/api/v1/notifications',  require('./routes/notifications'));
-
+app.use('/api/v1/invoices', require('./routes/invoices'));
 
 
 // MongoDB connection
