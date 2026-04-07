@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập — Arena Kinetic</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-body">
+
+    <div id="header-placeholder"></div>
+
+    <main id="login-content" class="flex-grow flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto w-full">
+
+        <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden rounded-3xl bg-surface-container-lowest shadow-[0_20px_40px_rgba(25,28,29,0.06)]">
+
+            <div class="relative hidden lg:block overflow-hidden min-h-[600px]">
+                <img class="absolute inset-0 w-full h-full object-cover" alt="Bóng rổ" src="https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2090&auto=format&fit=crop"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/40 to-transparent"></div>
+                <div class="absolute bottom-12 left-12 right-12">
+                    <h1 class="font-headline font-black text-5xl text-white leading-tight tracking-tighter mb-4">
+                        PRECISION<br/>IN MOTION.
+                    </h1>
+                    <p class="font-body text-white/80 text-lg max-w-md">
+                        Nền tảng đặt sân thể thao cao cấp dành cho những vận động viên chuyên nghiệp.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-surface-container-lowest">
+                <div class="mb-10">
+                    <h2 class="font-headline font-extrabold text-3xl text-on-surface tracking-tight mb-2">Đăng nhập</h2>
+                    <p class="font-body text-on-surface-variant">Chào mừng bạn trở lại với Arena Kinetic.</p>
+                </div>
+
+                <div id="error-message" style="display: none;" class="mb-6 p-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200" role="alert">
+                    <span class="font-semibold block mb-1">Đăng nhập thất bại!</span> 
+                    <span id="error-text">Email hoặc mật khẩu không chính xác.</span>
+                </div>
+
+                <form id="loginForm" class="space-y-6">
+
+                    <div class="space-y-2">
+                        <label class="font-label font-semibold text-sm text-on-surface tracking-wide" for="email">ĐỊA CHỈ EMAIL</label>
+                        <div class="relative group">
+                            <input class="w-full bg-surface-container-highest border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 rounded-lg px-4 py-3.5 text-on-surface placeholder:text-on-surface-variant/50 transition-all font-body"
+                                   id="email" name="email" placeholder="name@example.com" type="email" required/>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label font-semibold text-sm text-on-surface tracking-wide" for="password">MẬT KHẨU</label>
+                        <div class="relative group">
+                            <input class="w-full bg-surface-container-highest border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 rounded-lg px-4 pr-10 py-3.5 text-on-surface placeholder:text-on-surface-variant/50 transition-all font-body"
+                                   id="password" name="password" placeholder="••••••••" type="password" required/>
+
+                            <button type="button" class="toggle-password absolute right-0 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors focus:outline-none bg-transparent border-none p-1 cursor-pointer flex items-center justify-center" data-target="password">
+                                <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between font-body text-sm">
+                        <div class="flex items-center">
+                            <input class="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary" id="remember-me" name="remember-me" type="checkbox"/>
+                            <label class="ml-2 block text-on-surface-variant" for="remember-me">Ghi nhớ tôi</label>
+                        </div>
+                        <a class="font-semibold text-primary hover:text-orange-500 transition-colors no-underline" href="#">Quên mật khẩu?</a>
+                    </div>
+
+                    <button class="w-full bg-primary text-white font-headline font-bold py-4 rounded-xl shadow-lg shadow-primary/30 hover:shadow-xl hover:bg-orange-700 active:scale-[0.98] transition-all tracking-tight uppercase border-none cursor-pointer" type="submit">
+                        Đăng Nhập
+                    </button>
+                </form>
+
+                <div class="relative my-10">
+                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-outline-variant/30"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm font-label">
+                        <span class="bg-surface-container-lowest px-4 text-on-surface-variant">Hoặc đăng nhập bằng</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <a href="javascript:void(0)" onclick="alert('Chức năng Google Auth đang xây dựng!')" class="flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-surface-container border border-outline-variant/20 hover:bg-surface-variant transition-all group no-underline">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        <span class="font-body font-semibold text-on-surface text-sm">Google</span>
+                    </a>
+
+                    <a href="javascript:void(0)" onclick="alert('Chức năng Facebook Auth đang xây dựng!')" class="flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-surface-container border border-outline-variant/20 hover:bg-surface-variant transition-all group no-underline">
+                        <svg class="w-5 h-5 fill-[#1877F2]" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        <span class="font-body font-semibold text-on-surface text-sm">Facebook</span>
+                    </a>
+                </div>
+
+                <p class="mt-12 text-center font-body text-on-surface-variant">
+                    Bạn chưa có tài khoản?
+                    <a href="register.html" class="font-bold text-secondary hover:text-primary transition-colors underline decoration-2 underline-offset-4 ml-1">Đăng ký ngay</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+
+    <script>
+        // JS ẨN/HIỆN MẬT KHẨU
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); 
+                    const targetId = this.getAttribute('data-target');
+                    const inputField = document.getElementById(targetId);
+                    const icon = this.querySelector('.material-symbols-outlined');
+
+                    if (inputField.type === 'password') {
+                        inputField.type = 'text';
+                        icon.textContent = 'visibility'; 
+                        icon.classList.add('text-primary'); 
+                    } else {
+                        inputField.type = 'password';
+                        icon.textContent = 'visibility_off'; 
+                        icon.classList.remove('text-primary'); 
+                    }
+                });
+            });
+        });
+
+        // JS BẮN API ĐĂNG NHẬP
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = { 
+                email: document.getElementById('email').value, 
+                password: document.getElementById('password').value 
+            };
+            const errorDiv = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            
+            try {
+                const result = await apiLogin(data);
+                if (result.success || result.token) { 
+                    errorDiv.style.display = 'none'; // Ẩn lỗi nếu có
+                    alert("🎉 Đăng nhập thành công!");
+                    localStorage.setItem('token', result.data?.token || result.token || 'fake-token');
+                    localStorage.setItem('user', JSON.stringify(result.data || {}));
+                    
+                    // Đá về trang chủ ngoài cùng
+                    window.location.href = '../index.html'; 
+                } else {
+                    errorText.innerText = result.message || 'Email hoặc mật khẩu không chính xác.';
+                    errorDiv.style.display = 'block'; // Hiện bảng lỗi màu đỏ
+                }
+            } catch (error) {
+                errorText.innerText = "Lỗi kết nối Backend. Hãy kiểm tra Node.js!";
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký | Arena Kinetic</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-body">
+
+    <div id="header-placeholder"></div>
+
+    <main id="register-content" class="flex-grow flex flex-col md:flex-row overflow-hidden ">
+
+        <section class="relative hidden md:flex md:w-1/2 lg:w-3/5 items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 bg-slate-950">
+                <img class="w-full h-full object-cover opacity-60" alt="Tennis court" src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2070&auto=format&fit=crop"/>
+                <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-transparent to-transparent opacity-80"></div>
+                <div class="absolute -right-20 top-1/4 w-64 h-64 bg-primary rounded-full blur-[120px] opacity-20"></div>
+            </div>
+            <div class="relative z-10 px-12 lg:px-20 max-w-2xl">
+                <div class="mb-6 inline-flex items-center gap-2">
+                    <span class="text-3xl font-black text-primary italic font-headline tracking-tighter">Arena Kinetic</span>
+                </div>
+                <h1 class="text-5xl lg:text-7xl font-headline font-black text-white leading-[0.95] tracking-tighter mb-6 uppercase">
+                    JOIN THE ARENA.<br/>STEP INTO PRECISION.
+                </h1>
+                <p class="text-xl text-slate-300 font-body max-w-lg leading-relaxed">
+                    Bắt đầu hành trình chinh phục đam mê của bạn ngay hôm nay.
+                </p>
+            </div>
+        </section>
+
+        <section class="flex-1 flex items-center justify-center p-6 lg:p-12 bg-surface-container-low">
+            <div class="w-full max-w-md bg-surface-container-lowest rounded-xl p-8 lg:p-10 shadow-[0_20px_40px_rgba(25,28,29,0.06)] mt-8 md:mt-0">
+
+                <div class="mb-10 text-center md:text-left">
+                    <h2 class="text-3xl font-headline font-extrabold text-on-surface mb-2 tracking-tight">Đăng ký tài khoản</h2>
+                    <p class="text-on-surface-variant font-body">Trở thành thành viên của cộng đồng Arena Kinetic.</p>
+                </div>
+
+                <div id="api-error" class="hidden mb-6 p-4 text-sm text-red-800 rounded-lg bg-red-50 flex items-center gap-2 border border-red-200" role="alert">
+                    <span class="material-symbols-outlined text-[20px]">error</span>
+                    <span id="api-error-text" class="font-semibold">Lỗi đăng ký</span>
+                </div>
+
+                <form id="registerForm" class="space-y-5">
+
+                    <div class="space-y-1.5">
+                        <label class="font-label text-sm font-semibold text-on-surface ml-1">Họ và tên</label>
+                        <input type="text" id="fullName" required
+                               class="w-full bg-surface-container-high border-none rounded-lg px-4 py-3.5 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none border-b-2 border-transparent focus:border-primary"
+                               placeholder="Nhập họ và tên của bạn"/>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="font-label text-sm font-semibold text-on-surface ml-1">Địa chỉ Email</label>
+                        <input type="email" id="reg-email" required
+                               class="w-full bg-surface-container-high border-none rounded-lg px-4 py-3.5 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none border-b-2 border-transparent focus:border-primary"
+                               placeholder="example@gmail.com"/>
+                        <p id="email-client-error" class="hidden text-red-500 text-xs mt-1.5 font-medium flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">info</span>
+                            <span>Email không đúng định dạng</span>
+                        </p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="font-label text-sm font-semibold text-on-surface ml-1">Số điện thoại</label>
+                        <input type="tel" id="reg-phone" required inputmode="numeric" pattern="[0-9]{9,15}"
+                               class="w-full bg-surface-container-high border-none rounded-lg px-4 py-3.5 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none border-b-2 border-transparent focus:border-primary"
+                               placeholder="0901234567"/>
+                        <p id="phone-client-error" class="hidden text-red-500 text-xs mt-1.5 font-medium flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">info</span>
+                            <span>Số điện thoại chỉ bao gồm số</span>
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="font-label text-sm font-semibold text-on-surface ml-1">Mật khẩu</label>
+                            <div class="relative">
+                                <input type="password" id="reg-password" required minlength="8"
+                                       class="w-full bg-surface-container-high border-none rounded-lg pl-4 pr-12 py-3.5 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none border-b-2 border-transparent focus:border-primary"
+                                       placeholder="••••••••"/>
+                                <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors focus:outline-none bg-transparent border-none p-1 cursor-pointer flex items-center justify-center" data-target="reg-password">
+                                    <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                                </button>
+                            </div>
+                            <p id="password-client-error" class="hidden text-red-500 text-xs mt-1.5 font-medium flex items-start gap-1">
+                                <span class="material-symbols-outlined text-[14px] mt-0.5">info</span>
+                                <span>Mật khẩu phải có ít nhất 8 ký tự</span>
+                            </p>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="font-label text-sm font-semibold text-on-surface ml-1">Xác nhận mật khẩu</label>
+                            <div class="relative">
+                                <input type="password" id="reg-confirm-password" required
+                                       class="w-full bg-surface-container-high border-none rounded-lg pl-4 pr-12 py-3.5 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none border-b-2 border-transparent focus:border-primary"
+                                       placeholder="••••••••"/>
+                                <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors focus:outline-none bg-transparent border-none p-1 cursor-pointer flex items-center justify-center" data-target="reg-confirm-password">
+                                    <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                                </button>
+                            </div>
+                            <p id="confirm-password-client-error" class="hidden text-red-500 text-xs mt-1.5 font-medium flex items-start gap-1">
+                                <span class="material-symbols-outlined text-[14px] mt-0.5">info</span>
+                                <span>Mật khẩu không khớp</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 pt-2">
+                        <div class="flex items-center gap-3 bg-surface-container p-3 rounded-lg border border-outline-variant/30 hover:border-primary/50 transition-colors">
+                            <div class="flex items-center h-5">
+                                <input class="w-5 h-5 text-primary border-outline-variant rounded focus:ring-primary bg-surface-container-highest cursor-pointer"
+                                       id="ownerCheck" type="checkbox"/>
+                            </div>
+                            <label class="text-sm font-bold text-zinc-800 leading-tight cursor-pointer font-headline tracking-tight m-0" for="ownerCheck">
+                                Đăng ký làm <span class="text-primary">Chủ sân thể thao</span>
+                            </label>
+                        </div>
+
+                        <div class="flex items-start gap-3 px-1">
+                            <div class="flex items-center h-5">
+                                <input class="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary bg-surface-container-highest cursor-pointer"
+                                       id="terms" type="checkbox" required/>
+                            </div>
+                            <label class="text-sm text-on-surface-variant leading-tight cursor-pointer" for="terms">
+                                Tôi đồng ý với <a href="#" class="text-secondary font-medium hover:underline">Điều khoản</a> và <a href="#" class="text-secondary font-medium hover:underline">Chính sách</a>.
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full kinetic-gradient text-white font-headline font-bold py-4 rounded-xl shadow-[0_12px_24px_rgba(176,47,0,0.25)] hover:shadow-primary/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2 border-none cursor-pointer">
+                            ĐĂNG KÝ NGAY
+                        </button>
+                    </div>
+
+                </form>
+
+                <div class="relative my-8">
+                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-outline-variant/30"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm font-label">
+                        <span class="bg-surface-container-lowest px-4 text-on-surface-variant">Hoặc đăng ký bằng</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <a href="javascript:void(0)" onclick="alert('Đang bảo trì')" class="flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-surface-container border border-outline-variant/20 hover:bg-surface-variant transition-all no-underline">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        <span class="font-body font-semibold text-on-surface text-sm">Google</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="alert('Đang bảo trì')" class="flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-surface-container border border-outline-variant/20 hover:bg-surface-variant transition-all no-underline">
+                        <svg class="w-5 h-5 fill-[#1877F2]" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        <span class="font-body font-semibold text-on-surface text-sm">Facebook</span>
+                    </a>
+                </div>
+                <div class="mt-8 text-center">
+                    <p class="text-on-surface-variant text-sm font-body">
+                        Bạn đã có tài khoản?
+                        <a href="login.html" class="text-primary font-bold hover:underline ml-1">Đăng nhập ngay</a>
+                    </p>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Logic ẩn/hiện con mắt mật khẩu
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            const emailInput = document.getElementById('reg-email');
+            const emailClientError = document.getElementById('email-client-error');
+            const phoneInput = document.getElementById('reg-phone');
+            const phoneClientError = document.getElementById('phone-client-error');
+            const passwordInput = document.getElementById('reg-password');
+            const passwordClientError = document.getElementById('password-client-error');
+            const confirmPasswordInput = document.getElementById('reg-confirm-password');
+            const confirmPasswordClientError = document.getElementById('confirm-password-client-error');
+
+            function validateEmailRealtime() {
+                if (!emailInput || !emailClientError) return;
+                const value = emailInput.value.trim();
+                const isValidEmail = value === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                if (!isValidEmail) {
+                    emailClientError.classList.remove('hidden');
+                    emailInput.classList.add('border-red-500', 'focus:border-red-500');
+                    emailInput.setCustomValidity('Email không đúng định dạng');
+                } else {
+                    emailClientError.classList.add('hidden');
+                    emailInput.classList.remove('border-red-500', 'focus:border-red-500');
+                    emailInput.setCustomValidity('');
+                }
+            }
+
+            function validatePhoneRealtime() {
+                if (!phoneInput || !phoneClientError) return;
+                const value = phoneInput.value;
+                const isDigitsOnly = /^\d*$/.test(value);
+                if (!isDigitsOnly) {
+                    phoneClientError.classList.remove('hidden');
+                    phoneInput.classList.add('border-red-500', 'focus:border-red-500');
+                    phoneInput.setCustomValidity('Số điện thoại chỉ bao gồm số');
+                } else {
+                    phoneClientError.classList.add('hidden');
+                    phoneInput.classList.remove('border-red-500', 'focus:border-red-500');
+                    phoneInput.setCustomValidity('');
+                }
+            }
+
+            function validatePasswordRealtime() {
+                if (!passwordInput || !passwordClientError) return;
+                const value = passwordInput.value;
+                const isValid = value === '' || value.length >= 8;
+                if (!isValid) {
+                    passwordClientError.classList.remove('hidden');
+                    passwordInput.classList.add('border-red-500', 'focus:border-red-500');
+                    passwordInput.setCustomValidity('Mật khẩu phải có ít nhất 8 ký tự');
+                } else {
+                    passwordClientError.classList.add('hidden');
+                    passwordInput.classList.remove('border-red-500', 'focus:border-red-500');
+                    passwordInput.setCustomValidity('');
+                }
+                if(confirmPasswordInput.value !== '') validateConfirmPasswordRealtime();
+            }
+
+            function validateConfirmPasswordRealtime() {
+                if (!confirmPasswordInput || !confirmPasswordClientError) return;
+                const value = confirmPasswordInput.value;
+                const mainPassword = passwordInput.value;
+                const isValid = value === '' || value === mainPassword;
+                if (!isValid) {
+                    confirmPasswordClientError.classList.remove('hidden');
+                    confirmPasswordInput.classList.add('border-red-500', 'focus:border-red-500');
+                    confirmPasswordInput.setCustomValidity('Mật khẩu xác nhận không khớp');
+                } else {
+                    confirmPasswordClientError.classList.add('hidden');
+                    confirmPasswordInput.classList.remove('border-red-500', 'focus:border-red-500');
+                    confirmPasswordInput.setCustomValidity('');
+                }
+            }
+
+            if (emailInput) { emailInput.addEventListener('input', validateEmailRealtime); emailInput.addEventListener('blur', validateEmailRealtime); }
+            if (phoneInput) { phoneInput.addEventListener('input', validatePhoneRealtime); phoneInput.addEventListener('blur', validatePhoneRealtime); }
+            if (passwordInput) { passwordInput.addEventListener('input', validatePasswordRealtime); passwordInput.addEventListener('blur', validatePasswordRealtime); }
+            if (confirmPasswordInput) { confirmPasswordInput.addEventListener('input', validateConfirmPasswordRealtime); confirmPasswordInput.addEventListener('blur', validateConfirmPasswordRealtime); }
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const inputField = document.getElementById(targetId);
+                    const icon = this.querySelector('.material-symbols-outlined');
+                    if (inputField.type === 'password') {
+                        inputField.type = 'text';
+                        icon.textContent = 'visibility'; 
+                        icon.classList.add('text-primary'); 
+                    } else {
+                        inputField.type = 'password';
+                        icon.textContent = 'visibility_off'; 
+                        icon.classList.remove('text-primary');
+                    }
+                });
+            });
+
+            // 2. Logic Bắn API Đăng Ký
+            document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Nếu trình duyệt báo lỗi form (như pattern hay required) thì chặn lại
+                if (!this.checkValidity()) return; 
+
+                const data = {
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('reg-email').value,
+                    phone: document.getElementById('reg-phone').value,
+                    password: passwordInput.value,
+                    confirmPassword: confirmPasswordInput.value,
+                    registerAsOwner: document.getElementById('ownerCheck').checked
+                };
+
+                const errorDiv = document.getElementById('api-error');
+                const errorText = document.getElementById('api-error-text');
+
+                try {
+                    const result = await apiRegister(data);
+                    
+                    if (result.success) {
+                        errorDiv.classList.add('hidden');
+                        alert("🎉 Tạo tài khoản thành công! Xin mời đăng nhập.");
+                        window.location.href = 'login.html'; 
+                    } else {
+                        errorText.innerText = result.message || 'Email đã tồn tại hoặc lỗi đăng ký!';
+                        errorDiv.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    errorText.innerText = "Lỗi kết nối Backend. Hãy kiểm tra Node.js!";
+                    errorDiv.classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
