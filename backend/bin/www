@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+
+var { server } = require('../app');
+var debug = require('debug')('sport-booking:server');
+var port = normalizePort(process.env.PORT || '3000');
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+var bookingController = require('../controllers/bookings');
+
+// Scheduler: tự động hoàn thành booking đã hết giờ (mỗi 5 phút)
+setInterval(async function () {
+  try {
+    await bookingController.CompleteExpiredBookings();
+  } catch (err) {
+    console.error('Scheduler error (CompleteExpiredBookings):', err.message);
+  }
+}, 5 * 60 * 1000);
+
+// Scheduler: tự động hủy booking PENDING quá hạn (mỗi 2 phút)
+setInterval(async function () {
+  try {
+    var timeout = parseInt(process.env.PAYMENT_TIMEOUT_MINUTES) || 10;
+    await bookingController.CancelExpiredPending(timeout);
+  } catch (err) {
+    console.error('Scheduler error (CancelExpiredPending):', err.message);
+  }
+}, 2 * 60 * 1000);
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+  if (isNaN(port)) return val;
+  if (port >= 0) return port;
+  return false;
+}
+
+function onError(error) {
+  if (error.syscall !== 'listen') throw error;
+  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+  console.log('Server running on port ' + addr.port);
+}
