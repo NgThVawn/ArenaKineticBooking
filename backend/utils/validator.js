@@ -140,5 +140,13 @@ module.exports = {
       .bail().isInt({ min: 1, max: 5 }).withMessage('Đánh giá phải từ 1 đến 5'),
     body('comment').optional().isLength({ max: 1000 }).withMessage('Nhận xét không được vượt quá 1000 ký tự')
   ],
+  InvoiceValidator: [
+    body('actualStartTime').optional().matches(TIME_REGEX).withMessage('Giờ bắt đầu thực tế phải có định dạng HH:mm'),
+    body('actualEndTime').optional().matches(TIME_REGEX).withMessage('Giờ kết thúc thực tế phải có định dạng HH:mm'),
+    body('additionalItems').optional().isArray().withMessage('Danh sách phụ phí phải là mảng'),
+    body('additionalItems.*.description').notEmpty().withMessage('Mô tả phụ phí không được để trống'),
+    body('additionalItems.*.quantity').isInt({ min: 1 }).withMessage('Số lượng phải là số nguyên dương'),
+    body('additionalItems.*.unitPrice').isFloat({ min: 0 }).withMessage('Đơn giá phải là số dương')
+  ],
   // Các validator khác sẽ được thêm ở các bước tiếp theo
 };
