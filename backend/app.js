@@ -44,6 +44,7 @@ app.use('/api/v1/favorites', require('./routes/favorites'));
 app.use('/api/v1/notifications',  require('./routes/notifications'));
 app.use('/api/v1/invoices', require('./routes/invoices'));
 app.use('/api/v1/admin', require('./routes/admin'));
+app.use('/api/v1/owner', require('./routes/owner'));
 
 
 // MongoDB connection
