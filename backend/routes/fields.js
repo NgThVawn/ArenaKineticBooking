@@ -97,6 +97,31 @@ router.delete('/:id', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), as
     return res.status(400).json({ success: false, message: error.message });
   }
 });
+// PATCH /api/v1/fields/:id/status (owner)
+router.patch('/:id/status', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    var field = await fieldController.FindById(req.params.id);
+    if (!field) return res.status(404).json({ success: false, message: 'Không tìm thấy sân' });
+
+    var userRoles = req.user.roles.map(function (r) { return r.name; });
+    var isAdminOrSuper = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
+    if (!isAdminOrSuper && String(field.facility.owner._id) !== String(req.user._id)) {
+      return res.status(403).json({ success: false, message: 'Không có quyền chỉnh sửa sân này' });
+    }
+
+    var { status } = req.body;
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Vui lòng cung cấp trạng thái mới' });
+    }
+
+    // Dùng hàm Update có sẵn để chỉ cập nhật đúng trường status
+    var updated = await fieldController.Update(req.params.id, { status: status });
+
+    return res.json({ success: true, message: 'Cập nhật trạng thái sân thành công', data: updated });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 // GET /api/v1/fields/:fieldId/price?date=...&start=...&end=...  (public)
 router.get('/:fieldId/price', PriceQueryValidator, validatedResult, async function (req, res) {
   try {

@@ -48,5 +48,23 @@ router.delete('/:id', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), as
     return res.status(400).json({ success: false, message: error.message });
   }
 });
+// PUT /api/v1/blocked-times/:id  (owner)
+router.put('/:id', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    var blocked = await blockedTimeController.FindById(req.params.id);
+    if (!blocked) return res.status(404).json({ success: false, message: 'Không tìm thấy khung giờ chặn' });
 
+    // Lấy dữ liệu mới từ Frontend gửi lên
+    var { date, startTime, endTime, reason } = req.body;
+
+    // Cập nhật vào Database
+    var updated = await blockedTimeController.Update(req.params.id, {
+      date, startTime, endTime, reason
+    });
+
+    return res.json({ success: true, message: 'Cập nhật thành công', data: updated });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 module.exports = router;

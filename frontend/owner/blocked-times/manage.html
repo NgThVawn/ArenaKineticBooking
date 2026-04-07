@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chặn khung giờ | Arena Kinetic Owner</title>
+
+    <link href="../../css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../../js/tailwind-config.js"></script>
+
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* --- CSS CHO TIMELINE --- */
+        .timeline-wrapper {
+            overflow-x: auto; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
+            border: 1px solid #f1f5f9; border-radius: 12px;
+        }
+        .timeline-wrapper::-webkit-scrollbar { height: 6px; }
+        .timeline-wrapper::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+
+        .timeline-row { display: grid; border-bottom: 1px solid #f1f5f9; background: white; width: max-content; min-width: 100%; }
+        .timeline-row:last-child { border-bottom: none; }
+
+        .time-cell { height: 48px; border-right: 1px solid #f8fafc; position: relative; cursor: pointer; transition: all 0.2s ease; }
+        .time-header {
+            height: 36px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; color: #94a3b8; background: #f8fafc;
+            border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
+        }
+
+        .time-cell.available:hover { background-color: #ffedd5; }
+        .time-cell.occupied { background-color: #ef4444; cursor: not-allowed; background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px); }
+        .time-cell.blocked { background-color: #9ca3af; cursor: not-allowed; }
+        .time-cell.selected { background-color: #ea580c; box-shadow: inset 0 0 0 1px #c2410c; z-index: 10;}
+        .time-cell.in-range { background-color: #fed7aa; box-shadow: inset 0 1px 0 #fbd38d, inset 0 -1px 0 #fbd38d; }
+        .time-cell.available.ghost-range { background-color: #ffedd5; opacity: 0.7;}
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative flex flex-col">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10 shrink-0">
+        <div class="flex items-center gap-2 text-sm font-medium">
+            <span class="text-slate-400">Arena Manager</span>
+            <span class="text-slate-300">/</span>
+            <a href="../facilities/list.html" class="text-slate-500 hover:text-primary transition-colors no-underline">Cơ sở</a>
+            <span class="text-slate-300">/</span>
+            <a id="breadcrumbFacilityName" href="#" class="text-slate-500 hover:text-primary transition-colors no-underline">...</a>
+            <span class="text-slate-300">/</span>
+            <a id="breadcrumbFieldsLink" href="#" class="text-slate-500 hover:text-primary transition-colors no-underline">Sân</a>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-800 font-bold">Chặn khung giờ</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a id="btnBackToFields" href="#" class="text-sm text-orange-600 font-bold hover:underline flex items-center gap-1 no-underline">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Quay lại danh sách sân
+            </a>
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+                <div class="text-right">
+                    <p id="header-email" class="text-sm font-bold text-on-surface leading-none">...</p>
+                </div>
+                <div id="header-avatar-wrap" class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold overflow-hidden ring-2 ring-orange-500/20">
+                    <span id="header-initial">O</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 flex-1">
+        <div id="alertToast" class="fixed top-20 right-8 z-50 mb-6 p-4 rounded-xl shadow-lg transition-all duration-500 opacity-0 translate-y-[-20px] hidden" style="min-width: 300px;">
+            <div class="flex items-center gap-3">
+                <span id="toastIcon" class="material-symbols-outlined"></span>
+                <span id="toastText" class="font-bold text-sm"></span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+            
+            <section class="xl:col-span-2 space-y-6">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                        <h2 class="font-headline font-black text-3xl text-slate-900 tracking-tight">Chặn khung giờ</h2>
+                        <p class="text-slate-500 text-sm mt-1">Sân: <span id="displayFieldName" class="font-bold text-slate-900">Đang tải...</span></p>
+                    </div>
+
+                    <div id="dateFilterForm" class="flex items-center gap-2">
+                        <input type="date" id="filterDate" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-bold text-slate-700">
+                        <button id="btnViewAll" class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-colors cursor-pointer border-solid">Xem tất cả</button>
+                    </div>
+
+                    <div id="viewAllModeLabel" class="flex items-center gap-2 hidden">
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-500">Đang xem tất cả</span>
+                        <button id="btnBackToDate" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-colors cursor-pointer border-none">Trở về lọc theo ngày</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 p-6 md:p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <h3 class="font-headline font-bold text-lg text-slate-900 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-orange-600">touch_app</span> Kéo chọn trên biểu đồ
+                        </h3>
+                        <div class="flex gap-4 font-body text-[10px] font-bold uppercase tracking-wide">
+                            <div class="flex items-center gap-1.5 text-slate-500"><span class="w-3 h-3 rounded-sm border border-slate-200 bg-white"></span> Trống</div>
+                            <div class="flex items-center gap-1.5 text-slate-700"><span class="w-3 h-3 rounded-sm bg-red-500"></span> Bận/Đã chặn</div>
+                            <div class="flex items-center gap-1.5 text-slate-700"><span class="w-3 h-3 rounded-sm bg-orange-600"></span> Đang chọn</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-wrapper relative" id="timelineContainer">
+                        <div class="text-center py-10 text-slate-400 font-bold animate-pulse" id="loadingTimeline">
+                            Đang tải dữ liệu sân...
+                        </div>
+                        <div id="timelineContent" class="hidden overflow-x-visible">
+                            <div class="timeline-row bg-slate-50 sticky top-0 z-20" id="timeHeaderRow">
+                                </div>
+                            <div id="fieldsContainer">
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="button" id="resetSelectionBtn" class="hidden px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-colors cursor-pointer border-none uppercase tracking-widest font-label">
+                            Hủy chọn
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[1.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                            <tr class="bg-slate-50/50 border-b border-slate-100 text-[11px] uppercase tracking-wider text-slate-500 font-bold font-label">
+                                <th id="thDateCol" class="px-6 py-4 hidden">Ngày</th>
+                                <th class="px-6 py-4">Khung giờ chặn</th>
+                                <th class="px-6 py-4">Lý do</th>
+                                <th class="px-6 py-4 text-right">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody id="blocksTableBody" class="text-sm font-medium text-slate-700 divide-y divide-slate-50">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="space-y-4 sticky top-24">
+                <div class="bg-slate-900 p-6 md:p-8 rounded-[1.5rem] shadow-xl border border-slate-800 text-white relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-orange-500/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+                    <h3 class="font-headline font-black text-xl text-white mb-6 uppercase tracking-wider flex items-center gap-2 border-b border-white/10 pb-4">
+                        <span class="material-symbols-outlined text-orange-500">lock_clock</span> Khóa giờ mới
+                    </h3>
+
+                    <form id="createBlockForm" class="space-y-5">
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Ngày áp dụng</label>
+                            <input type="date" id="formDate" class="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none font-bold">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Khóa Từ giờ</label>
+                                <input type="time" id="startTime" readonly class="w-full bg-white/5 border border-white/10 text-orange-300 rounded-xl px-4 py-3 text-sm focus:outline-none font-black cursor-not-allowed text-center" placeholder="--:--">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Đến giờ</label>
+                                <input type="time" id="endTime" readonly class="w-full bg-white/5 border border-white/10 text-orange-300 rounded-xl px-4 py-3 text-sm focus:outline-none font-black cursor-not-allowed text-center" placeholder="--:--">
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] text-orange-400/80 italic font-medium m-0">* Vui lòng dùng chuột kéo chọn giờ trên biểu đồ bên trái.</p>
+
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Lý do chặn (Tùy chọn)</label>
+                            <input type="text" id="reason" class="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none font-medium placeholder:text-slate-400" placeholder="VD: Bảo trì sân, Quét dọn...">
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="w-full py-4 mt-2 bg-orange-600 text-white font-black font-headline uppercase tracking-widest text-sm rounded-xl hover:bg-orange-500 shadow-lg shadow-orange-600/30 transition-all border-none cursor-not-allowed opacity-50 flex items-center justify-center gap-2" disabled>
+                            Xác nhận khóa giờ
+                        </button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>
+
+<div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px]" onclick="closeDeleteModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden pointer-events-auto transform transition-all scale-95 opacity-0" id="deleteModalContent">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-600">lock_open</span>
+                <h3 class="m-0 text-base font-black text-slate-900 font-headline">Xác nhận bỏ chặn</h3>
+            </div>
+            <div class="px-5 py-4">
+                <p class="m-0 text-sm text-slate-600 leading-relaxed">
+                    Bạn có chắc muốn bỏ chặn khung giờ này? Sân sẽ lập tức được mở lại cho khách hàng đặt.
+                </p>
+            </div>
+            <div class="px-5 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-white bg-transparent cursor-pointer border-none">Hủy</button>
+                <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700 border-none cursor-pointer">Xác nhận Bỏ chặn</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/layout_owner.js"></script>
+<script src="../../js/owner_blocked_times.js"></script>
+
+</body>
+</html>

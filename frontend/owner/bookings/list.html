@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Quản lý Đơn đặt sân | Arena Kinetic Owner</title>
+    
+    <link href="/css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "primary": "#b02f00",
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Inter"],
+                        "label": ["Lexend"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10">
+        <div>
+            <h2 class="font-headline tracking-tight font-bold text-xl text-on-surface">Quản lý Đơn đặt sân</h2>
+            <p class="text-[11px] text-slate-500 font-label uppercase tracking-wider">Theo dõi, duyệt và xử lý đơn</p>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3 px-4 py-2 rounded-full bg-orange-50 text-orange-700 text-sm font-semibold">
+                <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+                <span id="headerBookingCount">0 đơn</span>
+            </div>
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+                <div class="text-right">
+                    <p id="header-email" class="text-sm font-bold text-on-surface leading-none">...</p>
+                </div>
+                <div id="header-avatar-wrap" class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold font-headline overflow-hidden ring-2 ring-orange-500/20">
+                    <span id="header-initial">O</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 space-y-8">
+        <div id="alertToast" class="fixed top-20 right-8 z-50 mb-6 p-4 rounded-xl shadow-lg transition-all duration-500 opacity-0 translate-y-[-20px] hidden" style="min-width: 300px;">
+            <div class="flex items-center gap-3">
+                <span id="toastIcon" class="material-symbols-outlined"></span>
+                <span id="toastText" class="font-bold text-sm"></span>
+            </div>
+        </div>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-orange-700">Tổng quan</span>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Tổng đơn hiển thị</p>
+                <h3 id="statTotalBookings" class="font-headline text-2xl font-black text-on-surface">0</h3>
+            </div>
+
+            <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hourglass_top</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Tập trung xử lý</p>
+                <h3 class="font-headline text-2xl font-black text-on-surface">Duyệt, hủy, phản hồi</h3>
+            </div>
+
+            <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Quy trình</p>
+                <h3 class="font-headline text-2xl font-black text-on-surface">Liền mạch</h3>
+            </div>
+        </section>
+
+        <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-100">
+                <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+                    <div>
+                        <h3 class="font-headline text-lg font-bold text-on-surface">Bộ lọc đơn đặt sân</h3>
+                        <p class="text-sm text-slate-500 mt-1">Lọc theo ngày đá và trạng thái để xử lý nhanh hơn.</p>
+                    </div>
+                    <button id="btnClearFilter" class="text-sm font-semibold text-orange-700 hover:text-orange-800 hidden border-none bg-transparent cursor-pointer">Xóa bộ lọc</button>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+                    <div class="lg:col-span-3 space-y-2">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lọc theo ngày đá</label>
+                        <input type="date" id="filterDate" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                    </div>
+
+                    <div class="lg:col-span-4 space-y-2">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Trạng thái đơn</label>
+                        <select id="filterStatus" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 cursor-pointer">
+                            <option value=""> Tất cả trạng thái </option>
+                            <option value="PENDING"> Chờ duyệt đơn</option>
+                            <option value="CANCEL_PENDING"> Đang chờ xác nhận hủy</option>
+                            <option value="CONFIRMED"> Đã duyệt </option>
+                            <option value="COMPLETED"> Đã hoàn thành</option>
+                            <option value="CANCELLED"> Đã hủy</option>
+                        </select>
+                    </div>
+
+                    <div class="lg:col-span-5 flex flex-wrap gap-3">
+                        <button id="btnApplyFilter" class="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition-colors border-none cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">filter_alt</span>
+                            <span>Áp dụng</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-headline text-lg font-bold text-on-surface">Danh sách đơn đặt sân</h3>
+                    <p class="text-sm text-slate-500">Theo dõi, duyệt và xử lý yêu cầu của khách hàng.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-600 uppercase tracking-wider text-xs">
+                    <tr>
+                        <th class="px-5 py-4 text-left">Mã đơn</th>
+                        <th class="px-5 py-4 text-left">Sân tập</th>
+                        <th class="px-5 py-4 text-left">Thời gian đá</th>
+                        <th class="px-5 py-4 text-right">Tổng tiền</th>
+                        <th class="px-5 py-4 text-left">Ghi chú</th>
+                        <th class="px-5 py-4 text-left">Trạng thái</th>
+                        <th class="px-5 py-4 text-center">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100">
+                        <tr><td colspan="7" class="py-10 text-center"><span class="material-symbols-outlined animate-spin text-slate-400">sync</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="paginationContainer" class="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30 hidden">
+                <span class="text-sm text-slate-500">
+                    Đang hiển thị <span id="pageInfo" class="font-bold text-slate-800"></span>
+                </span>
+                <div class="flex items-center gap-1">
+                    <button id="btnPrev" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors border-none bg-transparent cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                    </button>
+                    <div id="pageNumbers" class="flex gap-1"></div>
+                    <button id="btnNext" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors border-none bg-transparent cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<div id="bookingConfirmModal" class="fixed inset-0 z-[95] hidden items-center justify-center px-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeConfirmModal()"></div>
+    <div class="relative z-10 w-full max-w-md rounded-3xl bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.25)] border border-slate-100 transform transition-all scale-95 opacity-0" id="confirmModalContent">
+        <div class="flex items-start gap-4">
+            <div id="bookingConfirmIcon" class="mt-1 h-11 w-11 rounded-xl flex items-center justify-center bg-emerald-100 text-emerald-700">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            </div>
+            <div class="flex-1">
+                <h4 id="bookingConfirmTitle" class="font-headline text-xl font-bold text-slate-900">Xác nhận thao tác</h4>
+                <p id="bookingConfirmMessage" class="mt-2 text-sm leading-6 text-slate-600">Bạn có chắc chắn muốn tiếp tục thao tác này?</p>
+            </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-3">
+            <button onclick="closeConfirmModal()" type="button" class="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors border-none cursor-pointer">Hủy</button>
+            <button id="bookingConfirmSubmit" type="button" class="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors border-none cursor-pointer">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<div id="cancelBookingModal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onclick="closeCancelModal()"></div>
+    <div class="relative z-10 w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 opacity-0" id="cancelModalContent">
+        <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-5 text-white flex items-start justify-between gap-4">
+            <div>
+                <p class="text-[11px] font-label uppercase tracking-[0.2em] text-orange-100">Xử lý đơn đặt sân</p>
+                <h5 class="font-headline text-xl font-bold mt-1" id="cancelModalTitle">Hủy/Từ chối đơn đặt sân</h5>
+            </div>
+            <button type="button" onclick="closeCancelModal()" class="text-white/90 hover:text-white transition-colors border-none bg-transparent cursor-pointer">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <form id="cancelBookingForm" class="m-0">
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-slate-500">Vui lòng nhập lý do để khách hàng nắm được thông tin.</p>
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lý do (Bắt buộc)</label>
+                    <textarea class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                              id="cancelReasonInput" rows="4"
+                              placeholder="Ví dụ: Sân đang bảo trì đột xuất, sự cố mất điện..." required></textarea>
+                </div>
+            </div>
+            <div class="border-t border-slate-100 px-6 py-4 flex items-center justify-end gap-2 bg-slate-50">
+                <button type="button" onclick="closeCancelModal()" class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer">Đóng</button>
+                <button type="submit" id="btnSubmitCancel" class="rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition-colors border-none cursor-pointer flex items-center gap-2">Xác nhận</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/layout_owner.js"></script>
+<script src="/js/owner_bookings.js"></script>
+
+</body>
+</html>

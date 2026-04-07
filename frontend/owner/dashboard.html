@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Arena Kinetic - Dashboard Chủ Sân</title>
+    
+    <link href="../css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10">
+        <div>
+            <div class="flex items-center gap-2 text-xs font-label uppercase tracking-wider text-slate-500">
+                <span>Arena Manager</span>
+                <span>/</span>
+                <span>Dashboard</span>
+            </div>
+            <h2 class="font-headline tracking-tight font-bold text-xl text-on-surface">Tổng quan chủ sân</h2>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="bookings.html" class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-700 hover:border-orange-300 hover:text-orange-700 transition-colors no-underline">
+                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                Đơn đặt sân
+            </a>
+            <a href="facilities-create.html" class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600 text-white text-sm font-semibold hover:bg-orange-700 transition-colors no-underline">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Thêm cơ sở
+            </a>
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+                <div class="text-right">
+                    <p id="header-user-email" class="text-sm font-bold text-on-surface leading-none">Đang tải...</p>
+                </div>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold font-headline overflow-hidden ring-2 ring-orange-500/20">
+                    <img id="header-user-avatar" src="" class="w-full h-full object-cover hidden" alt="Avatar">
+                    <span id="header-user-initial">O</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 space-y-8">
+        
+        <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
+            <article class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Doanh thu tháng</p>
+                <h3 id="stat-revenue" class="font-headline text-2xl font-black text-on-surface">0đ</h3>
+            </article>
+
+            <article class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stadium</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Cơ sở</p>
+                <h3 id="stat-facilities" class="font-headline text-2xl font-black text-on-surface">0</h3>
+            </article>
+
+            <article class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Tổng sân con</p>
+                <h3 id="stat-fields" class="font-headline text-2xl font-black text-on-surface">0</h3>
+            </article>
+
+            <article class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Tổng đơn</p>
+                <h3 id="stat-total-bookings" class="font-headline text-2xl font-black text-on-surface">0</h3>
+            </article>
+
+            <article class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hourglass_top</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Đơn chờ thanh toán</p>
+                <h3 id="stat-pending-bookings" class="font-headline text-2xl font-black text-on-surface">0</h3>
+            </article>
+
+            <article class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm border border-slate-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schedule_send</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-xs font-label uppercase tracking-wider mb-1">Đã hoàn thành</p>
+                <h3 id="stat-completed-bookings" class="font-headline text-2xl font-black text-on-surface">0</h3>
+            </article>
+        </section>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <section class="xl:col-span-2 space-y-4">
+                <div class="flex items-end justify-between gap-4">
+                    <div>
+                        <h3 class="font-headline font-bold text-lg flex items-center gap-2">
+                            <span class="material-symbols-outlined text-orange-600">notification_important</span>
+                            Đơn đặt sân gần đây
+                        </h3>
+                        <p class="text-sm text-slate-500 mt-1">Danh sách các đơn đặt sân mới nhất phát sinh tại cơ sở của bạn.</p>
+                    </div>
+                    <a href="bookings.html" class="text-sm font-semibold text-orange-700 hover:text-orange-800 no-underline">Xem toàn bộ</a>
+                </div>
+
+                <div class="bg-surface-container-lowest rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-900">Danh sách đơn mới</p>
+                                <p class="text-sm text-slate-500">Hiển thị 10 đơn gần nhất</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-4" id="recent-bookings-container">
+                        <div class="text-center py-10"><span class="material-symbols-outlined animate-spin">sync</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-6">
+                <div class="rounded-3xl bg-surface-container-lowest shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100">
+                        <h3 class="font-headline text-lg font-bold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-orange-600">stadium</span>
+                            Cơ sở cần chú ý
+                        </h3>
+                        <p class="text-sm text-slate-500 mt-1">Hệ thống đang bảo trì phần này...</p>
+                    </div>
+                    <div class="p-6 space-y-3" id="attention-facilities-container">
+                        <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-5 py-10 text-center text-slate-500">
+                            <span class="material-symbols-outlined text-4xl text-slate-300 block mb-2">verified</span>
+                            Mọi cơ sở đều hoạt động tốt.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-3xl bg-slate-950 text-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">
+                    <p class="text-xs uppercase tracking-[0.2em] text-white/55 font-label mb-3">Số liệu nhanh</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="rounded-2xl bg-white/10 p-4 border border-white/10">
+                            <p class="text-white/55 text-[11px] uppercase tracking-widest mb-2">Đã xác nhận</p>
+                            <p id="quick-stat-confirmed" class="font-headline text-2xl font-black">0</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/10 p-4 border border-white/10">
+                            <p class="text-white/55 text-[11px] uppercase tracking-widest mb-2">Hoàn thành</p>
+                            <p id="quick-stat-completed" class="font-headline text-2xl font-black">0</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/10 p-4 border border-white/10">
+                            <p class="text-white/55 text-[11px] uppercase tracking-widest mb-2">Đang chờ</p>
+                            <p id="quick-stat-pending" class="font-headline text-2xl font-black">0</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/10 p-4 border border-white/10">
+                            <p class="text-white/55 text-[11px] uppercase tracking-widest mb-2">Sân con</p>
+                            <p id="quick-stat-fields" class="font-headline text-2xl font-black">0</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<div id="bookingConfirmModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" data-close-modal="true"></div>
+    <div class="relative z-10 w-full max-w-md rounded-3xl bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.25)] border border-slate-100">
+        <div class="flex items-start gap-4">
+            <div id="bookingConfirmIcon" class="mt-1 h-11 w-11 rounded-xl flex items-center justify-center">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;"></span>
+            </div>
+            <div class="flex-1">
+                <h4 id="bookingConfirmTitle" class="font-headline text-xl font-bold text-slate-900">Xác nhận</h4>
+                <p id="bookingConfirmMessage" class="mt-2 text-sm leading-6 text-slate-600">Bạn có chắc chắn?</p>
+            </div>
+        </div>
+        <div class="mt-6 grid grid-cols-2 gap-3">
+            <button id="bookingConfirmCancel" type="button" class="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors">Hủy</button>
+            <button id="bookingConfirmSubmit" type="button" class="rounded-xl px-4 py-3 text-sm font-semibold text-white transition-colors"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/layout_owner.js"></script>
+<script src="../js/owner_dashboard.js"></script>
+
+</body>
+</html>
