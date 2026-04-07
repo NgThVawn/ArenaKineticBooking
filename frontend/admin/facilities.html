@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Duyệt Cơ Sở</title>
+
+    <!-- Fonts + Icons -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue&family=Inter&family=Lexend&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        surface: "#f3f6fb",
+                        primary: "#b02f00",
+                        "on-surface": "#101827"
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface">
+
+<div id="sidebar-container"></div>
+
+<main class="ml-64 min-h-screen">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 bg-white/80 backdrop-blur flex justify-between px-8 h-16 items-center shadow-sm">
+        <div>
+            <h2 class="font-bold text-xl">Duyệt Cơ Sở</h2>
+            <p class="text-xs text-gray-500 uppercase">Quản lý trạng thái toàn hệ thống</p>
+        </div>
+
+        <div class="flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-full font-semibold">
+            <span class="material-symbols-outlined">stadium</span>
+            <span id="facilityCount">0 cơ sở</span>
+        </div>
+    </header>
+
+    <div class="p-8 space-y-6">
+
+        <!-- MESSAGE -->
+        <div id="messageBox" class="hidden p-4 rounded-xl border"></div>
+
+        <!-- TABLE -->
+        <section class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                    <tr>
+                        <th class="px-5 py-4 text-left">Ảnh</th>
+                        <th class="px-5 py-4 text-left">Thông tin</th>
+                        <th class="px-5 py-4 text-left">Chủ</th>
+                        <th class="px-5 py-4 text-left">Liên hệ</th>
+                        <th class="px-5 py-4 text-left">Trạng thái</th>
+                        <th class="px-5 py-4 text-left">Hành động</th>
+                    </tr>
+                </thead>
+
+                <tbody id="facilitiesTable"></tbody>
+            </table>
+        </section>
+
+        <!-- PAGINATION -->
+        <div id="paginationContainer" class="hidden px-6 py-4 border rounded-xl border-slate-200 flex justify-between items-center bg-slate-50/30">
+            <span class="text-sm text-slate-500">
+                Đang hiển thị <span id="pageInfo" class="font-bold text-slate-800"></span>
+            </span>
+
+            <div class="flex gap-1">
+                <button id="prevBtn" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-200 rounded-lg">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+
+                <div id="pageNumbers" class="flex gap-1"></div>
+
+                <button id="nextBtn" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-200 rounded-lg">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+const BASE_URL = 'http://localhost:3000/api/v1';
+const token = localStorage.getItem('token');
+const SIDEBAR_CACHE_KEY = 'admin_sidebar_html_v1';
+
+let currentPage = 1;
+let totalPages = 1;
+
+async function loadSidebar() {
+    const container = document.getElementById('sidebar-container');
+    let html = sessionStorage.getItem(SIDEBAR_CACHE_KEY);
+
+    if (!html) {
+        const candidates = ['./sidebar/sidebar.html', '/admin/sidebar/sidebar.html'];
+        for (const url of candidates) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) continue;
+                const content = await response.text();
+                if (!content.includes('sidebar-link')) continue;
+                html = content;
+                sessionStorage.setItem(SIDEBAR_CACHE_KEY, html);
+                break;
+            } catch (_) {}
+        }
+    }
+
+    if (!html) {
+        console.error('Không tải được sidebar');
+        return;
+    }
+
+    container.innerHTML = html;
+
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        const page = link.getAttribute('data-page');
+        if (page === 'facilities') {
+            link.classList.add('active', 'bg-orange-600', 'text-white');
+        }
+        link.addEventListener('click', () => {
+            sessionStorage.setItem('admin_sidebar_active', page || '');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active', 'bg-orange-600', 'text-white'));
+            link.classList.add('active', 'bg-orange-600', 'text-white');
+        });
+    });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '../auth/login.html';
+        });
+    }
+}
+
+/* ================= STATUS ================= */
+function getStatusColor(status) {
+    switch(status) {
+        case 'PENDING_APPROVAL': return 'bg-orange-50 text-orange-700';
+        case 'OPEN': return 'bg-emerald-50 text-emerald-700';
+        case 'BLOCKED': return 'bg-black text-white';
+        default: return 'bg-gray-100 text-gray-600';
+    }
+}
+
+function getStatusLabel(status) {
+    return {
+        PENDING_APPROVAL: 'CHỜ DUYỆT',
+        OPEN: 'ĐANG MỞ',
+        BLOCKED: 'BỊ KHÓA'
+    }[status] || status;
+}
+
+function renderStatusOptions(status) {
+    if (status === 'PENDING_APPROVAL') {
+        return `
+            <option disabled selected>Đang chờ duyệt</option>
+            <option value="OPEN">Duyệt</option>
+            <option value="BLOCKED">Từ chối</option>
+        `;
+    }
+
+    if (status === 'BLOCKED') {
+        return `
+            <option disabled selected>Đang bị khóa</option>
+            <option value="OPEN">Mở khóa</option>
+        `;
+    }
+
+    return `
+        <option selected value="${status}">Giữ nguyên</option>
+        <option value="BLOCKED">Khóa</option>
+    `;
+}
+
+/* ================= FETCH ================= */
+async function authFetch(url, options = {}) {
+    const res = await fetch(BASE_URL + url, {
+        ...options,
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+        }
+    });
+    return res.json();
+}
+
+/* ================= LOAD DATA ================= */
+async function loadFacilities() {
+    const data = await authFetch(`/admin/facilities?page=${currentPage}`);
+
+    const list = data.data.facilities;
+    const total = data.data.total || 0;
+    totalPages = Math.ceil(data.data.total / 10);
+
+    document.getElementById('facilityCount').innerText = data.data.total + " cơ sở";
+
+    const table = document.getElementById('facilitiesTable');
+
+    table.innerHTML = list.map(f => `
+        <tr class="hover:bg-gray-50">
+
+            <td class="px-5 py-4">
+                <img src="${f.images?.[0]?.url || 'https://via.placeholder.com/100'}"
+                     class="w-[100px] h-[70px] object-cover rounded-xl">
+            </td>
+
+            <td class="px-5 py-4">
+                <b>${f.name}</b><br>
+                <small class="text-gray-500">${f.address || ''}</small>
+            </td>
+
+            <td class="px-5 py-4">
+                ${f.owner?.fullName || 'N/A'}<br>
+                <small class="text-gray-500">${f.owner?.email || ''}</small>
+            </td>
+
+            <td class="px-5 py-4">
+                <div class="flex gap-1 items-center">
+                    <span class="material-symbols-outlined text-sm">call</span>
+                    ${f.phone || 'N/A'}
+                </div>
+                <div class="flex gap-1 items-center">
+                    <span class="material-symbols-outlined text-sm">schedule</span>
+                    ${f.openTime || '??'} - ${f.closeTime || '??'}
+                </div>
+            </td>
+
+            <td class="px-5 py-4">
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(f.status)}">
+                    ${getStatusLabel(f.status)}
+                </span>
+            </td>
+
+            <td class="px-5 py-4">
+                <select class="status-select border rounded-lg px-3 py-2"
+                        data-id="${f._id}"
+                        data-current="${f.status}">
+                    ${renderStatusOptions(f.status)}
+                </select>
+            </td>
+
+        </tr>
+    `).join('');
+
+    /* change status */
+    document.querySelectorAll('.status-select').forEach(s => {
+        s.onchange = async () => {
+            const id = s.dataset.id;
+            const newStatus = s.value;
+
+            await authFetch(`/admin/facilities/${id}/status`, {
+                method: 'PUT',
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            loadFacilities();
+        }
+    });
+
+    updatePagination(total);
+}
+
+/* ================= PAGINATION ================= */
+function updatePagination(total) {
+    const container = document.getElementById('paginationContainer');
+    const pageInfo = document.getElementById('pageInfo');
+    const pageNumbers = document.getElementById('pageNumbers');
+
+    if (!container || !pageInfo || !pageNumbers) return;
+
+    if (totalPages <= 1) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    container.classList.remove('hidden');
+
+    const limit = 10;
+    const start = (currentPage - 1) * limit + 1;
+    const end = Math.min(currentPage * limit, total);
+
+    pageInfo.innerHTML = `${start} - ${end} trong <span class="text-primary">${total}</span> cơ sở`;
+
+    pageNumbers.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = i === currentPage
+            ? 'w-8 h-8 bg-primary text-white rounded-lg'
+            : 'w-8 h-8 hover:bg-slate-200 rounded-lg';
+
+        btn.onclick = () => {
+            currentPage = i;
+            loadFacilities();
+        };
+
+        pageNumbers.appendChild(btn);
+    }
+
+    document.getElementById('prevBtn').onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadFacilities();
+        }
+    };
+
+    document.getElementById('nextBtn').onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadFacilities();
+        }
+    };
+}
+
+/* ================= INIT ================= */
+async function init() {
+    if (!token) {
+        window.location.href = '../auth/login.html';
+        return;
+    }
+
+    await loadSidebar();
+    await loadFacilities();
+}
+
+init();
+</script>
+
+</body>
+</html>
