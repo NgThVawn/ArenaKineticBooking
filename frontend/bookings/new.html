@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác nhận Đặt sân | Arena Kinetic</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+
+<body class="bg-slate-50/50 font-body text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 pt-28">
+
+        <div class="max-w-xl w-full bg-white p-8 sm:p-10 rounded-[2rem] shadow-[0_10px_40px_rgb(0,0,0,0.04)] border border-slate-100 relative overflow-hidden">
+            <div class="absolute -top-16 -right-16 w-40 h-40 bg-orange-100 rounded-full blur-[50px] pointer-events-none"></div>
+
+            <div class="text-center mb-8 relative z-10">
+                <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-orange-100">
+                    <span class="material-symbols-outlined text-primary text-[32px]">event_available</span>
+                </div>
+                <h2 class="text-3xl font-black font-headline text-slate-900 uppercase italic tracking-tight mb-2">Xác nhận đặt sân</h2>
+                <p class="text-sm text-slate-500">Vui lòng kiểm tra lại thông tin thời gian trước khi hoàn tất chốt đơn.</p>
+            </div>
+
+            <div id="errorBox" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 relative z-10 animate-fade-in">
+                <span class="material-symbols-outlined text-red-600 mt-0.5">error</span>
+                <p id="errorMsg" class="text-sm font-bold text-red-800 m-0 leading-relaxed"></p>
+            </div>
+
+            <form id="bookingForm" class="space-y-6 relative z-10 m-0">
+                
+                <div class="bg-slate-950 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-slate-900/20">
+                    <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/30 blur-[40px] rounded-full pointer-events-none"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+                        <div>
+                            <span class="block text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-1.5">Ngày thi đấu</span>
+                            <div class="flex items-center gap-2 font-bold text-lg text-white">
+                                <span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
+                                <span id="uiDate">--/--/----</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-1.5">Khung giờ</span>
+                            <div class="flex items-center gap-2 font-bold text-lg text-orange-400">
+                                <span class="material-symbols-outlined text-[20px]">schedule</span>
+                                <span id="uiTime">--:-- - --:--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 overflow-hidden">
+                    <div class="px-4 py-3 bg-slate-100 border-b border-slate-200">
+                        <p class="m-0 text-xs font-bold uppercase tracking-widest text-slate-600">Chi tiết chọn giờ</p>
+                    </div>
+                    <div class="p-4 space-y-2 text-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-500">Cơ sở</span>
+                            <span class="font-bold text-slate-800 text-right" id="uiFacName">Đang tải...</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-500">Sân</span>
+                            <span class="font-bold text-slate-800 text-right" id="uiFieldName">Đang tải...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="note" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 font-label">Ghi chú (Tùy chọn)</label>
+                    <textarea id="note" rows="3" class="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none" placeholder="Nhập yêu cầu đặc biệt của bạn (VD: Xin bóng mới, cần áo pitch...)"></textarea>
+                </div>
+
+                <div id="servicesWrap" class="hidden rounded-2xl border border-slate-200 overflow-hidden">
+                    <div class="px-4 py-3 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+                        <p class="m-0 text-xs font-bold uppercase tracking-widest text-slate-600">Dịch vụ đã chọn</p>
+                        <span class="text-[11px] text-slate-500">Đã chọn từ giao diện đặt sân</span>
+                    </div>
+                    <div id="servicesList" class="divide-y divide-slate-100">
+                        </div>
+                </div>
+
+                <div class="rounded-2xl bg-slate-900 text-white p-5 space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-slate-300">Tiền sân</span>
+                        <span class="font-bold" id="fieldPriceText">0đ</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-slate-300">Dịch vụ đi kèm</span>
+                        <span class="font-bold text-cyan-300" id="extraPriceText">0đ</span>
+                    </div>
+                    <div class="pt-2 border-t border-white/20 flex items-center justify-between">
+                        <span class="text-xs uppercase tracking-widest text-slate-400">Tổng tạm tính</span>
+                        <span class="text-xl font-black text-white" id="grandTotalText">0đ</span>
+                    </div>
+                    <div class="pt-2 border-t border-white/10 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-amber-300 font-semibold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">payments</span>
+                                Cọc ngay (50%)
+                            </span>
+                            <span class="font-black text-2xl text-orange-400" id="depositText">0đ</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Thanh toán khi kết thúc</span>
+                            <span class="font-bold text-sm text-slate-300" id="remainText">0đ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                    <span class="material-symbols-outlined text-amber-500 text-[18px] mt-0.5">info</span>
+                    <p class="text-xs text-amber-800 font-medium m-0 leading-relaxed">
+                        Bạn chỉ cần thanh toán <strong class="text-amber-700">50% tiền cọc</strong> khi đặt sân. Phần còn lại thanh toán sau khi hoàn thành buổi đấu.
+                    </p>
+                </div>
+
+                <div class="space-y-3 pt-4 border-t border-slate-100">
+                    <button type="submit" id="btnSubmit" class="w-full flex items-center justify-center gap-2 py-4 bg-primary hover:bg-orange-700 text-white font-headline font-black text-lg uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/30 active:scale-95 border-none cursor-pointer">
+                        <span class="material-symbols-outlined text-[24px]" id="btnIcon">check_circle</span>
+                        <span id="btnText">XÁC NHẬN ĐẶT SÂN</span>
+                    </button>
+                    <button type="button" id="btnBack" class="w-full flex items-center justify-center gap-2 py-3.5 bg-white hover:bg-slate-50 text-slate-500 font-bold rounded-xl transition-colors text-decoration-none text-sm border border-slate-200 cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                        Quay lại chọn giờ khác
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            
+            // 1. CHỘP PARAMETERS TỪ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const fieldId = urlParams.get('fieldId');
+            const date = urlParams.get('date');
+            const start = urlParams.get('start');
+            const end = urlParams.get('end');
+
+            if (!fieldId || !date || !start || !end) {
+                showError("Thông tin đặt sân không hợp lệ. Vui lòng quay lại chọn sân.");
+                document.getElementById('btnSubmit').disabled = true;
+                document.getElementById('btnSubmit').classList.add('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            // Gắn sự kiện nút Quay lại
+            document.getElementById('btnBack').addEventListener('click', () => {
+                window.history.back(); // Quay lại trang chi tiết trước đó
+            });
+
+            // Gắn thông tin cơ bản lên UI
+            document.getElementById('uiDate').innerText = date.split('-').reverse().join('/');
+            document.getElementById('uiTime').innerText = `${start} - ${end}`;
+
+            // Lấy danh sách extraItems từ URL (Mảng Array)
+            const extraItems = [];
+            let idx = 0;
+            while (urlParams.has(`extraItems[${idx}].serviceId`)) {
+                extraItems.push({
+                    serviceId: urlParams.get(`extraItems[${idx}].serviceId`),
+                    quantity: Number(urlParams.get(`extraItems[${idx}].quantity`))
+                });
+                idx++;
+            }
+
+            let facilityId = null;
+            let finalFieldPrice = 0;
+            let finalExtraPrice = 0;
+
+            try {
+                // 2. GỌI API ĐỂ LẤY TÊN SÂN VÀ GIÁ TIỀN THỰC TẾ 
+                // Gọi API lấy Sân
+                const fieldRes = await fetch(`http://localhost:3000/api/v1/fields/${fieldId}`);
+                const fieldJson = await fieldRes.json();
+                
+                if (!fieldJson.success) throw new Error("Không tìm thấy thông tin Sân.");
+                
+                const fieldData = fieldJson.data;
+                facilityId = fieldData.facility._id;
+                document.getElementById('uiFacName').innerText = fieldData.facility.name;
+                document.getElementById('uiFieldName').innerText = fieldData.name;
+
+                // Gọi API tính Giá Tiền Sân
+                const priceRes = await fetch(`http://localhost:3000/api/v1/fields/${fieldId}/price?date=${date}&start=${start}&end=${end}`);
+                const priceJson = await priceRes.json();
+                if (priceJson.success && priceJson.data) {
+                    finalFieldPrice = priceJson.data.totalPrice || 0;
+                    document.getElementById('fieldPriceText').innerText = finalFieldPrice.toLocaleString('vi-VN') + 'đ';
+                }
+
+                // Gọi API lấy danh sách Dịch Vụ (để móc tên và tính tiền)
+                if (extraItems.length > 0) {
+                    const servicesRes = await fetch(`http://localhost:3000/api/v1/extra-services/facility/${facilityId}`);
+                    const servicesJson = await servicesRes.json();
+                    const allServices = servicesJson.data || [];
+
+                    const sWrap = document.getElementById('servicesWrap');
+                    const sList = document.getElementById('servicesList');
+                    let sHtml = '';
+
+                    extraItems.forEach(item => {
+                        const sDetail = allServices.find(s => s._id === item.serviceId);
+                        if (sDetail) {
+                            const lineTotal = sDetail.price * item.quantity;
+                            finalExtraPrice += lineTotal;
+                            sHtml += `
+                                <div class="p-4 flex items-center justify-between gap-3">
+                                    <div>
+                                        <p class="m-0 font-bold text-slate-800 text-sm">${sDetail.name}</p>
+                                        <p class="m-0 text-xs text-slate-500">Số lượng: ${item.quantity}</p>
+                                        <p class="m-0 text-xs text-slate-500">Đơn giá: ${sDetail.price.toLocaleString('vi-VN')}đ/${sDetail.unit === 'PER_ITEM' ? 'món' : sDetail.unit}</p>
+                                    </div>
+                                    <p class="m-0 text-xs font-black text-primary">${lineTotal.toLocaleString('vi-VN')}đ</p>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    if (sHtml !== '') {
+                        sList.innerHTML = sHtml;
+                        sWrap.classList.remove('hidden');
+                        document.getElementById('extraPriceText').innerText = finalExtraPrice.toLocaleString('vi-VN') + 'đ';
+                    }
+                }
+
+                // Tổng tiền & cọc 50%
+                const grandTotal = finalFieldPrice + finalExtraPrice;
+                const deposit = Math.round(grandTotal * 0.5);
+                const remain = grandTotal - deposit;
+                document.getElementById('grandTotalText').innerText = grandTotal.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('depositText').innerText = deposit.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('remainText').innerText = remain.toLocaleString('vi-VN') + 'đ';
+
+            } catch (err) {
+                console.error(err);
+                showError("Đã có lỗi xảy ra khi lấy thông tin. Vui lòng F5 lại trang.");
+            }
+
+            // 3. XỬ LÝ SỰ KIỆN BẤM XÁC NHẬN ĐẶT SÂN (GỌI API POST)
+            document.getElementById('bookingForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // Lấy Token kiểm tra đăng nhập
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    // 🛑 Thay alert bằng Toast + Delay chuyển trang
+                    if (window.showToast) window.showToast('Cảnh báo', 'Vui lòng đăng nhập để đặt sân!', 'WARNING');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login.html';
+                    }, 1500);
+                    return;
+                }
+
+                const btnSubmit = document.getElementById('btnSubmit');
+                const btnText = document.getElementById('btnText');
+                const btnIcon = document.getElementById('btnIcon');
+                const noteValue = document.getElementById('note').value;
+
+                // Chuẩn bị cục JSON bắn API
+                const payload = {
+                    fieldId: fieldId,
+                    bookingDate: date,
+                    startTime: start,
+                    endTime: end,
+                    note: noteValue,
+                    extraServices: extraItems,
+                    extraItems: extraItems // Gắn mảng dịch vụ nếu có
+                };
+
+                try {
+                    // Đổi UI nút bấm sang Loading
+                    btnSubmit.disabled = true;
+                    btnSubmit.classList.add('opacity-70', 'cursor-wait');
+                    btnIcon.innerText = 'sync';
+                    btnIcon.classList.add('animate-spin');
+                    btnText.innerText = 'ĐANG XỬ LÝ...';
+
+                    // BẮN API
+                    const res = await fetch('http://localhost:3000/api/v1/bookings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` 
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const json = await res.json();
+                    
+                    if (res.ok && json.success) {
+                        // Lấy thông tin booking từ API trả về
+                        const bookingData = json.data.booking || json.data;
+                        const bookingCode = bookingData.bookingCode;
+                        const bookingId = bookingData._id;
+
+                        // 🛑 Gói thông báo "Đặt thành công" vào bì thư cho trang Checkout mở
+                        localStorage.setItem('pendingToast', JSON.stringify({
+                            title: 'Tạo đơn thành công',
+                            message: 'Vui lòng thanh toán để hoàn tất giữ sân.',
+                            type: 'SUCCESS'
+                        }));
+
+                        // Ưu tiên dùng bookingCode (BK...), fallback sang bookingId
+                        const checkoutParam = bookingCode
+                            ? `bookingCode=${encodeURIComponent(bookingCode)}`
+                            : `bookingId=${bookingId}`;
+                        window.location.href = `/payment/checkout.html?${checkoutParam}`;
+                    } else {
+                        // Lỗi từ server (vd: Trùng giờ, hết sân...)
+                        throw new Error(json.message || "Không thể đặt sân lúc này.");
+                    }
+
+                } catch (err) {
+                    console.error("Booking Error:", err);
+                    showError(err.message);
+                    
+                    // Phục hồi lại nút bấm
+                    btnSubmit.disabled = false;
+                    btnSubmit.classList.remove('opacity-70', 'cursor-wait');
+                    btnIcon.innerText = 'check_circle';
+                    btnIcon.classList.remove('animate-spin');
+                    btnText.innerText = 'XÁC NHẬN ĐẶT SÂN';
+                }
+            });
+
+            // 🛑 Nâng cấp hàm hiển thị lỗi (Kết hợp cả hộp đỏ và Toast)
+            function showError(msg) {
+                // Bắn thêm cái Toast đỏ cho khách dễ chú ý
+                if (window.showToast) window.showToast('Lỗi đặt sân', msg, 'ERROR');
+
+                // Vẫn giữ lại cái hộp đỏ ở form cho rõ ràng
+                const box = document.getElementById('errorBox');
+                const text = document.getElementById('errorMsg');
+                text.innerText = msg;
+                box.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    </script>
+</body>
+</html>

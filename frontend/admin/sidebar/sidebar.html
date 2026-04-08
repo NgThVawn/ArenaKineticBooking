@@ -1,0 +1,131 @@
+<aside class="h-screen w-64 fixed left-0 top-0 z-50 bg-slate-950 flex flex-col py-6 shadow-2xl">
+
+    <!-- Logo Section -->
+    <div class="px-6 mb-8 flex items-center gap-3 shrink-0">
+        <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white">
+            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings:'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;">shield</span>
+        </div>
+        <div>
+            <h1 class="font-black text-white text-lg leading-tight uppercase tracking-tighter">Admin Console</h1>
+            <p class="text-[10px] text-slate-500 font-medium tracking-widest uppercase">Quản trị hệ thống</p>
+        </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="flex-1 space-y-1 overflow-y-auto pb-4">
+        <!-- Dashboard -->
+        <a href="./index.html"
+           class="sidebar-link mx-2 my-1 px-4 py-3 flex items-center gap-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-300 hover:translate-x-1 no-underline"
+           data-page="dashboard">
+            <span class="material-symbols-outlined text-[22px] leading-none">dashboard</span>
+            <span>Tổng quan</span>
+        </a>
+
+        <a href="./notifications.html"
+           class="sidebar-link mx-2 my-1 px-4 py-3 flex items-center gap-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-300 hover:translate-x-1 no-underline"
+           data-page="notifications">
+            <span class="material-symbols-outlined text-[22px] leading-none">notifications</span>
+            <span>Thông báo</span>
+        </a>
+
+        <!-- Users -->
+        <a href="./users.html"
+           class="sidebar-link mx-2 my-1 px-4 py-3 flex items-center gap-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-300 hover:translate-x-1 no-underline"
+           data-page="users">
+            <span class="material-symbols-outlined text-[22px] leading-none">groups</span>
+            <span>Người dùng</span>
+        </a>
+
+        <!-- Facilities -->
+        <a href="./facilities.html"
+           class="sidebar-link mx-2 my-1 px-4 py-3 flex items-center gap-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-300 hover:translate-x-1 no-underline"
+           data-page="facilities">
+            <span class="material-symbols-outlined text-[22px] leading-none">stadium</span>
+            <span>Cơ sở</span>
+        </a>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="mx-4 mt-auto">
+        <button id="logoutBtn"
+                class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-left text-white font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2 cursor-pointer">
+            <span class="material-symbols-outlined text-[22px] leading-none">logout</span>
+            <span>Đăng xuất</span>
+        </button>
+    </div>
+
+    <!-- Toast Container for Notifications (Optional) -->
+    <div id="admin-notif-toast-container" style="position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:360px"></div>
+
+</aside>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        sidebarLinks.forEach(link => {
+            link.classList.remove('bg-orange-600', 'text-white');
+            link.classList.add('text-slate-300', 'hover:bg-slate-800');
+
+            if (currentPath.includes(link.getAttribute('data-page')) || 
+                (link.getAttribute('data-page') === 'dashboard' && currentPath.includes('/admin'))) {
+                link.classList.remove('text-slate-300', 'hover:bg-slate-800');
+                link.classList.add('bg-orange-600', 'text-white');
+            }
+        });
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '../auth/login.html';
+            });
+        }
+    });
+
+    function showAdminNotifToast(notif) {
+        const container = document.getElementById('admin-notif-toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background:white;border-radius:12px;padding:14px 16px;
+            box-shadow:0 10px 40px rgba(0,0,0,0.1);border-left:4px solid #ea580c;
+            display:flex;flex-direction:column;gap:4px;animation:slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor:pointer; font-family:'Inter', sans-serif;`;
+
+        toast.innerHTML = `
+            <div style="font-weight:700;font-size:14px;color:#0f172a">${escapeHtml(notif.title || 'Thông báo')}</div>
+            <div style="font-size:13px;color:#64748b;line-height:1.5">${escapeHtml(notif.message || '')}</div>
+        `;
+
+        if (notif.link) toast.addEventListener('click', () => window.location.href = notif.link);
+
+        container.prepend(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = 'all 0.4s ease';
+            setTimeout(() => toast.remove(), 400);
+        }, 6000);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(text || ''));
+        return div.innerHTML;
+    }
+</script>
+
+<style>
+    @keyframes slideIn {
+        from { transform: translateX(120%); opacity: 0; }
+        to   { transform: translateX(0); opacity: 1; }
+    }
+
+    .no-underline {
+        text-decoration: none;
+    }
+</style>

@@ -5,7 +5,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
-var cors = require('cors');
+// var cors = require('cors');
+const cors = require('cors');
 var http = require('http');
 var { Server } = require('socket.io');
 
@@ -13,21 +14,27 @@ var app = express();
 var server = http.createServer(app);
 var io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL ,
     credentials: true
   }
 });
-
 // Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
-}));
+// app.use(cors({
+//   origin: process.env.CLIENT_URL || 'http://localhost:5173',
+//   credentials: true
+// }));
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Serve static files from frontend folder
+app.use(express.static(path.join(__dirname, '../frontend'), {
+  index: ['index.html'],
+  dotfiles: 'ignore'
+}));
 
 // Routes
 app.use('/api/v1/auth', require('./routes/auth'));
@@ -48,7 +55,14 @@ app.use('/api/v1/owner', require('./routes/owner'));
 
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI);
+function connectMongo() {
+  return mongoose.connect(process.env.MONGODB_URI)
+    .catch(function (err) {
+      console.error('MongoDB initial connect failed:', err.message);
+      setTimeout(connectMongo, 5000);
+    });
+}
+connectMongo();
 mongoose.connection.on('connected', function () {
   console.log('MongoDB connected');
 });
@@ -58,6 +72,11 @@ mongoose.connection.on('error', function (err) {
 
 // Socket.io setup
 require('./utils/socketHandler')(io);
+
+// Fallback route: serve index.html for all non-API routes (for client-side routing)
+app.get('/{*path}', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
 
 // 404 handler
 app.use(function (req, res, next) {

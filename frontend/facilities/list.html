@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Sân | Arena Kinetic</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-body">
+
+    <div id="header-placeholder"></div>
+    <main class="flex-grow flex flex-col w-full">
+        <section class="bg-zinc-950 pt-28 pb-10 px-6 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-5"
+                 style="background-image: repeating-linear-gradient(0deg,transparent,transparent 40px,#fff 40px,#fff 41px),
+                    repeating-linear-gradient(90deg,transparent,transparent 40px,#fff 40px,#fff 41px)">
+            </div>
+            <div class="max-w-screen-xl mx-auto relative z-10">
+                <p class="text-zinc-500 text-xs font-bold uppercase tracking-widest font-label mb-3">
+                    Arena Kinetic / Tìm sân
+                </p>
+                <div class="flex flex-wrap items-end justify-between gap-4">
+                    <h1 class="text-5xl font-black font-headline italic text-white tracking-tighter uppercase leading-none">
+                        TÌM SÂN<br><span class="text-primary-container">GẦN BẠN</span>
+                    </h1>
+                    <p class="text-zinc-400 font-body text-sm max-w-xs">
+                        <span id="total-facilities-count" class="text-white font-bold text-xl">0</span>
+                        cơ sở đang hoạt động trên toàn quốc
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class="sticky top-[79px] z-40 bg-white/95 backdrop-blur-xl border-b border-zinc-200 shadow-sm">
+            <div class="max-w-screen-xl mx-auto px-6 py-4">
+                <form id="filterForm" class="flex flex-wrap lg:flex-nowrap items-center gap-3">
+                    <input type="hidden" name="sport" id="sport-hidden" value="" />
+
+                    <div class="flex items-center gap-2 px-4 py-2.5 bg-zinc-100 rounded-xl flex-1 min-w-[160px] relative" id="city-search-wrapper">
+                        <span class="material-symbols-outlined text-zinc-400 text-[20px]">location_on</span>
+                        <div class="flex flex-col w-full">
+                            <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest font-label">Khu vực</span>
+                            <input type="text" name="city" id="city-search-input"
+                                   class="bg-transparent border-none p-0 text-sm font-semibold text-zinc-800 focus:ring-0 outline-none w-full placeholder:text-zinc-400"
+                                   placeholder="Thành phố, quận..." autocomplete="off"/>
+                        </div>
+                        <ul id="city-search-dropdown" class="absolute left-0 top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50 overflow-y-auto hidden" style="border: 1px solid #e4e4e7; max-height: 260px; min-width: 240px;"></ul>
+                    </div>
+
+                    <div class="flex items-center gap-2 px-4 py-2.5 bg-zinc-100 rounded-xl flex-1 min-w-[160px]">
+                        <span class="material-symbols-outlined text-zinc-400 text-[20px]">search</span>
+                        <div class="flex flex-col w-full">
+                            <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest font-label">Tên / Địa chỉ</span>
+                            <input type="text" name="name" id="name-search-input"
+                                   class="bg-transparent border-none p-0 text-sm font-semibold text-zinc-800 focus:ring-0 outline-none w-full placeholder:text-zinc-400"
+                                   placeholder="Tên, địa chỉ..."/>
+                        </div>
+                    </div>
+
+                    <label class="flex items-center gap-3 px-4 py-2.5 bg-zinc-100 rounded-xl flex-1 min-w-[160px] cursor-pointer hover:bg-red-50 transition-all border border-transparent group select-none">
+                        <input type="checkbox" name="favoritesOnly" id="fav-checkbox" class="hidden">
+                        <span class="material-symbols-outlined text-[24px] text-zinc-400 transition-colors" id="fav-icon">favorite</span>
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-bold uppercase tracking-widest font-label text-zinc-400 transition-colors">Bộ lọc</span>
+                            <span class="text-sm font-semibold text-zinc-800 transition-colors">Cơ sở yêu thích</span>
+                        </div>
+                    </label>
+
+                    <div class="flex gap-2">
+                        <button type="submit" class="kinetic-gradient text-white px-6 py-3 rounded-xl font-bold font-headline text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 whitespace-nowrap border-none cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]">search</span> TÌM SÂN
+                        </button>
+                        <a href="./list.html" class="w-12 h-12 flex items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-100 transition-colors no-underline" title="Xóa bộ lọc">
+                            <span class="material-symbols-outlined text-[20px]">close</span>
+                        </a>
+                    </div>
+                </form>
+
+                <div class="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide" id="sport-chips-container">
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-label whitespace-nowrap mr-1">Lọc nhanh:</span>
+                    <button type="button" data-sport="" class="sport-chip">
+                        <span class="material-symbols-outlined text-[14px]">apps</span> Tất cả
+                    </button>
+                    <button type="button" data-sport="FOOTBALL" class="sport-chip">
+                        <span class="sport-chip-icon material-symbols-outlined text-[14px]">sports_soccer</span> Bóng đá
+                    </button>
+                    <button type="button" data-sport="BASKETBALL" class="sport-chip">
+                        <span class="sport-chip-icon material-symbols-outlined text-[14px]">sports_basketball</span> Bóng rổ
+                    </button>
+                    <button type="button" data-sport="TENNIS" class="sport-chip">
+                        <span class="sport-chip-icon material-symbols-outlined text-[14px]">sports_tennis</span> Tennis
+                    </button>
+                    <button type="button" data-sport="BADMINTON" class="sport-chip">
+                        <span class="sport-chip-icon material-symbols-outlined text-[14px]">sports</span> Cầu lông
+                    </button>
+                    <button type="button" data-sport="VOLLEYBALL" class="sport-chip">
+                        <span class="sport-chip-icon material-symbols-outlined text-[14px]">sports_volleyball</span> Bóng chuyền
+                    </button>
+                    <button type="button" data-sport="PICKLEBALL" class="sport-chip">
+                        <span class="sport-chip-icon material-symbols-outlined text-[14px]">sports_tennis</span> Pickleball
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-screen-xl mx-auto px-6 py-8 w-full">
+            
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6" id="search-status" style="display: none;">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <p class="text-zinc-800 font-bold font-headline m-0">
+                        <span class="text-primary" id="status-count">0</span><span> cơ sở</span>
+                        <span id="status-city" class="text-zinc-500 font-normal"></span>
+                    </p>
+                    <div class="flex gap-2 flex-wrap" id="status-tags"></div>
+                </div>
+            </div>
+
+            <div id="facilities-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full text-center py-20 text-zinc-500">
+                    <span class="material-symbols-outlined animate-spin text-4xl">sync</span>
+                    <p class="mt-2 font-bold">Đang tải dữ liệu sân đấu...</p>
+                </div>
+            </div>
+
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-24 text-center">
+                <div class="w-20 h-20 rounded-2xl bg-zinc-100 flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-[40px] text-zinc-300">stadium</span>
+                </div>
+                <h3 class="text-2xl font-black font-headline text-zinc-800 uppercase italic mb-2">Không tìm thấy cơ sở</h3>
+                <p class="text-zinc-400 font-body mb-6 max-w-sm">Không có cơ sở nào phù hợp với bộ lọc hiện tại. Hãy thử điều chỉnh tiêu chí tìm kiếm.</p>
+                <a href="./list.html" class="kinetic-gradient text-white px-6 py-3 rounded-xl font-bold font-headline text-sm hover:shadow-lg hover:shadow-primary/20 transition-all no-underline">Xóa bộ lọc</a>
+            </div>
+        </div>
+    </main>
+    <div id="footer-placeholder"></div>
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+
+<script>
+        const token = localStorage.getItem('token');
+        let currentFavs = []; // Mảng chứa ID các cơ sở đã thả tim từ DB
+
+        // --- HÀM GỌI API TOGGLE YÊU THÍCH ---
+        window.toggleFavorite = async function(e, facilityId) {
+            e.preventDefault(); 
+            
+            if (!token) {
+                // 🛑 Thay alert bằng Toast + Delay chuyển trang
+                if (window.showToast) window.showToast('Cảnh báo', 'Vui lòng đăng nhập để sử dụng tính năng Yêu thích!', 'WARNING');
+                setTimeout(() => {
+                    window.location.href = '/auth/login.html';
+                }, 1500);
+                return;
+            }
+
+            const iconEl = document.getElementById(`fav-icon-card-${facilityId}`);
+            
+            try {
+                // Gọi API Toggle của Backend
+                const res = await fetch(`http://localhost:3000/api/v1/favorites/toggle/${facilityId}`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    }
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    const isFav = json.data.isFavorite; // Backend trả về true/false
+                    if (isFav) {
+                        // Bật tim đỏ
+                        iconEl.style.fontVariationSettings = "'FILL' 1";
+                        iconEl.classList.remove('text-zinc-400');
+                        iconEl.classList.add('text-red-500');
+                        if (!currentFavs.includes(facilityId)) currentFavs.push(facilityId);
+                        
+                        // 🛑 Thông báo thêm thành công
+                        if (window.showToast) window.showToast('Yêu thích', 'Đã lưu cơ sở vào danh sách yêu thích.', 'SUCCESS');
+                    } else {
+                        // Tắt tim đỏ
+                        iconEl.style.fontVariationSettings = "'FILL' 0";
+                        iconEl.classList.remove('text-red-500');
+                        iconEl.classList.add('text-zinc-400');
+                        currentFavs = currentFavs.filter(id => id !== facilityId);
+                        
+                        // 🛑 Thông báo xóa thành công (Dùng INFO màu xanh dương cho nó dịu)
+                        if (window.showToast) window.showToast('Bỏ yêu thích', 'Đã xóa cơ sở khỏi danh sách yêu thích.', 'INFO');
+                    }
+                } else {
+                    // 🛑 Lỗi từ API
+                    if (window.showToast) window.showToast('Lỗi', json.message || 'Có lỗi xảy ra khi thả tim!', 'ERROR');
+                }
+            } catch (err) {
+                console.error("Lỗi toggle favorite:", err);
+                if (window.showToast) window.showToast('Lỗi kết nối', 'Không thể kết nối đến máy chủ.', 'ERROR');
+            }
+        };
+
+        // --- HÀM LẤY DANH SÁCH YÊU THÍCH LÚC VÀO TRANG ---
+        async function fetchMyFavorites() {
+            if (!token) return;
+            try {
+                const res = await fetch('http://localhost:3000/api/v1/favorites/my', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const json = await res.json();
+                if (json.success && json.data) {
+                    // Moi cái ID facility ra từ mảng data
+                    currentFavs = json.data.map(item => item.facility._id);
+                }
+            } catch (err) {
+                console.error("Lỗi lấy danh sách yêu thích:", err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // 1. XỬ LÝ URL PARAMETERS
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlCity = urlParams.get('city') || '';
+            const urlName = urlParams.get('name') || '';
+            const urlSport = urlParams.get('sport') || '';
+            const urlFav = urlParams.get('favoritesOnly') === 'on';
+
+            // Lấy danh sách tim từ DB trước khi load giao diện
+            await fetchMyFavorites();
+
+            // Đổ data từ URL vào thanh Search
+            if(urlCity) document.getElementById('city-search-input').value = urlCity;
+            if(urlName) document.getElementById('name-search-input').value = urlName;
+            if(urlSport) document.getElementById('sport-hidden').value = urlSport;
+
+            // Xử lý UI nút Bộ Lọc Yêu Thích
+            const favCheckbox = document.getElementById('fav-checkbox');
+            const favIconTop = document.getElementById('fav-icon');
+            const favLabel = favCheckbox.closest('label');
+
+            if (urlFav) {
+                favCheckbox.checked = true;
+                favIconTop.classList.remove('text-zinc-400');
+                favIconTop.classList.add('text-red-500');
+                favIconTop.style.fontVariationSettings = "'FILL' 1";
+                favLabel.classList.add('bg-red-50', 'border-red-200');
+            }
+
+            favCheckbox.addEventListener('change', () => {
+                // Yêu cầu login nếu bấm lọc yêu thích mà chưa đăng nhập
+                if (favCheckbox.checked && !token) {
+                    alert('Vui lòng đăng nhập để xem cơ sở yêu thích!');
+                    favCheckbox.checked = false;
+                    window.location.href = '/auth/login.html';
+                    return;
+                }
+                document.getElementById('filterForm').submit();
+            });
+
+           // Xử lý UI Chip môn thể thao
+            const sportChips = document.querySelectorAll('.sport-chip');
+            const activeClasses = 'sport-chip bg-primary text-white border-primary shadow-sm shadow-primary/30 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold font-label whitespace-nowrap transition-all border-none cursor-pointer';
+            const inactiveClasses = 'sport-chip bg-white text-zinc-600 border-zinc-200 hover:border-primary hover:text-primary flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold font-label whitespace-nowrap transition-all cursor-pointer';
+
+            sportChips.forEach(chip => {
+                if (chip.getAttribute('data-sport') === urlSport) chip.className = activeClasses;
+                else chip.className = inactiveClasses;
+                
+                chip.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('sport-hidden').value = chip.getAttribute('data-sport');
+                    document.getElementById('filterForm').submit();
+                });
+            });
+
+            // 2. AUTOCOMPLETE THÀNH PHỐ
+            const cityInput = document.getElementById('city-search-input');
+            const cityDropdown = document.getElementById('city-search-dropdown');
+            const cityWrapper = document.getElementById('city-search-wrapper');
+
+            if (cityInput) {
+                let provinces = [];
+                fetch('https://provinces.open-api.vn/api/?depth=1').then(r => r.json()).then(data => { provinces = data; }).catch(() => {});
+
+                cityInput.addEventListener('input', () => {
+                    const q = cityInput.value.trim().toLowerCase();
+                    cityDropdown.innerHTML = '';
+                    if (!q) { cityDropdown.classList.add('hidden'); return; }
+                    const matches = provinces.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+                    if (!matches.length) { cityDropdown.classList.add('hidden'); return; }
+                    matches.forEach(p => {
+                        const li = document.createElement('li');
+                        li.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 cursor-pointer transition-colors';
+                        li.innerHTML = '<span class="material-symbols-outlined text-zinc-400 text-[16px]">location_on</span>' + p.name;
+                        li.addEventListener('mousedown', (e) => {
+                            e.preventDefault();
+                            cityInput.value = p.name;
+                            cityDropdown.classList.add('hidden');
+                        });
+                        cityDropdown.appendChild(li);
+                    });
+                    cityDropdown.classList.remove('hidden');
+                });
+                document.addEventListener('click', (e) => { if (!cityWrapper.contains(e.target)) cityDropdown.classList.add('hidden'); });
+            }
+
+            // 3. FETCH VÀ RENDER DỮ LIỆU SÂN
+            async function loadFacilitiesList() {
+                const grid = document.getElementById('facilities-grid');
+                const emptyState = document.getElementById('empty-state');
+                const countBadge = document.getElementById('total-facilities-count');
+                const statusCount = document.getElementById('status-count');
+
+                try {
+                    const response = await fetch(`http://localhost:3000/api/v1/facilities`, { method: 'GET' });
+                    const result = await response.json();
+
+                    if (result.success && result.data && result.data.facilities) {
+                        let list = result.data.facilities; 
+                        
+                        // --- LOGIC LỌC SÂN ---
+                        if (urlCity || urlName || urlSport || urlFav) {
+                            if (urlSport) {
+                                const allFieldPromises = list.map(item => 
+                                    fetch(`http://localhost:3000/api/v1/fields/facility/${item.facility._id}`)
+                                    .then(res => res.json())
+                                    .catch(() => ({ data: [] }))
+                                );
+                                const allFieldsResults = await Promise.all(allFieldPromises);
+                                list.forEach((item, index) => { item.fields = allFieldsResults[index].data || []; });
+                                
+                                list = list.filter(item => item.fields.some(f => f.status === 'OPEN' && f.sportType === urlSport));
+                            }
+
+                            if (urlName) {
+                                const nameLower = urlName.toLowerCase();
+                                list = list.filter(item => item.facility.name.toLowerCase().includes(nameLower));
+                            }
+
+                            if (urlCity) {
+                                const cityLower = urlCity.toLowerCase();
+                                list = list.filter(item => {
+                                    const facCity = item.facility.city ? item.facility.city.toLowerCase() : '';
+                                    const facDist = item.facility.district ? item.facility.district.toLowerCase() : '';
+                                    return facCity.includes(cityLower) || facDist.includes(cityLower);
+                                });
+                            }
+
+                            // 🛑 LỌC DỰA TRÊN MẢNG currentFavs LẤY TỪ DB
+                            if (urlFav) {
+                                list = list.filter(item => currentFavs.includes(item.facility._id));
+                            }
+                        }
+
+                        countBadge.innerText = list.length;
+                        statusCount.innerText = list.length;
+                        document.getElementById('search-status').style.display = 'flex';
+
+                        let tagsHtml = '';
+                        if (urlCity) document.getElementById('status-city').innerHTML = `tại <span class="text-zinc-800 font-bold">${urlCity}</span>`;
+                        if (urlName) tagsHtml += `<span class="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold font-label"><span class="material-symbols-outlined text-[12px]">search</span>${urlName}</span>`;
+                        if (urlSport) tagsHtml += `<span class="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold font-label"><span class="material-symbols-outlined text-[12px]">sports</span>${urlSport}</span>`;
+                        if (urlFav) tagsHtml += `<span class="flex items-center gap-1 px-3 py-1 bg-red-100 text-red-500 rounded-full text-xs font-bold font-label"><span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1">favorite</span>Yêu thích</span>`;
+                        document.getElementById('status-tags').innerHTML = tagsHtml;
+
+                        if (list.length === 0) {
+                            grid.innerHTML = '';
+                            emptyState.classList.remove('hidden');
+                            emptyState.classList.add('flex');
+                            return;
+                        }
+
+                        if (!urlSport) {
+                            const fieldPromises = list.map(item => 
+                                fetch(`http://localhost:3000/api/v1/fields/facility/${item.facility._id}`)
+                                .then(res => res.json())
+                                .catch(() => ({ data: [] }))
+                            );
+                            const fieldsResults = await Promise.all(fieldPromises);
+                            list.forEach((item, index) => {
+                                item.fields = fieldsResults[index].data || [];
+                            });
+                        }
+
+                        const SPORT_DICT = {
+                            FOOTBALL:   { icon: 'sports_soccer', name: 'Bóng đá' },
+                            TENNIS:     { icon: 'sports_tennis', name: 'Tennis' },
+                            BADMINTON:  { icon: 'sports', name: 'Cầu lông' },
+                            BASKETBALL: { icon: 'sports_basketball', name: 'Bóng rổ' },
+                            VOLLEYBALL: { icon: 'sports_volleyball', name: 'Bóng chuyền' },
+                            PICKLEBALL: { icon: 'sports_tennis', name: 'Pickleball' },
+                            DEFAULT:    { icon: 'sports', name: 'Thể thao' }
+                        };
+
+                        let html = '';
+                        
+                        list.forEach((item, i) => {
+                            const f = item.facility;
+                            const imgObj = item.primaryImage;
+                            let imgUrl = "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop"; 
+                            if (imgObj && imgObj.imageUrl) {
+                                imgUrl = imgObj.imageUrl.startsWith('/') ? `http://localhost:3000${imgObj.imageUrl}` : imgObj.imageUrl;
+                            }
+
+                            const facilityFields = item.fields;
+                            const openFields = facilityFields.filter(field => field.status === 'OPEN');
+                            const openFieldCount = openFields.length; 
+                            
+                            const uniqueSports = [...new Set(openFields.map(field => field.sportType))];
+
+                            let sportTagsHtml = '';
+                            if (openFieldCount > 0) {
+                                uniqueSports.forEach(sport => {
+                                    const sp = SPORT_DICT[sport] || SPORT_DICT.DEFAULT;
+                                    sportTagsHtml += `<span class="flex items-center gap-1 px-2.5 py-1 bg-orange-50 text-primary rounded-lg text-[11px] font-bold font-label border border-orange-100">
+                                        <span class="material-symbols-outlined text-[12px]">${sp.icon}</span>
+                                        <span>${sp.name}</span>
+                                    </span>`;
+                                });
+                            } else {
+                                sportTagsHtml = `<span class="px-2.5 py-1 bg-zinc-100 text-zinc-400 rounded-lg text-[11px] font-label">Chưa có sân</span>`;
+                            }
+
+                            // 🛑 SAO ĐÁNH GIÁ (RATING)
+                            const ratingValue = f.avgRating ? Number(f.avgRating).toFixed(1) : "0";
+                            const reviewCount = f.reviewCount ? f.reviewCount : 0;
+                            
+                            let topRatingHtml = ratingValue > 0 ? `
+                                <span class="flex items-center gap-1 bg-white/95 backdrop-blur-sm text-zinc-900 px-2.5 py-1 rounded-full text-xs font-bold font-label shadow-sm">
+                                    <span class="material-symbols-outlined text-amber-500 text-[14px]" style="font-variation-settings:'FILL' 1">star</span>
+                                    <span>${ratingValue}</span>
+                                </span>` : `
+                                <span class="flex items-center gap-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-2.5 py-1 rounded-full text-xs font-bold font-label shadow-sm">
+                                    <span class="material-symbols-outlined text-white text-[14px]">new_releases</span>
+                                    <span>Mới</span>
+                                </span>`;
+
+                            let bottomRatingHtml = ratingValue > 0 ? `
+                                <span class="flex items-center gap-1 text-zinc-500 ml-auto">
+                                    <span class="material-symbols-outlined text-amber-400 text-[14px]" style="font-variation-settings:'FILL' 1">star</span>
+                                    <span>${ratingValue} (${reviewCount})</span>
+                                </span>` : `
+                                <span class="flex items-center gap-1 text-zinc-400 ml-auto italic">Chưa có đánh giá</span>`;
+
+                            const statusColor = f.status === 'OPEN' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white';
+                            const statusText = f.status === 'OPEN' ? 'Đang mở' : 'Đóng cửa';
+
+                            // 🛑 ĐỊNH HÌNH NÚT YÊU THÍCH TRÊN CARD DỰA VÀO DATA DB
+                            const isFav = currentFavs.includes(f._id);
+                            const favIconFill = isFav ? 1 : 0;
+                            const favIconColor = isFav ? 'text-red-500' : 'text-zinc-400';
+
+                            html += `
+                            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-zinc-100 hover:-translate-y-1 flex flex-col" style="animation: slideInUp ${0.3 + (i * 0.1)}s ease forwards">
+                                <div class="relative overflow-hidden aspect-[16/10] bg-zinc-200">
+                                    <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${imgUrl}" alt="${f.name}"/>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                                    <div class="absolute top-3 left-3">
+                                        ${topRatingHtml}
+                                    </div>
+
+                                    <div class="absolute top-3 right-3 z-10">
+                                        <button onclick="toggleFavorite(event, '${f._id}')" class="w-9 h-9 rounded-full bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 border-none cursor-pointer">
+                                            <span id="fav-icon-card-${f._id}" class="material-symbols-outlined text-[20px] transition-colors duration-200 hover:text-red-500 ${favIconColor}" style="font-variation-settings: 'FILL' ${favIconFill}">favorite</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <span class="flex items-center gap-1 bg-black/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-label font-bold">
+                                            <span class="material-symbols-outlined text-[13px]">schedule</span>
+                                            <span>${f.openTime || '06:00'} – ${f.closeTime || '22:00'}</span>
+                                        </span>
+                                        <span class="flex items-center gap-1 bg-white/90 text-zinc-900 px-2.5 py-1 rounded-full text-xs font-label font-bold">
+                                            <span class="w-1.5 h-1.5 rounded-full ${statusColor}"></span> ${statusText}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 flex flex-col flex-1">
+                                    <div class="mb-3">
+                                        <h3 class="font-headline font-black text-zinc-900 text-lg leading-tight tracking-tight uppercase mb-1 line-clamp-1">${f.name}</h3>
+                                        <p class="flex items-center gap-1 text-zinc-500 text-sm m-0">
+                                            <span class="material-symbols-outlined text-[15px] shrink-0">location_on</span>
+                                            <span class="truncate">${f.address}, ${f.district}, ${f.city}</span>
+                                        </p>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-1.5 mb-3">
+                                        ${sportTagsHtml}
+                                    </div>
+
+                                    <div class="flex items-center gap-3 mt-auto pt-3 mb-3 border-t border-zinc-100 text-xs font-bold font-label">
+                                        <span class="flex items-center gap-1 text-zinc-500">
+                                            <span class="material-symbols-outlined text-[14px]">grid_on</span>
+                                            <span>${openFieldCount} sân</span>
+                                        </span>
+                                        ${bottomRatingHtml}
+                                    </div>
+
+                                    <a href="./detail.html?id=${f._id}" class="mt-auto flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold font-headline hover:bg-primary transition-colors duration-200 group/btn text-decoration-none border-none cursor-pointer">
+                                        <span>XEM &amp; ĐẶT SÂN</span>
+                                        <span class="material-symbols-outlined text-[16px] transition-transform duration-200 group-hover/btn:translate-x-1">arrow_forward</span>
+                                    </a>
+                                </div>
+                            </div>`;
+                        });
+                        grid.innerHTML = html;
+                    } else {
+                        grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-500 font-bold">Lỗi không thể tải danh sách.</div>';
+                    }
+                } catch (error) {
+                    console.error("Lỗi:", error);
+                    grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-500 font-bold">Lỗi kết nối Backend Node.js!</div>';
+                }
+            }
+
+            loadFacilitiesList();
+        });
+    </script>
+    
+    <style>
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</body>
+</html>

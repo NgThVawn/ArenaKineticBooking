@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Kinetic - Dashboard Quản Trị</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        surface: "#f3f6fb",
+                        primary: "#b02f00",
+                        "on-surface": "#101827",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    fontFamily: {
+                        headline: ["Epilogue"],
+                        body: ["Inter"],
+                        label: ["Lexend"]
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f6fb; color: #101827; }
+        .sidebar-link.active { background-color: #ea580c; color: #fff; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-surface font-body text-on-surface antialiased">
+
+    <div id="sidebar-container"></div>
+
+    <main class="ml-64 min-h-screen">
+        <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-100 px-8 h-16 flex items-center justify-between">
+            <h2 class="font-headline font-bold text-4 leading-none">Bảng điều khiển quản trị</h2>
+
+            <div class="flex items-center gap-6">
+                <a href="./notifications.html" class="relative no-underline text-slate-500 hover:text-orange-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">notifications</span>
+                    <span class="absolute -top-1 -right-1 block w-2 h-2 rounded-full bg-orange-500"></span>
+                </a>
+
+                <div class="flex items-center gap-3 border-l border-slate-200 pl-5">
+                    <div class="text-right">
+                        <p class="text-sm font-bold leading-none">System Administrator</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider font-label">System Admin</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center">S</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-8">
+            <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                <article class="bg-surface-container-lowest rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-[11px] bg-orange-50 text-orange-700 font-semibold">Live</span>
+                    </div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wider font-label">Người dùng tổng cộng</p>
+                    <h3 id="totalUsersCount" class="mt-1 text-4xl font-headline font-black">0</h3>
+                </article>
+
+                <article class="bg-surface-container-lowest rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                            <span class="material-symbols-outlined">stadium</span>
+                        </div>
+                        <span id="activeFacilitiesText" class="px-2 py-1 rounded-full text-[11px] bg-orange-50 text-orange-700 font-semibold">0 đang hoạt động</span>
+                    </div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wider font-label">Cơ sở tổng cộng</p>
+                    <h3 id="totalFacilitiesCount" class="mt-1 text-4xl font-headline font-black">0</h3>
+                </article>
+
+                <article class="bg-surface-container-lowest rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                            <span class="material-symbols-outlined">hourglass_top</span>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-[11px] bg-orange-50 text-orange-700 font-semibold">Cần xử lý</span>
+                    </div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wider font-label">Cơ sở chờ duyệt</p>
+                    <h3 id="pendingFacilitiesCount" class="mt-1 text-4xl font-headline font-black">0</h3>
+                </article>
+
+                <article class="bg-[#050c24] rounded-2xl p-6 shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined">block</span>
+                        </div>
+                        <p class="text-xs text-slate-300 uppercase tracking-wider font-label">Tài khoản bị khóa</p>
+                        <h3 id="bannedUsersCount" class="mt-1 text-4xl font-headline font-black text-white">0</h3>
+                    </div>
+                    <span class="absolute -bottom-6 -right-4 text-[90px] opacity-10">⚙️</span>
+                </article>
+            </section>
+
+            <section class="grid grid-cols-1 xl:grid-cols-3 gap-7">
+                <div class="xl:col-span-2 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-headline font-bold text-xl flex items-center gap-2"><span class="text-orange-600">🏟️</span> Cơ sở mới nhất</h3>
+                        <a href="./facilities.html" class="text-sm text-orange-700 hover:text-orange-800 no-underline font-semibold">Xem tất cả</a>
+                    </div>
+                    <div id="facilitiesContainer" class="space-y-4">
+                        <div class="bg-surface-container-lowest p-8 rounded-2xl text-center text-slate-500 border border-slate-100">Đang tải...</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-headline font-bold text-xl flex items-center gap-2"><span class="text-orange-600">👤</span> Người dùng gần đây</h3>
+                        <a href="./users.html" class="text-sm text-orange-700 hover:text-orange-800 no-underline font-semibold">Quản lý</a>
+                    </div>
+                    <div id="usersContainer" class="space-y-3">
+                        <div class="bg-surface-container-lowest p-6 rounded-2xl text-center text-slate-500 border border-slate-100">Đang tải...</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000/api/v1';
+        const token = localStorage.getItem('token');
+        const SIDEBAR_CACHE_KEY = 'admin_sidebar_html_v1';
+
+        async function loadSidebar() {
+            const container = document.getElementById('sidebar-container');
+            let html = sessionStorage.getItem(SIDEBAR_CACHE_KEY);
+
+            if (!html) {
+                const candidates = ['./sidebar/sidebar.html', '/admin/sidebar/sidebar.html'];
+                for (const url of candidates) {
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) continue;
+                        const content = await response.text();
+                        if (!content.includes('sidebar-link')) continue;
+                        html = content;
+                        sessionStorage.setItem(SIDEBAR_CACHE_KEY, html);
+                        break;
+                    } catch (_) {}
+                }
+            }
+
+            if (!html) return;
+            container.innerHTML = html;
+
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                const page = link.getAttribute('data-page');
+                if (page === 'dashboard') {
+                    link.classList.add('active', 'bg-orange-600', 'text-white');
+                }
+                link.addEventListener('click', () => {
+                    sessionStorage.setItem('admin_sidebar_active', page || '');
+                    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active', 'bg-orange-600', 'text-white'));
+                    link.classList.add('active', 'bg-orange-600', 'text-white');
+                });
+            });
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '../auth/login.html';
+                });
+            }
+        }
+
+        async function authFetch(path) {
+            const response = await fetch(BASE_URL + path, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '../auth/login.html';
+            }
+
+            return response.json();
+        }
+
+        async function loadDashboard() {
+            try {
+                const data = await authFetch('/admin/dashboard');
+                if (!data?.data) return;
+
+                document.getElementById('totalUsersCount').textContent = data.data.totalUsers || 0;
+                document.getElementById('totalFacilitiesCount').textContent = data.data.totalFacilities || 0;
+                document.getElementById('pendingFacilitiesCount').textContent = data.data.pendingFacilities || 0;
+                document.getElementById('bannedUsersCount').textContent = data.data.bannedUsers || 0;
+                document.getElementById('activeFacilitiesText').textContent = `${data.data.openFacilities || 0} đang hoạt động`;
+            } catch (_) {}
+        }
+
+        async function loadRecentFacilities() {
+            const box = document.getElementById('facilitiesContainer');
+            try {
+                const data = await authFetch('/admin/facilities?status=PENDING_APPROVAL&limit=5');
+                const list = data?.data?.facilities || [];
+                if (!list.length) {
+                    box.innerHTML = '<div class="bg-surface-container-lowest p-8 rounded-2xl text-center text-slate-500 border border-slate-100">Chưa có cơ sở nào cần duyệt.</div>';
+                    return;
+                }
+
+                box.innerHTML = list.map(f => `
+                    <a href="./facilities.html" class="block no-underline">
+                        <div class="bg-surface-container-lowest rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="font-bold text-lg text-on-surface">${f.name || 'Cơ sở'}</p>
+                                    <p class="text-sm text-slate-500">${f.city || ''}${f.district ? ' • ' + f.district : ''}</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold ${f.status === 'OPEN' ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'}">${f.status === 'OPEN' ? 'ĐANG MỞ' : 'CHỜ DUYỆT'}</span>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+            } catch (_) {
+                box.innerHTML = '<div class="bg-surface-container-lowest p-8 rounded-2xl text-center text-slate-500 border border-slate-100">Lỗi tải dữ liệu.</div>';
+            }
+        }
+
+        async function loadRecentUsers() {
+            const box = document.getElementById('usersContainer');
+            try {
+                const data = await authFetch('/admin/users?limit=5');
+                const list = data?.data?.users || [];
+                if (!list.length) {
+                    box.innerHTML = '<div class="bg-surface-container-lowest p-6 rounded-2xl text-center text-slate-500 border border-slate-100">Chưa có người dùng.</div>';
+                    return;
+                }
+
+                box.innerHTML = list.map(u => `
+                    <a href="./users.html" class="block no-underline">
+                        <div class="bg-surface-container-lowest p-4 rounded-xl border-l-4 border-orange-500 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-start justify-between mb-2 gap-3">
+                                <div>
+                                    <p class="font-bold text-sm text-on-surface">${u.fullName || 'Người dùng'}</p>
+                                    <p class="text-xs text-slate-500">${u.email || ''}</p>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-1 rounded-full ${u.isBanned ? 'bg-red-50 text-red-700' : 'bg-orange-50 text-orange-700'}">${u.isBanned ? 'BANNED' : 'OK'}</span>
+                            </div>
+                            <div class="text-xs text-slate-500 flex items-center justify-between">
+                                <span>${u.roles?.[0]?.name || 'USER'}</span>
+                                <span>${u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : ''}</span>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+            } catch (_) {
+                box.innerHTML = '<div class="bg-surface-container-lowest p-6 rounded-2xl text-center text-slate-500 border border-slate-100">Lỗi tải dữ liệu.</div>';
+            }
+        }
+
+        async function init() {
+            if (!token) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            await loadSidebar();
+            await loadDashboard();
+            await loadRecentFacilities();
+            await loadRecentUsers();
+        }
+
+        init();
+    </script>
+
+</body>
+</html>

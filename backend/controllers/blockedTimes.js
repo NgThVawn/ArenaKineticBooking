@@ -25,6 +25,9 @@ module.exports = {
     return await blockedTimeModel.findByIdAndDelete(id);
   },
 
+  Update: async function (id, data) {
+    return await blockedTimeModel.findByIdAndUpdate(id, data, { new: true });
+  },
   CheckConflict: async function (fieldId, dateStr, startTime, endTime) {
     var conflict = await blockedTimeModel.findOne({
       field: fieldId,

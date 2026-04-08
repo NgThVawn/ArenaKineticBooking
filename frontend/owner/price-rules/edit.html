@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chỉnh sửa quy tắc giá | Arena Kinetic Owner</title>
+
+    <link href="/css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "primary": "#b02f00",
+                        "surface": "#f8f9fa"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Inter"],
+                        "label": ["Lexend"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative flex flex-col">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10 shrink-0">
+        <div class="flex items-center gap-2 text-sm font-medium">
+            <span class="text-slate-400">Arena Manager</span>
+            <span class="text-slate-300">/</span>
+            <a href="../facilities/list.html" class="text-slate-500 hover:text-orange-600 transition-colors text-decoration-none">Cơ sở</a>
+            <span class="text-slate-300">/</span>
+            <a id="breadcrumbFieldsLink" href="#" class="text-slate-500 hover:text-orange-600 transition-colors text-decoration-none">Sân</a>
+            <span class="text-slate-300">/</span>
+            <a id="breadcrumbRulesLink" href="#" class="text-slate-500 hover:text-orange-600 transition-colors text-decoration-none">Quy tắc giá</a>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-800 font-bold">Chỉnh sửa</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a id="btnBackToRules" href="#" class="text-sm text-orange-600 font-bold hover:underline flex items-center gap-1 text-decoration-none">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Quay lại danh sách
+            </a>
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+                <div class="text-right">
+                    <p id="header-email" class="text-sm font-bold text-on-surface leading-none">...</p>
+                </div>
+                <div id="header-avatar-wrap" class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold font-headline overflow-hidden ring-2 ring-orange-500/20">
+                    <span id="header-initial">O</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 flex-1 flex justify-center">
+        <div class="w-full max-w-3xl"> 
+            
+            <div id="alertToast" class="mb-6 p-4 rounded-xl shadow-sm transition-all duration-500 opacity-0 hidden">
+                <div class="flex items-center gap-3">
+                    <span id="toastIcon" class="material-symbols-outlined"></span>
+                    <span id="toastText" class="font-bold text-sm"></span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-8 md:p-10 rounded-[2rem] shadow-2xl border border-slate-800 text-white relative overflow-hidden">
+                <div class="absolute -top-16 -right-16 w-48 h-48 bg-orange-500/20 blur-[60px] rounded-full pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-40 h-40 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none"></div>
+
+                <div class="flex items-center justify-between border-b border-white/10 pb-6 mb-8 relative z-10">
+                    <div>
+                        <h2 class="font-headline font-black text-2xl text-white uppercase tracking-wider flex items-center gap-3 m-0 mb-1.5">
+                            <span class="material-symbols-outlined text-orange-500 text-[28px]">edit_note</span> Cập nhật Quy Tắc
+                        </h2>
+                        <p class="text-slate-400 text-sm font-medium m-0">
+                            Áp dụng cho sân: <strong id="displayFieldName" class="text-white">Đang tải...</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <form id="editRuleForm" class="space-y-6 relative z-10">
+                    <div>
+                        <label class="block text-[11px] font-label font-bold uppercase text-slate-400 mb-2 tracking-widest">Tên quy tắc *</label>
+                        <input type="text" id="ruleName" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3.5 text-sm focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none placeholder:text-slate-500 font-medium" placeholder="VD: Khung giờ Vàng tối">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-label font-bold uppercase text-slate-400 mb-2 tracking-widest">Loại ngày áp dụng *</label>
+                        <div class="relative">
+                            <select id="dayType" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3.5 text-sm focus:bg-slate-800 focus:ring-2 focus:ring-orange-500 outline-none font-bold appearance-none cursor-pointer">
+                                <option value="WEEKDAY">Ngày thường (T2 - T6)</option>
+                                <option value="WEEKEND">Cuối tuần (T7 - CN)</option>
+                                <option value="HOLIDAY">Ngày lễ</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-label font-bold uppercase text-slate-400 mb-2 tracking-widest">Từ giờ *</label>
+                            <input type="time" id="startTime" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3.5 text-sm focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none font-bold [color-scheme:dark]">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-label font-bold uppercase text-slate-400 mb-2 tracking-widest">Đến giờ *</label>
+                            <input type="time" id="endTime" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3.5 text-sm focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none font-bold [color-scheme:dark]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-label font-bold uppercase text-slate-400 mb-2 tracking-widest">Mức giá mới / Giờ (₫) *</label>
+                        <input type="number" id="pricePerHour" required min="1000" class="w-full bg-white/5 border border-white/10 text-orange-400 rounded-xl px-4 py-3.5 text-xl font-black focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+
+                    <div class="bg-white/5 p-5 rounded-xl border border-white/10">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-[11px] font-label font-bold uppercase text-slate-400 tracking-widest m-0">Độ ưu tiên</label>
+                            <span class="material-symbols-outlined text-[16px] text-orange-400" title="Số càng lớn, ưu tiên càng cao.">lightbulb</span>
+                        </div>
+                        <input type="number" id="priority" required min="0" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3.5 text-sm font-bold focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none mb-3">
+                        <p class="text-[11px] text-slate-400 m-0 leading-relaxed font-medium">
+                            * Nếu có nhiều quy tắc trùng giờ nhau, hệ thống sẽ ưu tiên áp dụng mức giá của quy tắc có <strong class="text-orange-400">Độ ưu tiên lớn hơn</strong>.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
+                        <a id="btnCancel" href="#" class="flex-1 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all text-center text-sm uppercase tracking-widest no-underline border border-solid border-white/10">
+                            Hủy bỏ
+                        </a>
+                        <button type="submit" id="btnSubmit" class="flex-[2] py-4 bg-orange-600 text-white font-black font-headline uppercase tracking-widest text-sm rounded-xl hover:bg-orange-500 shadow-lg shadow-orange-600/30 transition-all border-none cursor-pointer flex items-center justify-center gap-2">
+                            LƯU THAY ĐỔI
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script src="/js/api.js"></script>
+<script src="/js/layout_owner.js"></script>
+<script src="/js/owner_price_rules_edit.js"></script>
+
+</body>
+</html>

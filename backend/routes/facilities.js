@@ -201,5 +201,49 @@ router.get('/:facilityId/availability', AvailabilityValidator, validatedResult, 
     return res.status(400).json({ success: false, message: error.message });
   }
 });
+// BẮT BUỘC PHẢI THÊM ĐOẠN NÀY VÀO ROUTES
+// PATCH /api/v1/facilities/:id/status
+router.patch('/:id/status', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    var result = await facilityController.FindById(req.params.id);
+    if (!result) return res.status(404).json({ success: false, message: 'Không tìm thấy cơ sở' });
 
+    var { facility } = result;
+    var userRoles = req.user.roles.map(function (r) { return r.name; });
+    var isAdminOrSuper = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
+
+    // Kiểm tra quyền (Chỉ chủ sân đó hoặc Admin mới được đổi)
+    if (!isAdminOrSuper && String(facility.owner._id) !== String(req.user._id)) {
+      return res.status(403).json({ success: false, message: 'Không có quyền chỉnh sửa cơ sở này' });
+    }
+
+    var { status } = req.body;
+    if (!status) {
+        return res.status(400).json({ success: false, message: 'Vui lòng cung cấp trạng thái mới' });
+    }
+
+    // Chặn chủ sân tự mở khóa nếu đang bị phạt hoặc chờ duyệt
+    if (!isAdminOrSuper && (facility.status === 'PENDING_APPROVAL' || facility.status === 'BLOCKED')) {
+        return res.status(403).json({ success: false, message: 'Cơ sở đang bị khóa hoặc chờ duyệt, không thể tự đổi trạng thái' });
+    }
+
+    // Gọi hàm ChangeStatus trong file Controller của bạn
+    var updated = await facilityController.ChangeStatus(req.params.id, status);
+
+    return res.json({ success: true, message: 'Cập nhật trạng thái thành công', data: updated });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// GET /api/v1/facilities/owner/all (Lấy toàn bộ cơ sở của Chủ sân, không phân biệt trạng thái)
+router.get('/owner/all', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    // Gọi hàm FindByOwner đã có sẵn trong controller của bạn
+    var result = await facilityController.FindByOwner(req.user._id);
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 module.exports = router;

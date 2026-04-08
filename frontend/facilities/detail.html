@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chi tiết cơ sở | Arena Kinetic</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* TIMELINE CSS KÉO TỪ BẢN GỐC CỦA NÍ VÀO ĐÂY */
+        .timeline-wrapper { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; border: 1px solid #f1f5f9; border-radius: 12px; }
+        .timeline-wrapper::-webkit-scrollbar { height: 6px; }
+        .timeline-wrapper::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .timeline-row { display: grid; border-bottom: 1px solid #f1f5f9; background: white; width: max-content; min-width: 100%; }
+        .timeline-row:last-child { border-bottom: none; }
+        .time-cell { height: 48px; border-right: 1px solid #f8fafc; position: relative; cursor: pointer; transition: all 0.2s ease; }
+        .time-header { height: 36px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #94a3b8; background: #f8fafc; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+        .time-cell.available:hover { background-color: #ffedd5; }
+        .time-cell.occupied { background-color: #e53e3e; cursor: not-allowed; }
+        .time-cell.blocked { background-color: #9ca3af; cursor: not-allowed; }
+        .time-cell.selected { background-color: #d33a11; box-shadow: inset 0 0 0 1px #9b2c0c; z-index: 10; }
+        .time-cell.in-range { background-color: #fed7aa; box-shadow: inset 0 1px 0 #fbd38d, inset 0 -1px 0 #fbd38d; }
+        .time-cell.available.ghost-range { background-color: #ffedd5; opacity: 0.7; }
+        .carousel-inner { transition: transform 0.5s ease-in-out; }
+    </style>
+</head>
+
+<body class="bg-surface font-body text-slate-800 antialiased">
+
+    <div id="header-placeholder"></div>
+
+    <main class="pt-24 pb-12 px-4 md:px-6 max-w-7xl mx-auto">
+
+        <header class="relative w-full h-[350px] md:h-[450px] rounded-[1.5rem] overflow-hidden mb-8 shadow-sm">
+            <div id="carouselInner" class="carousel-inner flex w-full h-full bg-slate-200">
+                </div>
+
+            <button id="prevBtn" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors border-none cursor-pointer z-20">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button id="nextBtn" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors border-none cursor-pointer z-20">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+
+            <div id="carouselDots" class="absolute bottom-32 left-1/2 -translate-x-1/2 flex gap-2 z-20"></div>
+
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8 pointer-events-none z-10">
+                <div class="flex flex-wrap gap-3 mb-4">
+                    <span class="bg-primary px-4 py-1.5 rounded-full text-white font-label text-xs font-bold uppercase tracking-widest flex items-center gap-1 shadow-lg">
+                        <span class="material-symbols-outlined text-[14px]">verified</span> Đối tác chính thức
+                    </span>
+                    <span class="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-white font-label text-xs font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg">
+                        <span class="material-symbols-outlined text-[14px] text-yellow-400" style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span id="facRating">--</span>
+                    </span>
+                </div>
+                <h1 id="facName" class="font-headline text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-tight mb-2">Đang tải...</h1>
+                <p class="text-white/90 font-body text-sm flex items-center gap-2 m-0">
+                    <span class="material-symbols-outlined text-[16px] text-green-400">location_on</span>
+                    <span id="facAddress">Đang lấy vị trí...</span>
+                </p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-8 space-y-6">
+
+                <section class="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm">
+                    <h2 class="font-headline text-xl font-bold mb-4 flex items-center gap-3 text-slate-900">
+                        <span class="w-1.5 h-6 bg-primary rounded"></span> Thông tin cơ sở
+                    </h2>
+                    <p id="facDesc" class="text-slate-600 text-sm leading-relaxed mb-6">Đang tải mô tả...</p>
+                    <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4">
+                        <p class="text-xs text-slate-500 m-0">Dịch vụ đi kèm sẽ hiển thị sau khi bạn chọn khung giờ và loại sân bên dưới.</p>
+                    </div>
+                </section>
+
+                <section class="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <h2 class="font-headline text-xl font-bold flex items-center gap-3 text-slate-900 m-0">
+                            <span class="w-1.5 h-6 bg-primary rounded"></span> Đặt lịch thi đấu
+                        </h2>
+                        <div class="flex gap-4 font-body text-[10px] font-bold uppercase tracking-wide">
+                            <div class="flex items-center gap-1.5 text-slate-500"><span class="w-3 h-3 rounded-sm border border-slate-200"></span> Trống</div>
+                            <div class="flex items-center gap-1.5 text-slate-700"><span class="w-3 h-3 rounded-sm bg-red-600"></span> Đã đặt</div>
+                            <div class="flex items-center gap-1.5 text-slate-700"><span class="w-3 h-3 rounded-sm bg-gray-400"></span> Khóa</div>
+                            <div class="flex items-center gap-1.5 text-slate-700"><span class="w-3 h-3 rounded-sm bg-primary"></span> Đang chọn</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <input type="date" id="bookingDate" class="w-full sm:w-auto bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none cursor-pointer">
+                    </div>
+
+                    <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+                        <span class="material-symbols-outlined text-amber-500">info</span>
+                        <p class="text-sm font-medium text-amber-800 m-0"><strong>Lưu ý:</strong> Thời gian đặt sân tối thiểu là <strong>1 giờ</strong> (tương đương chọn 2 ô liên tiếp trên biểu đồ).</p>
+                    </div>
+
+                    <div class="timeline-wrapper relative" id="timelineContainer">
+                        <div class="text-center py-10 text-slate-400 font-bold animate-pulse" id="loadingTimeline">
+                            Đang tải lịch sân...
+                        </div>
+                        <div id="timelineContent" class="hidden overflow-x-visible">
+                            <div class="timeline-row bg-slate-50 sticky top-0 z-20" id="timeHeaderRow">
+                                <div class="bg-slate-100 p-3 font-bold text-xs flex items-center justify-center border-r border-slate-200 sticky left-0 z-30 font-body text-slate-500">Sân</div>
+                            </div>
+                            <div id="fieldsContainer"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="button" id="resetSelectionBtn" class="hidden px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-colors font-body mx-auto cursor-pointer border-none">
+                            Hủy chọn
+                        </button>
+                    </div>
+
+                    <div id="servicePanel" class="mt-6 p-4 rounded-xl bg-slate-900 text-white border border-slate-800 hidden">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <p class="text-[11px] font-body uppercase tracking-wider text-slate-300 m-0">Chọn dịch vụ đi kèm</p>
+                            <span class="text-[10px] text-slate-400">Hiển thị theo sân đã chọn</span>
+                        </div>
+                        <div id="commonServiceWrap" class="mb-3 hidden">
+                            <p class="text-[10px] uppercase tracking-wider text-cyan-300 mb-2 font-bold">Tất cả loại sân</p>
+                            <div id="commonServiceList" class="space-y-2"></div>
+                        </div>
+                        <div id="specificServiceWrap" class="hidden">
+                            <p class="text-[10px] uppercase tracking-wider text-amber-300 mb-2 font-bold">Dịch vụ theo loại sân</p>
+                            <div id="specificServiceList" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="reviews" class="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm">
+                    <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                        <h2 class="font-headline text-xl font-bold flex items-center gap-3 text-slate-900 m-0">
+                            <span class="w-1.5 h-6 bg-amber-500 rounded"></span> Đánh giá từ khách hàng
+                        </h2>
+                        <div class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 border border-amber-100">
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span id="facRatingReview">--</span>
+                        </div>
+                    </div>
+                    <div id="reviewsContainer" class="space-y-4">
+                        <div class="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                            <p class="text-slate-500 font-medium m-0">Đang tải đánh giá...</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="lg:col-span-4 space-y-6 sticky top-24 mb-12">
+                <div class="bg-white p-6 rounded-[1.5rem] shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-headline font-bold text-sm flex items-center gap-2 uppercase text-slate-900">
+                            <span class="material-symbols-outlined text-primary text-[20px]">map</span> Vị trí
+                        </h3>
+                        <a id="btnMaps" href="#" target="_blank" class="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 text-decoration-none bg-blue-50 px-2 py-1 rounded">
+                            Chỉ đường
+                        </a>
+                    </div>
+                    <div class="w-full h-40 rounded-xl overflow-hidden bg-slate-100 relative mb-3" id="mapContainer">
+                        </div>
+                    <p id="facAddressSidebar" class="text-xs text-slate-600 font-medium m-0 leading-relaxed">Đang tải...</p>
+                </div>
+
+                <div class="bg-[#222222] text-white p-6 rounded-[1.5rem] shadow-xl">
+                    <h3 class="font-headline text-sm font-black mb-5 uppercase tracking-wide text-white">Chi tiết thanh toán</h3>
+                    
+                    <div id="emptyBookingState" class="py-6 text-center text-slate-400">
+                        <span class="material-symbols-outlined text-[32px] mb-2 opacity-50">ads_click</span>
+                        <p class="text-xs font-body leading-relaxed">Hãy chọn khung giờ trống<br />trên biểu đồ để xem giá</p>
+                    </div>
+
+                    <div id="activeBookingState" class="hidden">
+                        <div class="space-y-3 mb-6 font-body text-xs text-slate-300 border-b border-white/10 pb-4">
+                            <div class="flex justify-between items-center">
+                                <span>Sân chọn</span>
+                                <span class="font-bold text-white" id="summaryFieldName">--</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>Thời gian</span>
+                                <span class="font-bold text-white" id="summaryTime">--:-- đến --:--</span>
+                            </div>
+                            <div id="priceSegments" class="space-y-3 pt-3 border-t border-white/10"></div>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="text-[10px] font-body uppercase text-slate-400 mb-1">Tổng cộng</p>
+                            <p class="text-3xl font-headline font-black text-white" id="totalPrice">0₫</p>
+                            <p class="m-0 mt-1 text-[11px] text-slate-400" id="extraSummary">(bao gồm dịch vụ: 0đ)</p>
+                        </div>
+
+                        <div class="mb-6 border border-white/10 rounded-xl p-3 bg-white/5" id="selectedServiceSummaryWrap">
+                            <p class="m-0 mb-2 text-[10px] uppercase tracking-wider text-slate-400 font-bold">Dịch vụ đã chọn</p>
+                            <div id="selectedServiceSummary" class="space-y-2 text-[11px] text-slate-200">
+                                <p class="m-0 text-slate-400">Chưa chọn dịch vụ.</p>
+                            </div>
+                        </div>
+
+                        <a id="bookBtn" href="#" class="w-full py-3.5 bg-[#d33a11] hover:bg-[#b02f00] rounded-lg font-headline text-sm font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 text-white text-decoration-none">
+                            XÁC NHẬN ĐẶT SÂN <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </a>
+                    </div>
+                    <p class="text-[9px] text-center text-slate-500 mt-4 font-body">Hỗ trợ thanh toán VNPay & Tiền mặt</p>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <div id="facilityConfig" class="hidden" data-open="00:00" data-close="23:59"></div>
+    <div id="fieldDataContainer" class="hidden"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+
+<script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const facilityId = urlParams.get('id');
+
+            if (!facilityId) {
+                alert("Không tìm thấy thông tin cơ sở!");
+                window.location.href = '/facilities/list.html';
+                return;
+            }
+
+            const dateInput = document.getElementById('bookingDate');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+            dateInput.value = today;
+
+            // Biến toàn cục chứa dịch vụ của cơ sở
+            let globalExtraServices = []; 
+
+            try {
+                // 1. BẮN CÙNG LÚC 3 API: CƠ SỞ, SÂN CON, VÀ DỊCH VỤ ĐÍNH KÈM
+                const [facRes, fieldsRes, servicesRes] = await Promise.all([
+                    fetch(`http://localhost:3000/api/v1/facilities/${facilityId}`),
+                    fetch(`http://localhost:3000/api/v1/fields/facility/${facilityId}`),
+                    fetch(`http://localhost:3000/api/v1/extra-services/facility/${facilityId}`).catch(() => null)
+                ]);
+                
+                const facData = await facRes.json();
+                const fieldsData = await fieldsRes.json();
+                const servicesData = servicesRes ? await servicesRes.json() : { data: [] };
+
+                if (facData.success && facData.data && fieldsData.success) {
+                    const fac = facData.data.facility; 
+                    const images = facData.data.images || [];
+                    const reviewsData = facData.data.reviews || { reviews: [], total: 0 };
+                    const fields = fieldsData.data;
+                    
+                    // Lưu dịch vụ vào biến toàn cục để lát chọn sân mình móc ra dùng
+                    globalExtraServices = servicesData.data || [];
+
+                    renderFacilityDetails(fac, images);
+                    renderReviews(reviewsData, fac.avgRating);
+                    renderFieldsData(fields, fac.openTime, fac.closeTime);
+                    
+                    initTimelineUI(); 
+                } else {
+                    throw new Error("Lỗi dữ liệu từ Server");
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+                document.getElementById('facName').innerText = "Lỗi tải dữ liệu cơ sở!";
+            }
+
+            // ---------------------------------------------------------
+            // HÀM RENDER CHI TIẾT CƠ SỞ (Giữ nguyên)
+            // ---------------------------------------------------------
+            function renderFacilityDetails(fac, images) {
+                document.title = `${fac.name} | Arena Kinetic`;
+                document.getElementById('facName').innerText = fac.name;
+                
+                const addressStr = `${fac.address}, ${fac.district}, ${fac.city}`;
+                document.getElementById('facAddress').innerText = addressStr;
+                document.getElementById('facAddressSidebar').innerText = addressStr;
+                document.getElementById('facDesc').innerText = fac.description || 'Tận hưởng trải nghiệm thi đấu chuyên nghiệp tại hệ thống sân của chúng tôi.';
+                
+                const rating = (fac.avgRating && fac.avgRating > 0) ? fac.avgRating.toFixed(1) : "5.0";
+                document.getElementById('facRating').innerText = rating;
+                document.getElementById('facRatingReview').innerText = rating + ' / 5.0';
+
+                if (fac.latitude && fac.longitude) {
+                    document.getElementById('btnMaps').href = `https://www.google.com/maps/dir/?api=1&destination=${fac.latitude},${fac.longitude}`;
+                    document.getElementById('mapContainer').innerHTML = `<iframe class="absolute inset-0 w-full h-full" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${fac.latitude},${fac.longitude}&hl=vi&z=15&output=embed"></iframe>`;
+                }
+
+                const inner = document.getElementById('carouselInner');
+                let imagesHtml = '';
+                if (images.length > 0) {
+                    images.forEach(img => {
+                        let url = img.imageUrl.startsWith('/') ? `http://localhost:3000${img.imageUrl}` : img.imageUrl;
+                        imagesHtml += `<img class="w-full h-full object-cover shrink-0 block" src="${url}" alt="${fac.name}" />`;
+                    });
+                } else {
+                    imagesHtml = `<img class="w-full h-full object-cover shrink-0 block" src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop" alt="${fac.name}" />`;
+                }
+                inner.innerHTML = imagesHtml;
+                initCarousel();
+            }
+
+            // ---------------------------------------------------------
+            // HÀM RENDER ĐÁNH GIÁ (Giữ nguyên)
+            // ---------------------------------------------------------
+            function renderReviews(reviewsData, avgRating) {
+                const container = document.getElementById('reviewsContainer');
+                if (!reviewsData.reviews || reviewsData.reviews.length === 0) {
+                    container.innerHTML = `<div class="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200"><div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm"><span class="material-symbols-outlined text-4xl text-slate-300">reviews</span></div><p class="text-slate-500 font-medium m-0">Chưa có đánh giá nào cho cơ sở này.</p><p class="text-xs text-slate-400 mt-1">Khách hàng có thể để lại nhận xét sau khi trải nghiệm.</p></div>`;
+                    return;
+                }
+                let html = '';
+                reviewsData.reviews.forEach(r => {
+                    const avatar = r.user?.avatarUrl ? r.user.avatarUrl : null;
+                    const name = r.user?.fullName || r.user?.email || 'Khách hàng';
+                    const date = new Date(r.createdAt).toLocaleDateString('vi-VN');
+                    let starsHtml = '';
+                    for (let i = 1; i <= 5; i++) { starsHtml += `<span class="material-symbols-outlined ${i > r.rating ? 'text-slate-200' : ''}" style="font-variation-settings: 'FILL' 1;">star</span>`; }
+                    html += `<div class="flex gap-4"><div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200 text-slate-400 overflow-hidden">${avatar ? `<img src="${avatar}" class="w-full h-full object-cover" />` : `<span class="material-symbols-outlined text-[24px]">person</span>`}</div><div class="flex-grow bg-slate-50 p-4 rounded-2xl rounded-tl-none border border-slate-100"><div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2"><div class="flex items-center gap-2"><h4 class="font-bold text-slate-800 text-sm m-0">${name}</h4><span class="text-slate-300 text-xs">•</span><span class="text-[10px] text-slate-400 font-label tracking-widest uppercase">${date}</span></div><div class="flex text-amber-400 text-[14px]">${starsHtml}</div></div><p class="text-sm text-slate-600 leading-relaxed m-0">${r.comment}</p></div></div>`;
+                });
+                container.innerHTML = html;
+            }
+
+            function renderFieldsData(fields, openTime, closeTime) {
+                const configEl = document.getElementById('facilityConfig');
+                configEl.setAttribute('data-open', openTime || '06:00');
+                configEl.setAttribute('data-close', closeTime || '22:00');
+                let fieldsHtml = '';
+                fields.forEach(f => {
+                    if (f.status === 'OPEN') fieldsHtml += `<div class="field-item-data" data-id="${f._id}" data-name="${f.name}" data-sport="${f.sportType}"></div>`;
+                });
+                document.getElementById('fieldDataContainer').innerHTML = fieldsHtml;
+            }
+
+            function initCarousel() {
+                const inner = document.getElementById('carouselInner'); const prevBtn = document.getElementById('prevBtn'); const nextBtn = document.getElementById('nextBtn'); const dotsCon = document.getElementById('carouselDots'); const images = inner.querySelectorAll('img'); const totalImages = images.length; let currentIndex = 0; let autoPlayInterval;
+                if (totalImages > 1) {
+                    for (let i = 0; i < totalImages; i++) { const dot = document.createElement('div'); dot.className = `w-2 h-2 rounded-full cursor-pointer transition-all ${i === 0 ? 'bg-primary w-4' : 'bg-white/50'}`; dot.addEventListener('click', () => goToSlide(i)); dotsCon.appendChild(dot); }
+                    function goToSlide(index) { currentIndex = index; inner.style.transform = `translateX(-${currentIndex * 100}%)`; const dots = dotsCon.children; for (let i = 0; i < dots.length; i++) { dots[i].className = i === currentIndex ? 'w-4 h-2 rounded-full cursor-pointer transition-all bg-primary' : 'w-2 h-2 rounded-full cursor-pointer transition-all bg-white/50'; } resetAutoPlay(); }
+                    nextBtn.addEventListener('click', () => goToSlide((currentIndex + 1) % totalImages)); prevBtn.addEventListener('click', () => goToSlide((currentIndex - 1 + totalImages) % totalImages));
+                    function resetAutoPlay() { clearInterval(autoPlayInterval); autoPlayInterval = setInterval(() => goToSlide((currentIndex + 1) % totalImages), 5000); } resetAutoPlay();
+                } else { prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; }
+            }
+
+            // ---------------------------------------------------------
+            // LOGIC TIMELINE VÀ CHỌN GIỜ ĐẶT SÂN
+            // ---------------------------------------------------------
+            function initTimelineUI() {
+                const configEl = document.getElementById('facilityConfig');
+                const openTimeStr = configEl.getAttribute('data-open');
+                const closeTimeStr = configEl.getAttribute('data-close');
+
+                const openFields = Array.from(document.querySelectorAll('.field-item-data')).map(el => ({
+                    id: el.getAttribute('data-id'),
+                    name: el.getAttribute('data-name'),
+                    sportType: el.getAttribute('data-sport')
+                }));
+
+                const loadingEl = document.getElementById('loadingTimeline');
+                const contentEl = document.getElementById('timelineContent');
+                const headerRow = document.getElementById('timeHeaderRow');
+                const fieldsCon = document.getElementById('fieldsContainer');
+                const resetBtn = document.getElementById('resetSelectionBtn');
+
+                const emptyState = document.getElementById('emptyBookingState');
+                const activeState = document.getElementById('activeBookingState');
+                const lblFieldName = document.getElementById('summaryFieldName');
+                const lblTime = document.getElementById('summaryTime');
+                const priceSegEl = document.getElementById('priceSegments');
+                const totalPriceEl = document.getElementById('totalPrice');
+                const bookBtn = document.getElementById('bookBtn');
+                
+                const servicePanel = document.getElementById('servicePanel'); 
+                const commonServiceWrap = document.getElementById('commonServiceWrap');
+                const specificServiceWrap = document.getElementById('specificServiceWrap');
+                const commonServiceList = document.getElementById('commonServiceList');
+                const specificServiceList = document.getElementById('specificServiceList');
+                
+                let fieldsData = [];
+                let selectedFieldId = null; let selectedStartMin = null; let selectedEndMin = null;
+                let selectionStep = 0; let baseBookingPrice = 0; 
+                let currentApplicableServices = [];
+                const selectedExtras = new Map();
+
+                const facStartMin = toMinutes(openTimeStr);
+                const facEndMin = toMinutes(closeTimeStr);
+                const totalSlots = (facEndMin - facStartMin) / 30;
+                const gridColsTemplate = `80px repeat(${totalSlots}, minmax(40px, 1fr))`;
+
+                let headerHtml = '<div class="bg-white p-3 font-bold text-xs flex items-center justify-center border-r border-slate-200 sticky left-0 z-30 text-slate-500 font-body">Sân</div>';
+                for (let m = facStartMin; m < facEndMin; m += 30) {
+                    headerHtml += `<div class="time-header">${toHHMM(m)}</div>`;
+                }
+                headerRow.innerHTML = headerHtml;
+                headerRow.style.gridTemplateColumns = gridColsTemplate;
+
+                dateInput.addEventListener('change', loadAllFieldsData);
+                resetBtn.addEventListener('click', resetSelection);
+
+                async function loadAllFieldsData() {
+                    if (openFields.length === 0) { loadingEl.innerText = "Cơ sở này hiện không có sân hoạt động."; return; }
+                    loadingEl.classList.remove('hidden'); contentEl.classList.add('hidden');
+                    resetSelection(); fieldsData = [];
+
+                    try {
+                        const date = dateInput.value;
+                        const promises = openFields.map(f => fetch(`http://localhost:3000/api/v1/fields/${f.id}/availability?date=${date}`).then(r => r.json()));
+                        const results = await Promise.all(promises);
+
+                        results.forEach((res, index) => {
+                            if (res.data) fieldsData.push({ fieldInfo: openFields[index], availability: res.data });
+                        });
+
+                        renderGanttChart();
+                        loadingEl.classList.add('hidden'); contentEl.classList.remove('hidden');
+                    } catch (e) {
+                        console.error(e); loadingEl.innerText = "Lỗi tải dữ liệu lịch sân.";
+                    }
+                }
+
+                function renderGanttChart() {
+                    let html = '';
+                    fieldsData.forEach(item => {
+                        const field = item.fieldInfo; const occ = item.availability.occupied || [];
+                        html += `<div class="timeline-row group" data-field-id="${field.id}" style="grid-template-columns: ${gridColsTemplate};">`;
+                        html += `<div class="bg-white group-hover:bg-slate-50 p-2 font-bold text-xs flex flex-col justify-center border-r border-slate-100 sticky left-0 z-10 text-slate-800 text-center"><span class="truncate w-16 mx-auto" title="${field.name}">${field.name}</span></div>`;
+
+                        for (let m = facStartMin; m < facEndMin; m += 30) {
+                            const type = getSegmentType(m, m + 30, occ);
+                            html += `<div class="time-cell ${type}" data-field-id="${field.id}" data-start-min="${m}" data-end-min="${m + 30}"></div>`;
+                        }
+                        html += `</div>`;
+                    });
+
+                    fieldsCon.innerHTML = html;
+                    document.querySelectorAll('.time-cell.available').forEach(cell => {
+                        cell.addEventListener('click', handleCellClick);
+                        cell.addEventListener('mouseenter', handleCellHover);
+                    });
+                }
+
+                function handleCellClick(e) {
+                    const cell = e.target; const fid = cell.getAttribute('data-field-id');
+                    const sm = parseInt(cell.getAttribute('data-start-min')); const em = parseInt(cell.getAttribute('data-end-min'));
+
+                    if (selectionStep === 0 || selectedFieldId !== fid || selectionStep === 2) {
+                        selectedFieldId = fid; selectedStartMin = sm; selectedEndMin = em; selectionStep = 1;
+                    } else if (selectionStep === 1) {
+                        if (sm < selectedStartMin) { selectedStartMin = sm; selectedEndMin = em; selectionStep = 1; }
+                        else { selectedEndMin = em; selectionStep = 2; }
+                    }
+
+                    if (hasConflict(selectedFieldId, selectedStartMin, selectedEndMin)) {
+                        alert("Khoảng giờ bị vướng lịch. Vui lòng chọn lại!");
+                        selectedStartMin = sm; selectedEndMin = em; selectionStep = 1;
+                    }
+                    updateGridUI(); updateSidebarUI();
+                }
+
+                function handleCellHover(e) {
+                    if (selectionStep !== 1) return;
+                    const cell = e.target; const fid = cell.getAttribute('data-field-id');
+                    if (fid !== selectedFieldId) return;
+
+                    const hoverMin = parseInt(cell.getAttribute('data-start-min'));
+                    document.querySelectorAll('.ghost-range').forEach(c => c.classList.remove('ghost-range'));
+
+                    if (hoverMin > selectedStartMin) {
+                        document.querySelectorAll(`.time-cell[data-field-id="${fid}"]`).forEach(c => {
+                            const csm = parseInt(c.getAttribute('data-start-min'));
+                            if (csm > selectedStartMin && csm <= hoverMin && c.classList.contains('available')) c.classList.add('ghost-range');
+                        });
+                    }
+                }
+
+                function updateGridUI() {
+                    document.querySelectorAll('.time-cell').forEach(c => c.classList.remove('selected', 'in-range', 'ghost-range'));
+                    if (selectedStartMin !== null && selectedEndMin !== null) {
+                        resetBtn.classList.remove('hidden');
+                        document.querySelectorAll(`.time-cell[data-field-id="${selectedFieldId}"]`).forEach(c => {
+                            const sm = parseInt(c.getAttribute('data-start-min')); const em = parseInt(c.getAttribute('data-end-min'));
+                            if (sm >= selectedStartMin && em <= selectedEndMin) c.classList.add('selected');
+                        });
+                    } else { resetBtn.classList.add('hidden'); }
+                }
+
+                async function updateSidebarUI() {
+                    if (selectedStartMin === null) {
+                        servicePanel.classList.add('hidden'); commonServiceWrap.classList.add('hidden'); specificServiceWrap.classList.add('hidden');
+                        commonServiceList.innerHTML = ''; specificServiceList.innerHTML = '';
+                        baseBookingPrice = 0; currentApplicableServices = []; selectedExtras.clear(); updateTotalWithExtras();
+                        bookBtn.classList.add('opacity-50', 'pointer-events-none');
+                        bookBtn.innerHTML = 'XÁC NHẬN ĐẶT SÂN <span class="material-symbols-outlined text-[18px]">arrow_forward</span>';
+                        emptyState.classList.remove('hidden'); activeState.classList.add('hidden'); 
+                        return;
+                    }
+
+                    const fInfo = openFields.find(f => f.id === selectedFieldId);
+                    emptyState.classList.add('hidden'); activeState.classList.remove('hidden');
+                    lblFieldName.innerText = fInfo.name;
+                    const startStr = toHHMM(selectedStartMin); const endStr = toHHMM(selectedEndMin);
+                    lblTime.innerText = `${startStr} - ${endStr}`;
+                    
+                    bookBtn.classList.add('opacity-50', 'pointer-events-none');
+                    priceSegEl.innerHTML = '<span class="text-slate-400">Đang tính tiền...</span>';
+
+                    try {
+                        const date = dateInput.value;
+                        const res = await fetch(`http://localhost:3000/api/v1/fields/${selectedFieldId}/price?date=${date}&start=${startStr}&end=${endStr}`);
+                        const json = await res.json();
+
+                        if (json.data) {
+                            baseBookingPrice = Number(json.data.totalPrice || 0);
+                            
+                            // ===== LOGIC GOM NHÓM TÍNH TIỀN =====
+                            const breakdownArr = json.data.breakdown || [];
+                            const groupedObj = {};
+                            
+                            breakdownArr.forEach(s => {
+                                const key = `${s.rule}_${s.price}`;
+                                if (!groupedObj[key]) groupedObj[key] = { rule: s.rule, price: s.price, count: 0, total: 0 };
+                                groupedObj[key].count += 1;
+                                groupedObj[key].total += s.price;
+                            });
+
+                            let phtml = '';
+                            Object.values(groupedObj).forEach(g => {
+                                const durationHour = g.count / 2; // Mỗi slot là 30 phút = 0.5 giờ
+                                phtml += `<div class="flex justify-between items-center">
+                                            <span>${g.rule} <span class="text-[10px] opacity-70">(${durationHour} giờ)</span></span>
+                                            <span class="font-bold text-white">${fmt(g.total)}đ</span>
+                                          </div>`;
+                            });
+                            priceSegEl.innerHTML = phtml; 
+
+                            // ===== LOGIC LỌC & HIỂN THỊ DỊCH VỤ =====
+                            // Lọc dịch vụ từ biến globalExtraServices dựa trên môn thể thao của Sân đang chọn
+                            currentApplicableServices = globalExtraServices.filter(s => 
+                                s.appliesToSportType === null || s.appliesToSportType === fInfo.sportType
+                            ).map(s => {
+                                const availableStock = (s.quantity || 0) - (s.soldCount || 0) - (s.reserved || 0);
+
+                                return {
+                                    id: s._id,
+                                    name: s.name,
+                                    price: s.price,
+                                    unit: s.unit === 'PER_ITEM' ? 'món' : s.unit,
+                                    stock: availableStock > 0 ? availableStock : 0, // Chặn số âm
+                                    scope: s.appliesToSportType === null ? 'COMMON' : 'SPORT_SPECIFIC'
+                                };
+                            });
+                            
+                            renderServicePanel(currentApplicableServices);
+                            updateTotalWithExtras();
+
+                            if ((selectedEndMin - selectedStartMin) < 60) {
+                                bookBtn.classList.add('opacity-50', 'pointer-events-none');
+                                bookBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">warning</span> CHỌN TỐI THIỂU 1 GIỜ';
+                            } else {
+                                bookBtn.classList.remove('opacity-50', 'pointer-events-none');
+                                bookBtn.innerHTML = 'XÁC NHẬN ĐẶT SÂN <span class="material-symbols-outlined text-[18px]">arrow_forward</span>';
+                                updateBookLink();
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e); 
+                        priceSegEl.innerHTML = '<div class="text-red-400">Lỗi lấy giá từ Server.</div>'; 
+                    }
+                }
+
+                // ---------------------------------------------------------
+                // HÀM VẼ GIAO DIỆN DỊCH VỤ (EXTRA SERVICES)
+                // ---------------------------------------------------------
+                function renderServicePanel(services) {
+                    const activeIds = new Set(services.map(s => String(s.id)));
+                    Array.from(selectedExtras.keys()).forEach(id => {
+                        if (!activeIds.has(String(id))) selectedExtras.delete(id);
+                    });
+
+                    commonServiceList.innerHTML = ''; specificServiceList.innerHTML = '';
+                    const common = services.filter(s => s.scope === 'COMMON');
+                    const specific = services.filter(s => s.scope === 'SPORT_SPECIFIC');
+
+                    common.forEach(s => commonServiceList.appendChild(renderServiceItem(s)));
+                    specific.forEach(s => specificServiceList.appendChild(renderServiceItem(s)));
+
+                    commonServiceWrap.classList.toggle('hidden', common.length === 0);
+                    specificServiceWrap.classList.toggle('hidden', specific.length === 0);
+                    servicePanel.classList.toggle('hidden', services.length === 0);
+                }
+
+                function renderServiceItem(service) {
+                    const wrapper = document.createElement('div'); wrapper.className = 'flex flex-col gap-1';
+                    const item = document.createElement('div'); item.className = 'flex items-center justify-between gap-3 bg-white/10 rounded-lg px-3 py-2 transition-all border border-transparent';
+                    const left = document.createElement('div'); left.className = 'min-w-0 flex-1';
+                    const name = document.createElement('p'); name.className = 'm-0 text-xs font-bold text-white truncate'; name.innerText = service.name;
+                    const price = document.createElement('p'); price.className = 'm-0 text-[11px] font-semibold text-slate-300'; price.innerText = `${fmt(service.price)}đ/${service.unit}`;
+                    
+                    left.appendChild(name); left.appendChild(price);
+
+                    const controls = document.createElement('div'); controls.className = 'flex items-center gap-2 shrink-0 ml-2';
+                    const decBtn = document.createElement('button'); decBtn.className = 'w-6 h-6 rounded bg-white/15 hover:bg-white/25 text-white border-none cursor-pointer flex items-center justify-center'; decBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">remove</span>';
+                    const qtyLabel = document.createElement('span'); qtyLabel.className = 'text-xs font-bold min-w-[18px] text-center text-white'; qtyLabel.innerText = String(selectedExtras.get(service.id) || 0);
+                    const incBtn = document.createElement('button'); incBtn.className = 'w-6 h-6 rounded bg-white/15 hover:bg-white/25 text-white border-none cursor-pointer flex items-center justify-center'; incBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">add</span>';
+                    
+                    const maxStock = (service.stock !== undefined && service.stock !== null) ? service.stock : 999;
+                    const errorMsg = document.createElement('p'); 
+                    errorMsg.className = 'text-[10px] text-red-400 font-medium m-0 px-2 hidden flex items-center gap-1'; 
+                    errorMsg.innerHTML = `<span class="material-symbols-outlined text-[12px]">info</span> Chỉ còn tối đa ${maxStock} ${service.unit}`;
+
+                    // 🛑 KHÚC NÀY QUAN TRỌNG: Kiểm tra ngay lúc mới vẽ giao diện
+                    if (maxStock <= 0) {
+                        incBtn.disabled = true;
+                        incBtn.classList.add('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
+                        errorMsg.innerHTML = `<span class="material-symbols-outlined text-[12px]">block</span> Hết hàng`;
+                        errorMsg.classList.remove('hidden');
+                        item.classList.add('opacity-60'); // Làm mờ cả item đi cho khách biết là hết hàng
+                    }
+
+                    // Sự kiện nút Trừ
+                    decBtn.addEventListener('click', () => {
+                        const curr = Number(selectedExtras.get(service.id) || 0); 
+                        const next = Math.max(0, curr - 1);
+                        
+                        if (next === 0) selectedExtras.delete(service.id); 
+                        else selectedExtras.set(service.id, next);
+                        
+                        qtyLabel.innerText = String(next);
+
+                        // Nếu giảm xuống dưới mức max, mở lại nút Cộng
+                        if (next < maxStock) {
+                            errorMsg.classList.add('hidden');
+                            if (maxStock > 0) {
+                                incBtn.disabled = false;
+                                incBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                                item.classList.remove('border-red-500/50', 'bg-red-500/10');
+                            }
+                        }
+                        updateBookLink(); updateTotalWithExtras();
+                    });
+
+                    // Sự kiện nút Cộng
+                    incBtn.addEventListener('click', () => {
+                        const curr = Number(selectedExtras.get(service.id) || 0);
+                        const next = curr + 1;
+
+                        if (next <= maxStock) {
+                            selectedExtras.set(service.id, next);
+                            qtyLabel.innerText = String(next);
+                            
+                            // Nếu đạt tới giới hạn thì khóa ngay lập tức
+                            if (next >= maxStock) {
+                                errorMsg.classList.remove('hidden');
+                                item.classList.add('border-red-500/50', 'bg-red-500/10');
+                                incBtn.disabled = true;
+                                incBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                            }
+                        }
+                        updateBookLink(); updateTotalWithExtras();
+                    });
+
+                    const currentInitialQty = Number(selectedExtras.get(service.id) || 0);
+                    if (currentInitialQty >= maxStock && maxStock > 0) { errorMsg.classList.remove('hidden'); item.classList.add('border-red-500/50', 'bg-red-500/10'); incBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none'); }
+
+                    controls.appendChild(decBtn); controls.appendChild(qtyLabel); controls.appendChild(incBtn);
+                    item.appendChild(left); item.appendChild(controls);
+                    wrapper.appendChild(item); wrapper.appendChild(errorMsg);
+                    return wrapper;
+                }
+
+                function updateBookLink() {
+                    if (selectedStartMin === null || selectedEndMin === null || !selectedFieldId) return;
+                    const date = dateInput.value; const startStr = toHHMM(selectedStartMin); const endStr = toHHMM(selectedEndMin);
+                    const params = new URLSearchParams();
+                    params.set('fieldId', String(selectedFieldId)); params.set('date', date); params.set('start', startStr); params.set('end', endStr);
+                    let idx = 0;
+                    selectedExtras.forEach((qty, serviceId) => {
+                        if (qty > 0) { params.set(`extraItems[${idx}].serviceId`, String(serviceId)); params.set(`extraItems[${idx}].quantity`, String(qty)); idx += 1; }
+                    });
+                    bookBtn.href = `/bookings/new.html?${params.toString()}`;
+                }
+
+                function updateTotalWithExtras() {
+                    let extraTotal = 0; const selectedServiceSummary = document.getElementById('selectedServiceSummary'); let summaryHtml = '';
+                    selectedExtras.forEach((qty, serviceId) => {
+                        const service = currentApplicableServices.find(s => String(s.id) === String(serviceId));
+                        if (service) {
+                            const lineTotal = Number(service.price || 0) * Number(qty || 0); extraTotal += lineTotal;
+                            summaryHtml += `<div class="flex items-center justify-between gap-3"><span>${service.name} x${qty}</span><span class="font-bold text-white">${fmt(lineTotal)}đ</span></div>`;
+                        }
+                    });
+                    if (selectedServiceSummary) selectedServiceSummary.innerHTML = summaryHtml || '<p class="m-0 text-slate-400">Chưa chọn dịch vụ.</p>';
+                    totalPriceEl.innerText = fmt(baseBookingPrice + extraTotal) + 'đ';
+                    document.getElementById('extraSummary').innerText = `(bao gồm dịch vụ: ${fmt(extraTotal)}đ)`;
+                }
+
+                // CÁC HÀM TIỆN ÍCH
+                function resetSelection() { selectedFieldId = null; selectedStartMin = null; selectedEndMin = null; selectionStep = 0; updateGridUI(); updateSidebarUI(); }
+                function toMinutes(t) { if (!t) return 0; const parts = t.split(':'); return parseInt(parts[0]) * 60 + parseInt(parts[1]); }
+                function toHHMM(m) { return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+                function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
+                
+                function getSegmentType(start, end, occArr) {
+                        const sDate = dateInput.value; const now = new Date();
+                        const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                        
+                        // Chặn giờ trong quá khứ của ngày hôm nay
+                        if (sDate === todayStr && start <= (now.getHours() * 60 + now.getMinutes())) return 'blocked';
+                        
+                        for (const o of occArr) {
+                            // SỬA Ở ĐÂY: Dùng o.startTime và o.endTime theo đúng JSON
+                            const os = toMinutes(o.startTime), oe = toMinutes(o.endTime);
+                            if (start < oe && end > os) {
+                                // SỬA Ở ĐÂY: Chữ BOOKED thay vì BOOKING
+                                return o.type === 'BOOKED' ? 'occupied' : 'blocked';
+                            }
+                        }
+                        return 'available';
+                    }
+
+                function hasConflict(fid, startMin, endMin) {
+                    const data = fieldsData.find(i => i.fieldInfo.id === fid); if (!data) return true;
+                    const sDate = dateInput.value; const now = new Date();
+                    const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                    
+                    if (sDate === todayStr && startMin <= (now.getHours() * 60 + now.getMinutes())) return true;
+                    
+                    for (const o of data.availability.occupied) {
+                        // SỬA Ở ĐÂY: Dùng o.startTime và o.endTime
+                        const os = toMinutes(o.startTime), oe = toMinutes(o.endTime);
+                        if (startMin < oe && endMin > os) return true;
+                    }
+                    return false;
+                }
+
+                loadAllFieldsData(); // Bắt đầu chạy Chart
+            }
+        });
+    </script>
+</body>
+</html>

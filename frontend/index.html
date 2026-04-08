@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ | Arena Kinetic</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="./css/app.css">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="./js/tailwind-config.js"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-body">
+
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow flex flex-col w-full">
+        <section class="relative min-h-[870px] flex items-center overflow-hidden bg-zinc-950">
+            <div class="absolute inset-0 opacity-40">
+                <img class="w-full h-full object-cover" alt="Sân vận động chuyên nghiệp" src="https://images.unsplash.com/photo-1577223625816-7546f13df25d?q=80&w=2000&auto=format&fit=crop">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/60 to-transparent"></div>
+            <div class="relative w-full max-w-screen-2xl mx-auto px-6 py-24 z-10">
+                <div class="max-w-3xl">
+                    <span class="inline-block py-1 px-4 rounded-full bg-primary/20 text-primary-container font-label text-sm font-bold tracking-widest uppercase mb-6">CHỈ CÁC CƠ SỞ CHUYÊN NGHIỆP</span>
+                    <h1 class="text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8 italic font-headline">
+                        SỰ CHÍNH XÁC<br><span class="text-primary-container">NĂNG ĐỘNG.</span>
+                    </h1>
+                    <p class="text-xl text-zinc-300 font-body max-w-xl mb-10 leading-relaxed">
+                        Nâng tầm kỹ năng của bạn trong môi trường đẳng cấp. Đặt sân thể thao cao cấp với tính khả dụng theo thời gian thực.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-4 mt-8">
+                        <a href="/facilities/list.html" class="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-xl font-black font-headline text-lg hover:bg-orange-700 hover:shadow-[0_0_20px_rgba(211,58,17,0.4)] transition-all duration-300 uppercase tracking-widest no-underline group">
+                            <span>ĐẶT SÂN NGAY</span>
+                            <span class="material-symbols-outlined text-[24px] group-hover:translate-x-1.5 transition-transform">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="relative z-20 -mt-12 px-6">
+            <form action="/facilities/list.html" method="get" class="max-w-screen-xl mx-auto bg-surface-container-lowest p-4 rounded-2xl shadow-2xl flex flex-wrap lg:flex-nowrap items-center gap-4 border border-outline-variant/30">
+
+                <div class="flex-1 min-w-[200px] flex items-center gap-3 px-4 py-3 bg-surface-container rounded-xl relative" id="city-search-wrapper">
+                    <span class="material-symbols-outlined text-zinc-400 text-[20px]">location_on</span>
+                    <div class="flex flex-col w-full">
+                        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-label">ĐỊA ĐIỂM</span>
+                        <input type="text" name="city" id="city-search-input"
+                               class="bg-transparent border-none p-0 text-sm font-semibold text-zinc-800 focus:ring-0 outline-none w-full placeholder:text-zinc-400"
+                               placeholder="Thành phố, quận..." autocomplete="off"/>
+                    </div>
+                    <ul id="city-search-dropdown" class="absolute left-0 top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50 overflow-y-auto hidden" style="border: 1px solid #e4e4e7; max-height: 260px; min-width: 240px;"></ul>
+                </div>
+
+                <div class="flex-1 min-w-[200px] flex items-center gap-3 px-4 py-3 bg-surface-container rounded-xl">
+                    <span class="material-symbols-outlined text-zinc-400">search</span>
+                    <div class="flex flex-col w-full">
+                        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-label">TÊN SÂN</span>
+                        <input name="name" class="bg-transparent border-none p-0 text-sm font-semibold focus:ring-0 w-full outline-none" placeholder="Tìm tên sân cụ thể" type="text">
+                    </div>
+                </div>
+
+                <div class="flex-1 min-w-[200px] flex items-center gap-3 px-4 py-3 bg-surface-container rounded-xl relative cursor-pointer" id="custom-sport-select">
+                    <span class="material-symbols-outlined text-primary/70">sports_soccer</span>
+                    <div class="flex flex-col w-full relative">
+                        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-label mb-0.5">Môn thể thao</span>
+                        <div id="sport-display-box" class="flex justify-between items-center w-full">
+                            <span id="sport-selected-text" class="text-base font-bold text-zinc-800 truncate">Tất cả các môn</span>
+                            <span id="sport-arrow" class="material-symbols-outlined text-zinc-400 text-[20px] transition-transform duration-200">expand_more</span>
+                        </div>
+                        <input type="hidden" name="sport" id="sport-hidden-input" value="">
+
+                        <ul id="sport-dropdown-menu" class="absolute z-50 top-full left-[-45px] mt-5 w-[250px] bg-white rounded-2xl shadow-xl border border-outline-variant/30 py-2 hidden opacity-0 translate-y-2 transition-all duration-200 list-none pl-0 m-0">
+                            <li class="sport-option px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-semibold text-zinc-700 hover:text-primary transition-colors flex items-center gap-3" data-value="" data-text="Tất cả các môn">
+                                <span class="material-symbols-outlined text-[18px] text-zinc-400">apps</span> Tất cả các môn
+                            </li>
+                            <li class="sport-option px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-semibold text-zinc-700 hover:text-primary transition-colors flex items-center gap-3" data-value="FOOTBALL" data-text="Bóng đá">
+                                <span class="sport-item-icon material-symbols-outlined text-[18px] text-primary/70"></span> Bóng đá
+                            </li>
+                            <li class="sport-option px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-semibold text-zinc-700 hover:text-primary transition-colors flex items-center gap-3" data-value="BASKETBALL" data-text="Bóng rổ">
+                                <span class="sport-item-icon material-symbols-outlined text-[18px] text-primary/70"></span> Bóng rổ
+                            </li>
+                            <li class="sport-option px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-semibold text-zinc-700 hover:text-primary transition-colors flex items-center gap-3" data-value="TENNIS" data-text="Tennis">
+                                <span class="sport-item-icon material-symbols-outlined text-[18px] text-primary/70"></span> Tennis
+                            </li>
+                            <li class="sport-option px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-semibold text-zinc-700 hover:text-primary transition-colors flex items-center gap-3" data-value="BADMINTON" data-text="Cầu lông">
+                                <span class="sport-item-icon material-symbols-outlined text-[18px] text-primary/70"></span> Cầu lông
+                            </li>
+                            <li class="sport-option px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-semibold text-zinc-700 hover:text-primary transition-colors flex items-center gap-3" data-value="VOLLEYBALL" data-text="Bóng chuyền">
+                                <span class="sport-item-icon material-symbols-outlined text-[18px] text-primary/70"></span> Bóng chuyền
+                            </li>
+                            <li class="sport-option px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-semibold text-zinc-700 hover:text-primary transition-colors flex items-center gap-3" data-value="PICKLEBALL" data-text="Pickleball">
+                                <span class="sport-item-icon material-symbols-outlined text-[18px] text-primary/70"></span> Pickleball
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button type="submit" class="bg-secondary text-white px-8 py-4 rounded-xl font-bold font-headline flex items-center gap-2 hover:bg-secondary/90 transition-all active:scale-95 border-none cursor-pointer">
+                    <span class="material-symbols-outlined">search</span>
+                    TÌM SÂN
+                </button>
+            </form>
+        </section>
+
+        <section class="py-24 bg-surface-container-low px-6 mt-12">
+            <div class="max-w-screen-2xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-black tracking-tighter text-zinc-900 mb-4 uppercase italic font-headline">SÂN ĐẤU HÀNG ĐẦU</h2>
+                    <p class="text-zinc-500 max-w-2xl mx-auto font-body text-lg">Trải nghiệm những đấu trường nơi các nhà vô địch ra đời. Được cộng đồng đánh giá cao nhất.</p>
+                </div>
+
+                <div id="top-facilities-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    </div>
+            </div>
+        </section>
+
+        <section class="py-24 px-6 relative overflow-hidden bg-white border-t border-outline-variant/20">
+            <div class="max-w-screen-xl mx-auto flex flex-col lg:flex-row items-center gap-20">
+                <div class="lg:w-1/2">
+                    <h2 class="text-5xl font-black tracking-tighter text-zinc-900 mb-8 uppercase italic leading-none font-headline">KHÔNG TRỞ NGẠI.<br>TỐI ĐA TRẢI NGHIỆM.</h2>
+                    <p class="text-zinc-600 text-lg mb-12 font-body leading-relaxed">Chúng tôi đã loại bỏ sự phức tạp của việc đặt sân truyền thống. Ba bước giữa bạn và hiệu suất cao nhất của bạn.</p>
+                    <div class="space-y-12">
+                        <div class="flex gap-6 group">
+                            <div class="w-14 h-14 shrink-0 rounded-2xl bg-zinc-100 flex items-center justify-center text-primary font-black text-2xl font-headline group-hover:bg-primary group-hover:text-white transition-all shadow-sm">1</div>
+                            <div>
+                                <h4 class="text-xl font-black text-zinc-900 uppercase italic mb-2 font-headline">TÌM KIẾM SÂN</h4>
+                                <p class="text-zinc-500 font-body">Duyệt qua hình ảnh chất lượng cao và đánh giá đã xác thực của người chơi để tìm sân hoàn hảo cho đội của bạn.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6 group">
+                            <div class="w-14 h-14 shrink-0 rounded-2xl bg-zinc-100 flex items-center justify-center text-primary font-black text-2xl font-headline group-hover:bg-primary group-hover:text-white transition-all shadow-sm">2</div>
+                            <div>
+                                <h4 class="text-xl font-black text-zinc-900 uppercase italic mb-2 font-headline">KHÓA SÂN TỨC THÌ</h4>
+                                <p class="text-zinc-500 font-body">Đồng bộ thời gian thực đảm bảo bạn không bao giờ mất lượt. Đặt sân trong vài giây với hệ thống thanh toán an toàn.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6 group">
+                            <div class="w-14 h-14 shrink-0 rounded-2xl bg-zinc-100 flex items-center justify-center text-primary font-black text-2xl font-headline group-hover:bg-primary group-hover:text-white transition-all shadow-sm">3</div>
+                            <div>
+                                <h4 class="text-xl font-black text-zinc-900 uppercase italic mb-2 font-headline">TẬN HƯỞNG TRẬN ĐẤU</h4>
+                                <p class="text-zinc-500 font-body">Mọi thủ tục rườm rà đã được ARENAKINETIC lo liệu. Giờ là lúc xỏ giày ra sân, rèn luyện sức khỏe và tạo nên những khoảnh khắc tuyệt vời nhất.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 relative">
+                    <div class="absolute -top-10 -right-10 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+                    <div class="relative rounded-3xl overflow-hidden shadow-2xl rotate-3 translate-x-4 border border-outline-variant/30">
+                        <img class="w-full" alt="Giao diện App" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop">
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 bg-secondary text-white p-8 rounded-2xl shadow-xl -rotate-3 z-10">
+                        <span class="material-symbols-outlined text-4xl mb-4">speed</span>
+                        <p class="text-2xl font-black italic font-headline">45 GIÂY</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-zinc-300 font-label">Thời gian đặt sân trung bình</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="./js/api.js"></script>
+    <script src="./js/layout.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // 1. API Tìm Địa Điểm (Giữ nguyên gốc của ní)
+            const cityInput = document.getElementById('city-search-input');
+            const cityDropdown = document.getElementById('city-search-dropdown');
+            const cityWrapper = document.getElementById('city-search-wrapper');
+
+            if (cityInput) {
+                let provinces = [];
+                fetch('https://provinces.open-api.vn/api/?depth=1')
+                    .then(r => r.json())
+                    .then(data => { provinces = data; })
+                    .catch(() => {});
+
+                cityInput.addEventListener('input', () => {
+                    const q = cityInput.value.trim().toLowerCase();
+                    cityDropdown.innerHTML = ''; 
+                    if (!q) { cityDropdown.classList.add('hidden'); return; }
+                    const matches = provinces.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+                    if (!matches.length) { cityDropdown.classList.add('hidden'); return; }
+                    matches.forEach(p => {
+                        const li = document.createElement('li');
+                        li.className = 'flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 cursor-pointer transition-colors';
+                        li.innerHTML = '<span class="material-symbols-outlined text-zinc-400 text-[16px]">location_on</span>' + p.name;
+                        li.addEventListener('mousedown', (e) => {
+                            e.preventDefault(); 
+                            cityInput.value = p.name;
+                            cityDropdown.classList.add('hidden');
+                        });
+                        cityDropdown.appendChild(li);
+                    });
+                    cityDropdown.classList.remove('hidden');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!cityWrapper.contains(e.target)) cityDropdown.classList.add('hidden');
+                });
+            }
+
+            // 2. Logic Chọn Môn Thể Thao
+            const selectContainer = document.getElementById('custom-sport-select');
+            const displayBox = document.getElementById('sport-display-box');
+            const dropdownMenu = document.getElementById('sport-dropdown-menu');
+            const hiddenInput = document.getElementById('sport-hidden-input');
+            const selectedText = document.getElementById('sport-selected-text');
+            const arrow = document.getElementById('sport-arrow');
+            const options = document.querySelectorAll('.sport-option');
+
+            const sportIconMap = {
+                'FOOTBALL': 'sports_soccer',
+                'TENNIS': 'sports_tennis',
+                'BADMINTON': 'badminton',
+                'BASKETBALL': 'sports_basketball',
+                'VOLLEYBALL': 'sports_volleyball',
+                'PICKLEBALL': 'sports_tennis',
+                'DEFAULT': 'sports_score'
+            };
+
+            // Mapping icon tự động
+            document.querySelectorAll('[data-value]').forEach(item => {
+                const sportValue = item.getAttribute('data-value');
+                if (sportValue) {
+                    const iconSpan = item.querySelector('.sport-item-icon');
+                    if(iconSpan) iconSpan.textContent = sportIconMap[sportValue] || sportIconMap['DEFAULT'];
+                }
+            });
+
+            displayBox.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (dropdownMenu.classList.contains('hidden')) {
+                    dropdownMenu.classList.remove('hidden');
+                    setTimeout(() => {
+                        dropdownMenu.classList.remove('opacity-0', 'translate-y-2');
+                        arrow.classList.add('rotate-180');
+                    }, 10);
+                } else closeMenu();
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    hiddenInput.value = this.getAttribute('data-value');
+                    selectedText.textContent = this.getAttribute('data-text');
+                    selectedText.classList.add('text-primary');
+                    closeMenu();
+                });
+            });
+
+            document.addEventListener('click', e => { if (!selectContainer.contains(e.target)) closeMenu(); });
+
+            function closeMenu() {
+                dropdownMenu.classList.add('opacity-0', 'translate-y-2');
+                arrow.classList.remove('rotate-180');
+                setTimeout(() => dropdownMenu.classList.add('hidden'), 200);
+            }
+
+            // 3. Render Mock Data cho khu vực Top Sân Đấu
+            async function loadTopFacilities() {
+                const container = document.getElementById('top-facilities-container');
+                container.innerHTML = '<div class="col-span-3 text-center text-zinc-500"><span class="material-symbols-outlined animate-spin text-3xl">sync</span><p>Đang tải dữ liệu sân đấu...</p></div>';
+
+                try {
+                    const result = await apiGetFacilities(); // Gọi API thật
+                    
+                    if (result.success && result.data && result.data.facilities) {
+                        const facilitiesList = result.data.facilities;
+                        
+                        if (facilitiesList.length === 0) {
+                            container.innerHTML = '<p class="col-span-3 text-center text-zinc-500 font-bold">Hiện tại chưa có sân đấu nào. Ní thêm sân đi!</p>';
+                            return;
+                        }
+
+                        let html = '';
+                        // Vì giao diện lưới này tui thiết kế chỉ hiện 2 sân to nhất cho đẹp, nên tui slice(0, 2)
+                        const displayFacilities = facilitiesList.slice(0, 2);
+
+                        displayFacilities.forEach((item, index) => {
+                            const f = item.facility;          // Lấy object facility
+                            const imgObj = item.primaryImage; // Lấy object hình ảnh
+                            
+                            const isFirst = index === 0;
+                            const spanClass = isFirst ? 'md:col-span-2' : 'md:col-span-1';
+                            
+                            // XỬ LÝ ẢNH THÔNG MINH:
+                            // Nếu không có ảnh -> Dùng ảnh Unsplash mặc định
+                            // Nếu có ảnh mà đường dẫn bắt đầu bằng /uploads -> Ghép localhost:3000 vào trước
+                            let imgUrl = "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1000&auto=format&fit=crop"; 
+                            if (imgObj && imgObj.imageUrl) {
+                                imgUrl = imgObj.imageUrl.startsWith('/') ? `http://localhost:3000${imgObj.imageUrl}` : imgObj.imageUrl;
+                            }
+
+                            // Xử lý rating (Mặc định 5.0 nếu là 0)
+                            const rating = (f.avgRating && f.avgRating > 0) ? f.avgRating.toFixed(1) : "5.0";
+                            
+                            // Xử lý trạng thái
+                            const statusColor = f.status === 'OPEN' ? 'bg-green-500 animate-pulse' : 'bg-red-500';
+                            const statusText = f.status === 'OPEN' ? 'ĐANG MỞ CỬA' : 'ĐÓNG CỬA';
+
+                            // BỎ CÁI ONCLICK Ở THẺ DIV BÊN NGOÀI
+                            html += `
+                            <div class="${spanClass} group relative h-[500px] rounded-3xl overflow-hidden shadow-xl bg-white transition-transform duration-300 hover:-translate-y-2">
+                                <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${imgUrl}" alt="${f.name}">
+                                
+                                <div class="absolute top-6 left-6 flex flex-wrap gap-2 pr-6 z-10 pointer-events-none">
+                                    ${isFirst ? `<span class="bg-primary text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest font-label flex items-center gap-1 shadow-lg"><span class="material-symbols-outlined text-sm">star</span> CAO CẤP</span>` : ''}
+                                    <span class="bg-white/90 backdrop-blur-md text-zinc-900 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest font-label shadow-md flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full ${statusColor}"></span> ${statusText}
+                                    </span>
+                                </div>
+
+                                <div class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent z-10">
+                                    ${isFirst ? `
+                                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                                        <div>
+                                            <a href="/facilities/detail.html?id=${f._id}" class="text-decoration-none hover:text-primary transition-colors">
+                                                <h3 class="text-3xl md:text-4xl font-black text-white mb-2 font-headline italic uppercase">${f.name}</h3>
+                                            </a>
+                                            <div class="flex items-center gap-4 text-zinc-300 text-sm font-label">
+                                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> ${f.city}</span>
+                                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-yellow-400">star</span> ${rating}</span>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white p-4 rounded-2xl flex items-center gap-6 shadow-2xl shrink-0">
+                                            <button onclick="window.location.href='/facilities/detail.html?id=${f._id}'" class="bg-primary text-white px-8 py-3 rounded-xl font-bold font-headline hover:bg-orange-700 transition-all border-none cursor-pointer">ĐẶT SÂN</button>
+                                        </div>
+                                    </div>
+                                    ` : `
+                                    <div class="flex items-end justify-between gap-4">
+                                        <div class="flex-1">
+                                            <a href="/facilities/detail.html?id=${f._id}" class="text-decoration-none hover:text-primary transition-colors">
+                                                <h3 class="text-2xl font-black text-white mb-2 font-headline italic uppercase truncate">${f.name}</h3>
+                                            </a>
+                                            <div class="flex items-center gap-4 text-zinc-300 text-sm font-label">
+                                                <span class="flex items-center gap-1 truncate"><span class="material-symbols-outlined text-sm">location_on</span> ${f.city}</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="window.location.href='/facilities/list.html'" class="bg-white text-zinc-900 w-12 h-12 rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg shrink-0 border-none cursor-pointer" title="Xem tất cả sân đấu">
+                                            <span class="material-symbols-outlined font-bold text-2xl">add</span>
+                                        </button>
+                                    </div>
+                                    `}
+                                </div>
+                            </div>`;
+                        });
+                        
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = '<p class="col-span-3 text-center text-red-500 font-bold">Lỗi không thể tải danh sách sân.</p>';
+                    }
+                } catch (error) {
+                    console.error("Lỗi gọi API:", error);
+                    container.innerHTML = '<p class="col-span-3 text-center text-red-500 font-bold">Lỗi kết nối Backend!</p>';
+                }
+            }
+            
+            // Gọi hàm chạy ngay khi load trang
+            loadTopFacilities();
+        });
+    </script>
+</body>
+</html>

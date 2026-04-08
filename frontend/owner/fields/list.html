@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Quản lý Sân con | Arena Kinetic Owner</title>
+
+    <link href="/css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "primary": "#b02f00",
+                        "surface": "#f8f9fa"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Inter"],
+                        "label": ["Lexend"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative flex flex-col">
+
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10 shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 text-sm font-medium">
+                <span class="text-slate-400">Arena Manager</span>
+                <span class="text-slate-300">/</span>
+                <a href="../facilities/list.html" class="text-slate-500 hover:text-primary transition-colors text-decoration-none">Cơ sở</a>
+                <span class="text-slate-300">/</span>
+                <span class="text-slate-800 font-bold">Sân con</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="../facilities/list.html" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-orange-600 text-white text-sm font-bold hover:bg-orange-700 transition-colors text-decoration-none">Quay lại cơ sở</a>
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+                <div class="text-right">
+                    <p id="header-email" class="text-sm font-bold text-on-surface leading-none">...</p>
+                </div>
+                <div id="header-avatar-wrap" class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold font-headline overflow-hidden ring-2 ring-orange-500/20">
+                    <span id="header-initial">O</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 flex-1">
+
+        <div id="alertToast" class="fixed top-20 right-8 z-50 mb-6 p-4 rounded-xl shadow-lg transition-all duration-500 opacity-0 translate-y-[-20px] hidden" style="min-width: 300px;">
+            <div class="flex items-center gap-3">
+                <span id="toastIcon" class="material-symbols-outlined"></span>
+                <span id="toastText" class="font-bold text-sm"></span>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 id="facilityNameTitle" class="font-headline font-black text-3xl text-slate-900 tracking-tight">Đang tải...</h2>
+                <p class="text-slate-500 text-sm mt-1">Quản lý sân thi đấu thuộc cơ sở này.</p>
+            </div>
+
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="relative w-full md:w-72">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+                    <input type="text" id="searchInput" placeholder="Tìm tên sân, môn thể thao..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none shadow-sm">
+                </div>
+
+                <a id="btnAddField" href="#" class="shrink-0 px-5 py-2.5 bg-orange-600 text-white font-bold text-sm rounded-xl flex items-center gap-2 hover:bg-orange-700 hover:shadow-lg hover:shadow-orange-600/20 transition-all active:scale-95 text-decoration-none">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    <span class="hidden sm:inline">Thêm sân</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500 font-bold font-label">
+                        <th class="px-6 py-4">Tên sân</th>
+                        <th class="px-6 py-4">Môn thể thao</th>
+                        <th class="px-6 py-4">Mặt sân</th>
+                        <th class="px-6 py-4">Giá / giờ</th>
+                        <th class="px-6 py-4 text-center">Trạng thái</th>
+                        <th class="px-6 py-4 text-right">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody" class="text-sm font-medium text-slate-700 divide-y divide-slate-50">
+                        <tr><td colspan="6" class="py-10 text-center"><span class="material-symbols-outlined animate-spin text-slate-400">sync</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="paginationContainer" class="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30 hidden">
+                <span class="text-sm text-slate-500">
+                    Đang hiển thị <span id="pageInfo" class="font-bold text-slate-800"></span>
+                </span>
+                <div class="flex items-center gap-1">
+                    <button id="btnPrev" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors border-none bg-transparent cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                    </button>
+                    <div id="pageNumbers" class="flex gap-1"></div>
+                    <button id="btnNext" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors border-none bg-transparent cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="deleteFieldModal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
+    <div id="deleteModalContent" class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 relative z-10 transform transition-all scale-95 opacity-0">
+        <div class="mb-4 flex items-start gap-3">
+            <div class="shrink-0 w-11 h-11 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">delete</span>
+            </div>
+            <div>
+                <h3 class="font-headline text-xl font-bold text-on-surface">Xác nhận xóa sân</h3>
+                <p class="mt-1 text-sm text-slate-500">Sân <span id="deleteFieldName" class="font-bold text-slate-900"></span> sẽ bị xóa khỏi cơ sở và không thể khôi phục.</p>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+            Hãy kiểm tra lại trước khi xóa để tránh mất dữ liệu không mong muốn.
+        </div>
+
+        <div class="mt-5 flex justify-end gap-2">
+            <button type="button" onclick="closeDeleteFieldModal()" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">Hủy</button>
+            <button type="button" id="confirmDeleteFieldModal" class="rounded-lg border-none bg-orange-600 px-4 py-2 text-sm font-bold text-white hover:bg-orange-700 shadow-md cursor-pointer">Xác nhận xóa</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/layout_owner.js"></script>
+<script src="/js/owner_fields_list.js"></script>
+
+</body>
+</html>

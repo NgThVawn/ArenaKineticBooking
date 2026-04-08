@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo | Arena Kinetic Admin</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        surface: "#f3f6fb",
+                        primary: "#b02f00",
+                        "on-surface": "#101827",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    fontFamily: {
+                        headline: ["Epilogue"],
+                        body: ["Inter"],
+                        label: ["Lexend"]
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f6fb; color: #101827; }
+        .sidebar-link.active { background-color: #ea580c; color: #fff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .notif-item { animation: slideUpFade 0.35s ease forwards; opacity: 0; }
+    </style>
+</head>
+
+<body class="bg-surface font-body text-on-surface antialiased">
+
+    <div id="sidebar-container"></div>
+
+    <main class="ml-64 min-h-screen">
+        <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-100 px-8 h-16 flex items-center justify-between">
+            <h2 class="font-headline font-bold text-base leading-none">Thông báo hệ thống</h2>
+
+            <div class="flex items-center gap-4">
+                <button id="btnMarkAllRead"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-orange-700 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors border-none cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">done_all</span>
+                    Đánh dấu tất cả đã đọc
+                </button>
+
+                <div class="flex items-center gap-3 border-l border-slate-200 pl-5">
+                    <div class="text-right">
+                        <p id="adminName" class="text-sm font-bold leading-none">Administrator</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider font-label">Admin</p>
+                    </div>
+                    <div id="adminAvatar" class="w-10 h-10 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center overflow-hidden">
+                        <span id="adminInitial">A</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-4xl">
+
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-700 flex items-center justify-center shadow-sm">
+                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+                </div>
+                <div>
+                    <h2 class="font-headline font-black text-3xl text-slate-900 tracking-tight">Trung tâm thông báo</h2>
+                    <p class="text-sm text-slate-500 mt-1">Cập nhật các hoạt động mới nhất từ người dùng và hệ thống.</p>
+                </div>
+            </div>
+
+            <div id="notifList" class="flex flex-col gap-3">
+                <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                    <span class="material-symbols-outlined text-[44px] animate-spin mb-3">sync</span>
+                    <span class="text-sm font-bold font-label uppercase tracking-widest">Đang tải thông báo...</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000/api/v1';
+        const token = localStorage.getItem('token');
+        const SIDEBAR_CACHE_KEY = 'admin_sidebar_html_v1';
+
+        // Khởi tạo thông tin admin
+        (function initAdminInfo() {
+            const raw = JSON.parse(localStorage.getItem('user') || '{}');
+            const user = raw.user || raw;
+            if (user.fullName) {
+                document.getElementById('adminName').textContent = user.fullName;
+                document.getElementById('adminInitial').textContent = user.fullName.charAt(0).toUpperCase();
+            }
+            if (user.avatarUrl) {
+                document.getElementById('adminAvatar').innerHTML =
+                    `<img src="${user.avatarUrl}" class="w-full h-full object-cover" alt="Avatar">`;
+            }
+        })();
+
+        // Load sidebar
+        async function loadSidebar() {
+            const container = document.getElementById('sidebar-container');
+            let html = sessionStorage.getItem(SIDEBAR_CACHE_KEY);
+
+            if (!html) {
+                const candidates = ['./sidebar/sidebar.html', '/admin/sidebar/sidebar.html'];
+                for (const url of candidates) {
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) continue;
+                        const content = await response.text();
+                        if (!content.includes('sidebar-link')) continue;
+                        html = content;
+                        sessionStorage.setItem(SIDEBAR_CACHE_KEY, html);
+                        break;
+                    } catch (_) {}
+                }
+            }
+
+            if (!html) return;
+            container.innerHTML = html;
+
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                const page = link.getAttribute('data-page');
+                if (page === 'notifications') {
+                    link.classList.add('active', 'bg-orange-600', 'text-white');
+                }
+            });
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '../auth/login.html';
+                });
+            }
+        }
+
+        // Lấy và hiển thị thông báo
+        async function loadNotifications() {
+            const container = document.getElementById('notifList');
+            try {
+                const res = await fetch(`${BASE_URL}/notifications`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '../auth/login.html';
+                    return;
+                }
+                const json = await res.json();
+                const list = Array.isArray(json.data) ? json.data : [];
+                renderNotifications(list);
+            } catch (e) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-2xl border border-red-100 p-12 text-center shadow-sm">
+                        <span class="material-symbols-outlined text-5xl text-red-300 mb-4">error</span>
+                        <h4 class="font-headline font-bold text-xl text-red-600 mb-2">Lỗi kết nối</h4>
+                        <p class="text-slate-500">Không thể tải thông báo lúc này.</p>
+                    </div>`;
+            }
+        }
+
+        function getNotifConfig(type) {
+            switch (type) {
+                case 'PAYMENT_SUCCESS': case 'PAYMENT_RECEIVED':
+                    return { icon: 'payments', bg: 'bg-green-100', text: 'text-green-600' };
+                case 'PAYMENT_FAILED':
+                    return { icon: 'money_off', bg: 'bg-red-100', text: 'text-red-600' };
+                case 'BOOKING_CREATED': case 'NEW_BOOKING':
+                    return { icon: 'event_available', bg: 'bg-amber-100', text: 'text-amber-600' };
+                case 'BOOKING_CANCELLED': case 'BOOKING_AUTO_CANCELLED': case 'BOOKING_AUTO_CANCELLED_OWNER':
+                    return { icon: 'event_busy', bg: 'bg-red-100', text: 'text-red-600' };
+                case 'BOOKING_COMPLETED':
+                    return { icon: 'task_alt', bg: 'bg-emerald-100', text: 'text-emerald-600' };
+                case 'BOOKING_CANCEL_REQUEST': case 'CANCEL_APPROVED': case 'CANCEL_REJECTED':
+                    return { icon: 'cancel', bg: 'bg-orange-100', text: 'text-orange-600' };
+                case 'FACILITY_PENDING': case 'FACILITY_APPROVED': case 'FACILITY_REJECTED':
+                    return { icon: 'stadium', bg: 'bg-blue-100', text: 'text-blue-600' };
+                default:
+                    return { icon: 'notifications', bg: 'bg-slate-100', text: 'text-slate-600' };
+            }
+        }
+
+        function formatTime(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            const secs = Math.floor((new Date() - d) / 1000);
+            if (secs < 60) return 'Vừa xong';
+            if (secs < 3600) return Math.floor(secs / 60) + ' phút trước';
+            if (secs < 86400) return Math.floor(secs / 3600) + ' giờ trước';
+            return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text || ''));
+            return div.innerHTML;
+        }
+
+        function renderNotifications(list) {
+            const container = document.getElementById('notifList');
+            if (!list.length) {
+                container.innerHTML = `
+                    <div class="bg-surface-container-lowest rounded-2xl border border-slate-100 p-16 text-center shadow-sm">
+                        <span class="material-symbols-outlined text-6xl text-slate-200 mb-4">notifications_paused</span>
+                        <h4 class="font-headline font-bold text-xl text-slate-800 mb-2">Hộp thư trống</h4>
+                        <p class="text-slate-500">Chưa có thông báo nào từ hệ thống.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = list.map((n, i) => {
+                const cfg = getNotifConfig(n.type);
+                const unreadBg = n.isRead ? 'bg-white border-slate-100' : 'bg-orange-50/70 border-orange-200 shadow-sm';
+                return `
+                <div class="notif-item flex items-start gap-4 p-5 rounded-2xl border cursor-pointer
+                            transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${unreadBg}"
+                     style="animation-delay:${i * 40}ms"
+                     data-id="${n._id}" data-link="${escapeHtml(n.link || '')}" data-read="${n.isRead}"
+                     onclick="handleClick(this)">
+
+                    <div class="flex-shrink-0 w-11 h-11 mt-0.5 rounded-full flex items-center justify-center ${cfg.bg} ${cfg.text}">
+                        <span class="material-symbols-outlined text-[20px]" style="${!n.isRead ? "font-variation-settings:'FILL' 1;" : ""}">${cfg.icon}</span>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-bold text-base text-slate-900 font-headline leading-snug">${escapeHtml(n.title)}</h4>
+                            ${!n.isRead ? '<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0"></span>' : ''}
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">${escapeHtml(n.message)}</p>
+                        <p class="text-xs text-slate-400 font-label mt-2 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[13px]">schedule</span>
+                            ${formatTime(n.createdAt)}
+                        </p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function handleClick(el) {
+            const id = el.dataset.id;
+            const link = el.dataset.link;
+            const isRead = el.dataset.read === 'true';
+
+            // Đánh dấu đã đọc nếu chưa
+            if (!isRead) {
+                el.dataset.read = 'true';
+                el.classList.remove('bg-orange-50/70', 'border-orange-200', 'shadow-sm');
+                el.classList.add('bg-white', 'border-slate-100');
+                const dot = el.querySelector('.animate-pulse');
+                if (dot) dot.remove();
+                const icon = el.querySelector('.material-symbols-outlined[style]');
+                if (icon) icon.removeAttribute('style');
+
+                try {
+                    await fetch(`${BASE_URL}/notifications/${id}/read`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                } catch (_) {}
+            }
+
+            if (link && link !== 'null' && link !== '') {
+                window.location.href = link.startsWith('/') ? link : '/' + link;
+            }
+        }
+
+        async function markAllRead() {
+            try {
+                await fetch(`${BASE_URL}/notifications/read-all`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                loadNotifications();
+            } catch (_) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSidebar();
+            loadNotifications();
+            document.getElementById('btnMarkAllRead').addEventListener('click', markAllRead);
+        });
+    </script>
+</body>
+</html>

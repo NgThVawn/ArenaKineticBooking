@@ -75,5 +75,15 @@ router.delete('/:id', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), as
     return res.status(400).json({ success: false, message: error.message });
   }
 });
+// GET /api/v1/extra-services/owner/facility/:facilityId  (Dành cho Owner)
+router.get('/owner/facility/:facilityId', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    // Gọi cái hàm mới tạo ở Bước 1
+    var services = await extraServiceController.FindAllForOwner(req.params.facilityId);
+    return res.json({ success: true, data: services });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 
 module.exports = router;

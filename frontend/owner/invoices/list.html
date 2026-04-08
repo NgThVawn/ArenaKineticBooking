@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Danh sách Hóa đơn | Arena Kinetic Owner</title>
+
+    <link href="/css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "primary": "#b02f00",
+                    },
+                    fontFamily: { "headline": ["Epilogue"], "body": ["Inter"], "label": ["Lexend"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .row-anim { animation: fadeUp 0.3s ease forwards; opacity: 0; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10">
+        <h2 class="font-headline font-bold text-base">Hóa đơn</h2>
+        <div class="flex items-center gap-3">
+            <div class="text-right">
+                <p id="ownerName" class="text-sm font-bold leading-none">Owner</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-label">Owner</p>
+            </div>
+            <div id="ownerAvatar" class="w-10 h-10 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center overflow-hidden">
+                <span id="ownerInitial">O</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8">
+        <!-- Title -->
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-700 flex items-center justify-center shadow-sm shrink-0">
+                <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">description</span>
+            </div>
+            <div>
+                <h1 class="font-headline font-black text-3xl text-slate-900 tracking-tight">Danh sách Hóa đơn</h1>
+                <p class="text-sm text-slate-500 mt-1">Quản lý hóa đơn cho tất cả đơn đặt sân đã hoàn thành.</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <select id="filterStatus"
+                    class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 cursor-pointer">
+                <option value="">Tất cả trạng thái</option>
+                <option value="DRAFT">Nháp</option>
+                <option value="FINALIZED">Đã hoàn tất</option>
+            </select>
+
+            <div class="ml-auto text-sm text-slate-500 font-label" id="totalCount"></div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50/70 text-slate-500 text-xs font-label uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left">Mã đơn</th>
+                            <th class="px-6 py-4 text-left">Khách hàng</th>
+                            <th class="px-6 py-4 text-left">Sân</th>
+                            <th class="px-6 py-4 text-right">Tổng tiền</th>
+                            <th class="px-6 py-4 text-right">Còn lại</th>
+                            <th class="px-6 py-4 text-center">Trạng thái</th>
+                            <th class="px-6 py-4 text-center">Ngày tạo</th>
+                            <th class="px-6 py-4 text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceTableBody">
+                        <tr>
+                            <td colspan="8" class="py-16 text-center text-slate-400">
+                                <span class="material-symbols-outlined text-4xl animate-spin mb-2 block">sync</span>
+                                <span class="text-sm font-bold font-label uppercase tracking-widest">Đang tải...</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="flex items-center justify-center gap-2 mt-6 hidden"></div>
+    </div>
+</main>
+
+<script>
+    const BASE_URL = 'http://localhost:3000/api/v1';
+    const token = localStorage.getItem('token');
+    let currentPage = 1;
+    let currentStatus = '';
+
+    // Init owner info
+    (function initOwnerInfo() {
+        const raw = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = raw.user || raw;
+        if (user.fullName) {
+            document.getElementById('ownerName').textContent = user.fullName;
+            document.getElementById('ownerInitial').textContent = user.fullName.charAt(0).toUpperCase();
+        }
+        if (user.avatarUrl) {
+            document.getElementById('ownerAvatar').innerHTML =
+                `<img src="${user.avatarUrl}" class="w-full h-full object-cover" alt="Avatar">`;
+        }
+    })();
+
+    // Load sidebar
+    async function loadSidebar() {
+        const container = document.getElementById('sidebar-placeholder');
+        const CACHE_KEY = 'owner_sidebar_html_v1';
+        let html = sessionStorage.getItem(CACHE_KEY);
+
+        if (!html) {
+            const candidates = ['/components/sidebar_owner.html', '../../../components/sidebar_owner.html'];
+            for (const url of candidates) {
+                try {
+                    const r = await fetch(url);
+                    if (!r.ok) continue;
+                    const text = await r.text();
+                    if (!text.includes('sidebar-link')) continue;
+                    html = text;
+                    sessionStorage.setItem(CACHE_KEY, html);
+                    break;
+                } catch (_) {}
+            }
+        }
+
+        if (!html) return;
+        container.innerHTML = html;
+
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === '/owner/invoices/list.html') {
+                link.classList.add('bg-orange-600', 'text-white');
+                link.classList.remove('text-slate-400');
+            }
+        });
+    }
+
+    function fmt(amount) {
+        if (amount == null) return '—';
+        return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+    }
+
+    function fmtDate(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function statusBadge(status) {
+        if (status === 'FINALIZED') {
+            return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                        <span class="material-symbols-outlined text-[13px]" style="font-variation-settings:'FILL' 1;">check_circle</span>
+                        Hoàn tất
+                    </span>`;
+        }
+        return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                    <span class="material-symbols-outlined text-[13px]">edit_note</span>
+                    Nháp
+                </span>`;
+    }
+
+    async function loadInvoices(page = 1) {
+        currentPage = page;
+        const tbody = document.getElementById('invoiceTableBody');
+        tbody.innerHTML = `<tr><td colspan="8" class="py-16 text-center text-slate-400">
+            <span class="material-symbols-outlined text-4xl animate-spin mb-2 block">sync</span>
+            <span class="text-sm font-bold font-label uppercase tracking-widest">Đang tải...</span>
+        </td></tr>`;
+
+        try {
+            const params = new URLSearchParams({ page, limit: 20 });
+            if (currentStatus) params.set('status', currentStatus);
+
+            const res = await fetch(`${BASE_URL}/owner/invoices?${params}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/auth/login.html';
+                return;
+            }
+
+            const json = await res.json();
+            const { invoices = [], total = 0, totalPages = 1 } = json.data || {};
+
+            document.getElementById('totalCount').textContent = `${total} hóa đơn`;
+
+            const filtered = currentStatus
+                ? invoices.filter(inv => inv.status === currentStatus)
+                : invoices;
+
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-16 text-center text-slate-400">
+                    <span class="material-symbols-outlined text-5xl mb-3 block">description</span>
+                    <p class="font-bold text-slate-600">Chưa có hóa đơn nào</p>
+                    <p class="text-sm mt-1">Hóa đơn sẽ xuất hiện khi đơn đặt sân được xác nhận.</p>
+                </td></tr>`;
+                document.getElementById('pagination').classList.add('hidden');
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((inv, i) => {
+                const booking = inv.booking || {};
+                const customer = booking.customer || {};
+                const facility = booking.facility || {};
+                const bookingId = booking._id || inv.booking;
+                const amountDue = inv.amountDue ?? (inv.grandTotal - (inv.depositPaid || 0));
+
+                return `<tr class="row-anim border-b border-slate-50 hover:bg-slate-50/60 transition-colors"
+                          style="animation-delay:${i * 30}ms">
+                    <td class="px-6 py-4 font-mono text-xs text-slate-500">${booking.bookingCode || '—'}</td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-slate-800">${customer.fullName || '—'}</p>
+                        <p class="text-xs text-slate-400">${customer.email || ''}</p>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600">${facility.name || '—'}</td>
+                    <td class="px-6 py-4 text-right font-semibold text-slate-800">${fmt(inv.grandTotal)}</td>
+                    <td class="px-6 py-4 text-right font-semibold ${amountDue > 0 ? 'text-orange-600' : 'text-emerald-600'}">${fmt(amountDue)}</td>
+                    <td class="px-6 py-4 text-center">${statusBadge(inv.status)}</td>
+                    <td class="px-6 py-4 text-center text-slate-500 text-xs">${fmtDate(inv.createdAt)}</td>
+                    <td class="px-6 py-4 text-center">
+                        <a href="/owner/invoices/detail.html?bookingId=${bookingId}"
+                           class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold
+                                  bg-orange-50 text-orange-700 hover:bg-orange-600 hover:text-white transition-colors no-underline">
+                            <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                            Chi tiết
+                        </a>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            renderPagination(page, totalPages);
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-red-400">
+                <span class="material-symbols-outlined text-4xl mb-2 block">error</span>
+                <p class="font-bold">Lỗi tải dữ liệu</p>
+                <p class="text-sm text-slate-400 mt-1">${e.message}</p>
+            </td></tr>`;
+        }
+    }
+
+    function renderPagination(page, totalPages) {
+        const container = document.getElementById('pagination');
+        if (totalPages <= 1) { container.classList.add('hidden'); return; }
+        container.classList.remove('hidden');
+
+        const btnClass = 'w-9 h-9 flex items-center justify-center rounded-xl text-sm font-semibold transition-colors';
+        let html = '';
+
+        html += `<button onclick="loadInvoices(${page - 1})" ${page === 1 ? 'disabled' : ''}
+                    class="${btnClass} ${page === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-100'}">
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                </button>`;
+
+        for (let p = Math.max(1, page - 2); p <= Math.min(totalPages, page + 2); p++) {
+            html += `<button onclick="loadInvoices(${p})"
+                        class="${btnClass} ${p === page ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                        ${p}
+                    </button>`;
+        }
+
+        html += `<button onclick="loadInvoices(${page + 1})" ${page === totalPages ? 'disabled' : ''}
+                    class="${btnClass} ${page === totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-100'}">
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </button>`;
+
+        container.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSidebar();
+        loadInvoices();
+
+        document.getElementById('filterStatus').addEventListener('change', function () {
+            currentStatus = this.value;
+            loadInvoices(1);
+        });
+    });
+</script>
+</body>
+</html>

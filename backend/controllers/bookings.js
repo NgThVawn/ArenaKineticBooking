@@ -1,6 +1,7 @@
 var bookingModel = require('../schemas/bookings');
 var fieldModel = require('../schemas/fields');
 var facilityModel = require('../schemas/facilities');
+var facilityImageModel = require('../schemas/facilityImages');
 var userModel = require('../schemas/users');
 var notificationController = require('./notifications');
 var extraServiceController = require('./extraServices');
@@ -44,12 +45,42 @@ module.exports = {
   },
 
   FindByUser: async function (userId) {
-    return await bookingModel.find({ user: userId, isDeleted: false })
+    var bookings = await bookingModel.find({ user: userId, isDeleted: false })
       .populate({
         path: 'field',
         populate: { path: 'facility', select: 'name address city' }
       })
       .sort({ createdAt: -1 });
+
+    var facilityIdMap = {};
+    for (var booking of bookings) {
+      var facilityId = booking && booking.field && booking.field.facility ? String(booking.field.facility._id) : null;
+      if (facilityId) facilityIdMap[facilityId] = true;
+    }
+
+    var facilityIds = Object.keys(facilityIdMap);
+    var imageMap = {};
+
+    if (facilityIds.length > 0) {
+      var images = await facilityImageModel.find({ facility: { $in: facilityIds } })
+        .sort({ isPrimary: -1, displayOrder: 1, createdAt: 1 });
+
+      for (var image of images) {
+        var key = String(image.facility);
+        if (!imageMap[key]) {
+          imageMap[key] = image.imageUrl;
+        }
+      }
+    }
+
+    return bookings.map(function (booking) {
+      var obj = booking.toObject();
+      var facility = obj && obj.field ? obj.field.facility : null;
+      if (facility && facility._id) {
+        facility.primaryImageUrl = imageMap[String(facility._id)] || null;
+      }
+      return obj;
+    });
   },
 
   FindByCode: async function (bookingCode) {

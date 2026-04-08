@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác nhận Thanh toán | Arena Kinetic</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+
+<body class="bg-slate-50/50 font-body text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 pt-28">
+
+        <div class="max-w-2xl w-full bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.05)] border border-slate-100 relative overflow-hidden">
+
+            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-[80px] pointer-events-none -z-10"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-orange-50 rounded-full blur-[80px] pointer-events-none -z-10"></div>
+
+            <div class="text-center mb-10">
+                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-blue-100 shadow-sm">
+                    <span class="material-symbols-outlined text-blue-600 text-[32px]">payments</span>
+                </div>
+                <h2 class="text-3xl font-black font-headline text-slate-900 uppercase italic tracking-tight mb-2">Xác nhận thanh toán</h2>
+                <p class="text-sm text-slate-500 font-medium">Kiểm tra kỹ thông tin hóa đơn trước khi chuyển sang cổng Thanh toán</p>
+            </div>
+
+            <div id="loadingBox" class="text-center py-10">
+                <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+                <p class="mt-2 text-slate-500 font-bold">Đang tải hóa đơn...</p>
+            </div>
+
+            <div id="billContent" class="hidden">
+                <div class="bg-slate-950 rounded-[2rem] p-8 text-white relative shadow-2xl mb-8 overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/40 blur-[50px] rounded-full pointer-events-none"></div>
+
+                    <div class="flex justify-between items-center mb-6 pb-6 border-b border-white/10 border-dashed">
+                        <div>
+                            <span class="block text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-1">Mã hóa đơn</span>
+                            <div class="font-headline font-black text-xl tracking-wider text-orange-400" id="uiBookingCode">BK-Đang tải...</div>
+                        </div>
+                        <div class="bg-white/10 px-3 py-1.5 rounded-lg border border-white/5">
+                            <span class="text-xs font-bold text-slate-300 font-label uppercase tracking-widest" id="uiSportType">SPORT</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 mb-8 relative z-10">
+                        <div>
+                            <span class="block text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">stadium</span> Cơ sở</span>
+                            <div class="font-bold text-white text-base" id="uiFacName">Đang tải...</div>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">grid_view</span> Sân đấu</span>
+                            <div class="font-bold text-white text-base" id="uiFieldName">Đang tải...</div>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">calendar_today</span> Ngày đặt</span>
+                            <div class="font-bold text-white text-base" id="uiDate">--/--/----</div>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">schedule</span> Thời gian</span>
+                            <div class="font-bold text-white text-base" id="uiTime">--:-- - --:--</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 border border-white/10 rounded-xl p-4 bg-white/5" id="servicesWrap">
+                        <p class="text-[10px] font-label font-bold text-slate-400 uppercase tracking-widest mb-3">Dịch vụ đã chọn</p>
+                        <div class="space-y-2 text-xs" id="servicesList">
+                            </div>
+                    </div>
+
+                    <div class="relative flex items-center justify-center mb-6">
+                        <div class="absolute left-[-40px] w-6 h-6 bg-white rounded-full"></div>
+                        <div class="w-full border-t-2 border-dashed border-white/20"></div>
+                        <div class="absolute right-[-40px] w-6 h-6 bg-white rounded-full"></div>
+                    </div>
+
+                    <div class="space-y-2 mb-4 text-sm text-slate-200">
+                        <div class="flex items-center justify-between">
+                            <span>Tiền sân</span>
+                            <span class="font-bold text-white" id="uiFieldPrice">0 ₫</span>
+                        </div>
+                        <div class="flex items-center justify-between hidden" id="uiExtraPriceRow">
+                            <span>Dịch vụ đi kèm</span>
+                            <span class="font-bold text-cyan-300" id="uiExtraPrice">0 ₫</span>
+                        </div>
+                        <div class="flex items-center justify-between text-orange-200">
+                            <span>Tiền cọc yêu cầu (50%)</span>
+                            <span class="font-bold" id="uiDepositPrice">0 ₫</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-end relative z-10 border-t border-white/15 pt-4">
+                        <span class="text-xs font-label font-bold text-slate-400 uppercase tracking-widest mb-1">CẦN THANH TOÁN (CỌC)</span>
+                        <span class="text-4xl font-black font-headline text-white italic tracking-tight" id="uiTotalPrice">0 ₫</span>
+                    </div>
+                </div>
+
+                <div class="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 relative z-10">
+                    <span class="material-symbols-outlined text-amber-500 mt-0.5">timer</span>
+                    <p class="text-sm font-medium text-amber-900 m-0 leading-relaxed">
+                        Đơn đặt sân sẽ tự động bị hủy nếu không hoàn tất thanh toán trong vòng <strong class="font-bold text-amber-700">10 phút</strong>.
+                    </p>
+                </div>
+
+                <div class="space-y-4 relative z-10">
+                    <button type="button" id="btnVNPay" class="w-full flex items-center justify-center gap-3 py-4 bg-[#005BAA] hover:bg-[#004785] text-white font-headline font-black text-lg uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-[#005BAA]/30 active:scale-95 border-none cursor-pointer">
+                        <img src="https://cdn.brandfetch.io/idV02t6WJs/theme/dark/logo.svg?c=1dxbfHSJFAPEGdCLU4o5B" alt="VNPay Logo" class="h-6 brightness-0 invert">
+                        Thanh toán VNPay
+                    </button>
+                    
+                    <button type="button" id="btnMoMo" class="w-full flex items-center justify-center gap-3 py-4 bg-[#A50064] hover:bg-[#82004F] text-white font-headline font-black text-lg uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-[#A50064]/30 active:scale-95 border-none cursor-pointer">                       
+                        <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Transparent.png" alt="MoMo Logo" class="h-6 brightness-0 invert object-contain">                       
+                        Thanh toán MoMo
+                    </button>
+
+                    <a href="/bookings/history.html" class="w-full flex items-center justify-center py-4 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold font-label text-xs uppercase tracking-widest rounded-xl transition-colors text-decoration-none border border-slate-200">
+                        Để sau (Vào Lịch sử xem lại)
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+
+<script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            // Hốt cả 2 thằng, trên URL có thằng nào lấy thằng đó
+            const bookingId = urlParams.get('bookingId');
+            const bookingCodeURL = urlParams.get('bookingCode');
+
+            const identifier = bookingId || bookingCodeURL;
+
+            if (!identifier) {
+                alert("Không tìm thấy mã hóa đơn hợp lệ trên URL!");
+                window.location.href = '/facilities/list.html';
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            
+            // 🛑 TẠO BIẾN LƯU MÃ BK (Ví dụ: BK2026...)
+            let globalBookingCode = null;
+
+            // Bfcache: khôi phục trang từ cache (back button từ cổng thanh toán) — phải đăng ký
+            // trước try/catch để đảm bảo luôn được đăng ký dù fetch có lỗi hay không.
+            const VNPAY_BTN_HTML = document.getElementById('btnVNPay').innerHTML;
+            const MOMO_BTN_HTML = document.getElementById('btnMoMo').innerHTML;
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    document.getElementById('btnVNPay').disabled = false;
+                    document.getElementById('btnVNPay').innerHTML = VNPAY_BTN_HTML;
+                    document.getElementById('btnMoMo').disabled = false;
+                    document.getElementById('btnMoMo').innerHTML = MOMO_BTN_HTML;
+                }
+            });
+
+            try {
+                // 1. GỌI API LẤY CHI TIẾT BOOKING
+                // bookingId → GET /bookings/:id (MongoDB ObjectId)
+                // bookingCode → GET /bookings/code/:code (mã đặt sân dạng BK...)
+                const fetchUrl = bookingId
+                    ? `http://localhost:3000/api/v1/bookings/${bookingId}`
+                    : `http://localhost:3000/api/v1/bookings/code/${bookingCodeURL}`;
+                const res = await fetch(fetchUrl, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const json = await res.json();
+
+                if (res.ok && json.success) {
+                    const b = json.data.booking || json.data;
+                    
+                    // 🛑 CHỘP MÃ BK LƯU LẠI ĐỂ LÁT NỮA TRUYỀN CHO VNPAY/MOMO
+                    globalBookingCode = b.bookingCode; 
+
+                    // Đổ dữ liệu ra UI
+                    document.getElementById('uiBookingCode').innerText = b.bookingCode;
+                    document.getElementById('uiSportType').innerText = b.field.sportType;
+                    document.getElementById('uiFacName').innerText = b.field.facility.name;
+                    document.getElementById('uiFieldName').innerText = b.field.name;
+                    
+                    const dParts = b.bookingDate.split('-');
+                    document.getElementById('uiDate').innerText = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+                    document.getElementById('uiTime').innerText = `${b.startTime} - ${b.endTime}`;
+
+                    // Xử lý Dịch vụ đi kèm thông minh
+                    const sWrap = document.getElementById('servicesWrap');
+                    const sList = document.getElementById('servicesList');
+                    
+                    // Backend có thể trả về 'extraServices' hoặc 'extraItems'
+                    const listServices = b.extraServices && b.extraServices.length > 0 ? b.extraServices : b.extraItems;
+
+                    if (listServices && listServices.length > 0) {
+                        let sHtml = '';
+                        listServices.forEach(item => {
+                            // Đọc vị đủ mọi thể loại JSON backend có thể trả về
+                            const name = item.serviceName || (item.service && item.service.name) || (item.extraService && item.extraService.name) || 'Dịch vụ đính kèm';
+                            const qty = item.quantity || 1;
+                            const price = Number(item.unitPrice || (item.service && item.service.price) || (item.extraService && item.extraService.price) || 0);
+                            const subtotal = Number(item.subtotal || (qty * price));
+
+                            sHtml += `
+                            <div class="flex items-center justify-between text-slate-200 py-1">
+                                <div>
+                                    <p class="m-0 font-semibold text-white">${name}</p>
+                                    <p class="m-0 text-[11px] text-slate-400">Số lượng: ${qty} | Đơn giá: ${price.toLocaleString('vi-VN')}đ</p>
+                                </div>
+                                <span class="font-bold text-white">${subtotal.toLocaleString('vi-VN')}₫</span>
+                            </div>`;
+                        });
+                        sList.innerHTML = sHtml;
+                    } else {
+                        sWrap.innerHTML = '<p class="m-0 text-xs text-slate-300">Không có dịch vụ đi kèm.</p>';
+                    }
+
+                    // Tính toán tiền bạc
+                    const fieldPrice = b.totalPrice; 
+                    document.getElementById('uiFieldPrice').innerText = fieldPrice.toLocaleString('vi-VN') + ' ₫';
+                    
+                    // Deposit là tiền CẦN THANH TOÁN
+                    document.getElementById('uiDepositPrice').innerText = Number(b.depositAmount).toLocaleString('vi-VN') + ' ₫';
+                    document.getElementById('uiTotalPrice').innerText = Number(b.depositAmount).toLocaleString('vi-VN') + ' ₫';
+
+                    // Ẩn Loading, Hiện Bill
+                    document.getElementById('loadingBox').classList.add('hidden');
+                    document.getElementById('billContent').classList.remove('hidden');
+                } else {
+                    throw new Error("Không thể lấy thông tin hóa đơn.");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Lỗi tải hóa đơn: " + e.message);
+            }
+
+            // ----------------------------------------------------
+            // 2. XỬ LÝ NÚT BẤM VNPAY
+            // ----------------------------------------------------
+            document.getElementById('btnVNPay').addEventListener('click', async function() {
+                if (!globalBookingCode) return;
+                
+                const btn = this;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> ĐANG KẾT NỐI...';
+                btn.disabled = true;
+
+                try {
+                    const res = await fetch(`http://localhost:3000/api/v1/payments/vnpay/create`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        // 🛑 TRUYỀN MÃ BK CHO VNPAY
+                        body: JSON.stringify({ bookingCode: globalBookingCode })
+                    });
+                    const json = await res.json();
+                    
+                    if (res.ok && json.success && json.data.payUrl) {
+                        window.location.href = json.data.payUrl; // 🚀 Phóng qua VNPay
+                    } else {
+                        throw new Error(json.message || "Không thể tạo link VNPay.");
+                    }
+                } catch (e) {
+                    alert("Lỗi kết nối VNPay: " + e.message);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            });
+
+            // ----------------------------------------------------
+            // 3. XỬ LÝ NÚT BẤM MOMO
+            // ----------------------------------------------------
+            document.getElementById('btnMoMo').addEventListener('click', async function() {
+                if (!globalBookingCode) return;
+                
+                const btn = this;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> ĐANG KẾT NỐI...';
+                btn.disabled = true;
+
+                try {
+                    const res = await fetch(`http://localhost:3000/api/v1/payments/momo/create`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        // 🛑 TRUYỀN MÃ BK CHO MOMO
+                        body: JSON.stringify({ bookingCode: globalBookingCode })
+                    });
+                    const json = await res.json();
+                    
+                    if (res.ok && json.success && json.data.payUrl) {
+                        window.location.href = json.data.payUrl; // 🚀 Phóng qua MoMo
+                    } else {
+                        throw new Error(json.message || "Không thể tạo link MoMo.");
+                    }
+                } catch (e) {
+                    alert("Lỗi kết nối MoMo: " + e.message);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kết quả thanh toán VNPay | Arena Kinetic</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+
+<body class="bg-slate-50/50 font-body text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 pt-28">
+
+        <div class="max-w-xl w-full bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-[0_10px_40px_rgb(0,0,0,0.05)] border border-slate-100 relative overflow-hidden">
+
+            <div id="uiSuccessBlock" class="text-center hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-50 rounded-full blur-[80px] pointer-events-none -z-10"></div>
+                <div class="w-28 h-28 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_0_10px_rgba(16,185,129,0.1)] animate-[bounce_1s_ease-in-out_1]">
+                    <span class="material-symbols-outlined text-[64px] text-emerald-500" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                </div>
+                <h2 class="text-3xl font-black font-headline text-emerald-600 uppercase italic tracking-tight mb-2">Thanh toán thành công!</h2>
+                <p class="text-slate-500 font-medium">Tuyệt vời! Lịch đặt sân của bạn đã được xác nhận qua VNPay.</p>
+            </div>
+
+            <div id="uiErrorBlock" class="text-center hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-red-50 rounded-full blur-[80px] pointer-events-none -z-10"></div>
+                <div class="w-28 h-28 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_0_10px_rgba(239,68,68,0.1)]">
+                    <span class="material-symbols-outlined text-[64px] text-red-500" style="font-variation-settings: 'FILL' 1;">cancel</span>
+                </div>
+                <h2 class="text-3xl font-black font-headline text-red-600 uppercase italic tracking-tight mb-2">Giao dịch thất bại!</h2>
+                <p class="text-slate-500 font-medium mb-1">Rất tiếc, thanh toán VNPay của bạn chưa thành công.</p>
+                <div class="inline-flex items-center justify-center gap-2 bg-red-50 text-red-700 px-4 py-2 rounded-xl text-sm font-bold mt-2">
+                    <span class="material-symbols-outlined text-[18px]">info</span>
+                    <span id="uiErrorText">Đã xảy ra lỗi trong quá trình thanh toán.</span>
+                </div>
+            </div>
+
+            <div id="loadingBlock" class="text-center py-10">
+                <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+                <p class="mt-2 text-slate-500 font-bold">Đang xử lý kết quả VNPay...</p>
+            </div>
+
+            <div id="receiptBlock" class="mt-10 bg-slate-50 rounded-3xl border border-slate-100 p-6 md:p-8 relative hidden transition-all">
+                <div class="absolute -top-3 left-8 w-6 h-6 bg-white rounded-full border-b border-slate-100"></div>
+                <div class="absolute -top-3 right-8 w-6 h-6 bg-white rounded-full border-b border-slate-100"></div>
+
+                <h3 class="text-sm font-bold font-headline text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-400">receipt_long</span> Chi tiết giao dịch
+                </h3>
+
+                <div class="space-y-4 text-sm">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200/60 border-dashed">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Mã hóa đơn</span>
+                        <span class="font-bold text-slate-900" id="txtBookingCode">--</span>
+                    </div>
+
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200/60 border-dashed">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Cơ sở</span>
+                        <span class="font-bold text-slate-900 text-right max-w-[200px] truncate" id="txtFacName">--</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200/60 border-dashed">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Sân thi đấu</span>
+                        <span class="font-bold text-slate-900" id="txtFieldName">--</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200/60 border-dashed">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Thời gian đá</span>
+                        <div class="text-right">
+                            <span class="block font-bold text-slate-900" id="txtTime">--:-- – --:--</span>
+                            <span class="text-[11px] text-slate-500 font-medium" id="txtDate">--/--/----</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200/60 border-dashed hidden" id="rowTransId">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Mã VNPay</span>
+                        <span class="font-medium text-slate-700 font-mono" id="txtTransId">--</span>
+                    </div>
+
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200/60 border-dashed hidden" id="rowBankCode">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Ngân hàng</span>
+                        <span class="font-bold text-slate-700 bg-white px-2 py-1 rounded border border-slate-200 text-xs" id="txtBankCode">--</span>
+                    </div>
+
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200/60 border-dashed hidden" id="rowPayDate">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Ngày GD</span>
+                        <span class="font-medium text-slate-700" id="txtPayDate">--</span>
+                    </div>
+
+                    <div class="flex justify-between items-end pt-2">
+                        <span class="text-xs font-label uppercase tracking-widest text-slate-500 font-bold">Số tiền thanh toán</span>
+                        <span class="text-2xl font-black font-headline italic" id="txtAmount">0 ₫</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 space-y-3 hidden" id="actionBlock">
+                <div id="btnGroupSuccess" class="hidden flex-col sm:flex-row gap-3">
+                    <a href="/bookings/history.html" class="flex-1 flex items-center justify-center gap-2 py-3.5 bg-slate-900 hover:bg-primary text-white font-bold rounded-xl transition-colors text-decoration-none shadow-lg shadow-slate-900/20">
+                        <span class="material-symbols-outlined text-[20px]">history</span> Lịch sử đặt sân
+                    </a>
+                    <a href="/facilities/list.html" class="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-colors text-decoration-none border border-slate-200">
+                        <span class="material-symbols-outlined text-[20px]">add_circle</span> Đặt thêm sân
+                    </a>
+                </div>
+
+                <div id="btnGroupError" class="hidden flex-col sm:flex-row gap-3">
+                    <a id="btnRetry" href="#" class="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#005BAA] hover:bg-[#004785] text-white font-bold rounded-xl transition-colors text-decoration-none shadow-lg shadow-[#005BAA]/30">
+                        <span class="material-symbols-outlined text-[20px]">refresh</span> Thử thanh toán lại
+                    </a>
+                    <a href="/bookings/history.html" class="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-colors text-decoration-none border border-slate-200">
+                        Trở về lịch sử
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Tham số đặc trưng của VNPay
+            const vnp_ResponseCode = urlParams.get('vnp_ResponseCode');
+            const vnp_TxnRef = urlParams.get('vnp_TxnRef'); // Đây chính là bookingCode bên Backend truyền qua
+            const vnp_Amount = urlParams.get('vnp_Amount'); // Tiền nhân 100
+            const vnp_TransactionNo = urlParams.get('vnp_TransactionNo');
+            const vnp_BankCode = urlParams.get('vnp_BankCode');
+            const vnp_PayDate = urlParams.get('vnp_PayDate'); // Định dạng: yyyyMMddHHmmss
+
+            const bookingCode = vnp_TxnRef;
+
+            if (!bookingCode) {
+                alert("Không tìm thấy thông tin giao dịch!");
+                window.location.href = '/facilities/list.html';
+                return;
+            }
+
+            const isSuccess = (vnp_ResponseCode === '00'); // VNPay: 00 là thành công
+
+            // 1. CẬP NHẬT UI TRẠNG THÁI
+            document.getElementById('loadingBlock').classList.add('hidden');
+            document.getElementById('receiptBlock').classList.remove('hidden');
+            document.getElementById('actionBlock').classList.remove('hidden');
+
+            document.getElementById('txtBookingCode').innerText = bookingCode;
+            
+            // Chuyển đổi tiền VNPay (chia 100)
+            const amountVnd = vnp_Amount ? Number(vnp_Amount) / 100 : 0;
+            const amountEl = document.getElementById('txtAmount');
+            amountEl.innerText = amountVnd.toLocaleString('vi-VN') + ' ₫';
+
+            if (vnp_TransactionNo) {
+                document.getElementById('rowTransId').classList.remove('hidden');
+                document.getElementById('txtTransId').innerText = vnp_TransactionNo;
+            }
+            if (vnp_BankCode) {
+                document.getElementById('rowBankCode').classList.remove('hidden');
+                document.getElementById('txtBankCode').innerText = vnp_BankCode;
+            }
+            if (vnp_PayDate && vnp_PayDate.length >= 12) {
+                document.getElementById('rowPayDate').classList.remove('hidden');
+                // Cắt chuỗi yyyyMMddHHmmss -> HH:mm dd/MM/yyyy
+                const yyyy = vnp_PayDate.substring(0,4);
+                const MM = vnp_PayDate.substring(4,6);
+                const dd = vnp_PayDate.substring(6,8);
+                const HH = vnp_PayDate.substring(8,10);
+                const mm = vnp_PayDate.substring(10,12);
+                document.getElementById('txtPayDate').innerText = `${HH}:${mm} - ${dd}/${MM}/${yyyy}`;
+            }
+
+            if (isSuccess) {
+                document.getElementById('uiSuccessBlock').classList.remove('hidden');
+                document.getElementById('btnGroupSuccess').classList.remove('hidden');
+                document.getElementById('btnGroupSuccess').classList.add('flex');
+                amountEl.classList.add('text-emerald-600');
+            } else {
+                document.getElementById('uiErrorBlock').classList.remove('hidden');
+                document.getElementById('btnGroupError').classList.remove('hidden');
+                document.getElementById('btnGroupError').classList.add('flex');
+                amountEl.classList.add('text-slate-900');
+                
+                // Set link nút Thử lại
+                document.getElementById('btnRetry').href = `/payment/checkout.html?bookingCode=${bookingCode}`;
+
+                // Ánh xạ lỗi VNPay
+                let errorTxt = "Giao dịch không thành công.";
+                if (vnp_ResponseCode === '24') errorTxt = "Bạn đã chủ động hủy giao dịch.";
+                else if (vnp_ResponseCode === '51') errorTxt = "Tài khoản không đủ số dư.";
+                else if (vnp_ResponseCode === '65') errorTxt = "Tài khoản vượt hạn mức giao dịch trong ngày.";
+                else if (vnp_ResponseCode === '75') errorTxt = "Ngân hàng thanh toán đang bảo trì.";
+                else if (vnp_ResponseCode) errorTxt = `Mã lỗi: ${vnp_ResponseCode}. Vui lòng thử lại.`;
+                
+                document.getElementById('uiErrorText').innerText = errorTxt;
+            }
+
+            // 2. LẤY THÊM THÔNG TIN SÂN TỪ BACKEND ĐỂ IN BIÊN LAI
+            const token = localStorage.getItem('token');
+            if (bookingCode && token) {
+                try {
+                    // Gọi API lấy chi tiết booking bằng bookingCode (txnRef)
+                    const res = await fetch(`http://localhost:3000/api/v1/bookings/code/${bookingCode}`, {
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const json = await res.json();
+
+                    if (res.ok && json.data) {
+                        const b = json.data;
+
+                        // 🔍 DEBUG: Ní mở Console (F12) xem nó in ra cái gì ở đây nhé
+                        console.log("Dữ liệu Booking bốc được:", b);
+
+                        // 1. Đổ tên Cơ sở (Facility) - Thử mọi trường hợp có thể có
+                        const facName = (b.field && b.field.facility && b.field.facility.name) 
+                                        || (b.facility && b.facility.name) 
+                                        || "--";
+                        document.getElementById('txtFacName').innerText = facName;
+
+                        // 2. Đổ tên Sân (Field)
+                        const fieldName = (b.field && b.field.name) || b.fieldName || "--";
+                        document.getElementById('txtFieldName').innerText = fieldName;
+
+                        // 3. Đổ Ngày tháng (Booking Date)
+                        if (b.bookingDate) {
+                            const d = new Date(b.bookingDate);
+                            // Nếu date hợp lệ thì format dd/mm/yyyy
+                            if (!isNaN(d)) {
+                                const day = String(d.getDate()).padStart(2, '0');
+                                const month = String(d.getMonth() + 1).padStart(2, '0');
+                                document.getElementById('txtDate').innerText = `${day}/${month}/${d.getFullYear()}`;
+                            } else {
+                                // Nếu là string dạng yyyy-mm-dd
+                                const parts = b.bookingDate.split('T')[0].split('-');
+                                if(parts.length === 3) document.getElementById('txtDate').innerText = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                            }
+                        }
+
+                        // 4. Đổ Thời gian (Time)
+                        if (b.startTime && b.endTime) {
+                            document.getElementById('txtTime').innerText = `${b.startTime} – ${b.endTime}`;
+                        }
+                    } else {
+                        console.error("Không tìm thấy dữ liệu booking trong API");
+                    }
+                } catch (err) {
+                    console.error("Lỗi Fetch dữ liệu:", err);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

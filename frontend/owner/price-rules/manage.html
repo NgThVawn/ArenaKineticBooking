@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Quản lý giá sân | Arena Kinetic Owner</title>
+
+    <link href="/css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "primary": "#b02f00",
+                        "surface": "#f8f9fa"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Inter"],
+                        "label": ["Lexend"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative flex flex-col">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10 shrink-0">
+        <div class="flex items-center gap-2 text-sm font-medium">
+            <span class="text-slate-400">Arena Manager</span>
+            <span class="text-slate-300">/</span>
+            <a href="../facilities/list.html" class="text-slate-500 hover:text-orange-600 transition-colors text-decoration-none">Cơ sở</a>
+            <span class="text-slate-300">/</span>
+            <a id="breadcrumbFieldsLink" href="#" class="text-slate-500 hover:text-orange-600 transition-colors text-decoration-none">Sân</a>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-800 font-bold">Quy tắc giá</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a id="btnBackToFields" href="#" class="text-sm text-orange-600 font-bold hover:underline flex items-center gap-1 text-decoration-none">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Quay lại danh sách
+            </a>
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+                <div class="text-right">
+                    <p id="header-email" class="text-sm font-bold text-on-surface leading-none">...</p>
+                </div>
+                <div id="header-avatar-wrap" class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold font-headline overflow-hidden ring-2 ring-orange-500/20">
+                    <span id="header-initial">O</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 flex-1">
+        <div id="alertToast" class="fixed top-20 right-8 z-50 mb-6 p-4 rounded-xl shadow-lg transition-all duration-500 opacity-0 translate-y-[-20px] hidden" style="min-width: 300px;">
+            <div class="flex items-center gap-3">
+                <span id="toastIcon" class="material-symbols-outlined"></span>
+                <span id="toastText" class="font-bold text-sm"></span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+            <section class="xl:col-span-2 space-y-6">
+                <div class="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 bg-orange-50 rounded-bl-[100px] pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        <h2 class="font-headline font-black text-3xl text-slate-900 tracking-tight flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-orange-600 text-3xl">sell</span> Quy tắc giá
+                        </h2>
+                        <p class="text-slate-500 text-sm m-0">Sân áp dụng: <span id="displayFieldName" class="font-bold text-slate-800">Đang tải...</span></p>
+                    </div>
+
+                    <div class="bg-orange-50 border border-orange-100 px-5 py-3 rounded-2xl relative z-10 text-right">
+                        <p class="text-[10px] font-label font-bold uppercase tracking-widest text-orange-600/70 mb-0.5">Giá Cơ Bản / Giờ</p>
+                        <p id="displayBasePrice" class="font-black font-headline text-2xl text-orange-600 m-0">0₫</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[1.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                            <tr class="bg-slate-50/80 border-b border-slate-100 text-[10px] uppercase tracking-widest text-slate-400 font-bold font-label">
+                                <th class="px-6 py-4">Tên quy tắc</th>
+                                <th class="px-6 py-4">Loại ngày</th>
+                                <th class="px-6 py-4">Giờ áp dụng</th>
+                                <th class="px-6 py-4">Giá/giờ</th>
+                                <th class="px-6 py-4 text-center">Ưu tiên</th>
+                                <th class="px-6 py-4 text-right">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody id="rulesTableBody" class="text-sm font-medium text-slate-700 divide-y divide-slate-50">
+                                <tr><td colspan="6" class="py-10 text-center"><span class="material-symbols-outlined animate-spin text-slate-400">sync</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="space-y-4 sticky top-24">
+                <div class="bg-slate-900 p-6 md:p-8 rounded-[1.5rem] shadow-xl border border-slate-800 text-white relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-orange-500/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+                    <h3 class="font-headline font-black text-xl text-white mb-6 uppercase tracking-wider flex items-center gap-2 border-b border-white/10 pb-4">
+                        <span class="material-symbols-outlined text-orange-500">add_box</span> Thêm quy tắc
+                    </h3>
+
+                    <form id="createRuleForm" class="space-y-5">
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Tên quy tắc</label>
+                            <input type="text" id="ruleName" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none placeholder:text-slate-500 font-medium" placeholder="VD: Khung giờ Vàng tối">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Loại ngày áp dụng</label>
+                            <div class="relative">
+                                <select id="dayType" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:bg-slate-800 focus:ring-2 focus:ring-orange-500 outline-none font-bold appearance-none cursor-pointer">
+                                    <option value="WEEKDAY">Ngày thường (T2 - T6)</option>
+                                    <option value="WEEKEND">Cuối tuần (T7 - CN)</option>
+                                    <option value="HOLIDAY">Ngày lễ</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Từ giờ</label>
+                                <input type="time" id="startTime" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none font-bold [color-scheme:dark]">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Đến giờ</label>
+                                <input type="time" id="endTime" required class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none font-bold [color-scheme:dark]">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Mức giá mới / Giờ (₫)</label>
+                            <input type="number" id="pricePerHour" required min="1000" class="w-full bg-white/5 border border-white/10 text-orange-400 rounded-xl px-4 py-3 text-lg font-black focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-[10px] font-label font-bold uppercase text-slate-400 tracking-widest m-0">Độ ưu tiên</label>
+                                <span class="material-symbols-outlined text-[14px] text-slate-500" title="Số càng lớn, ưu tiên càng cao.">info</span>
+                            </div>
+                            <input type="number" id="priority" value="1" required min="0" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm font-bold focus:bg-white/10 focus:ring-2 focus:ring-orange-500 outline-none">
+                            <p class="text-[10px] text-slate-500 mt-2 m-0 leading-relaxed font-medium">
+                                * Nếu có 2 quy tắc trùng giờ, hệ thống sẽ lấy giá của quy tắc có <strong class="text-orange-400">Ưu tiên lớn hơn</strong>.
+                            </p>
+                        </div>
+
+                        <button type="submit" id="btnSubmitRule" class="w-full py-4 mt-2 bg-orange-600 text-white font-black font-headline uppercase tracking-widest text-sm rounded-xl hover:bg-orange-500 shadow-lg shadow-orange-600/30 transition-all border-none cursor-pointer flex items-center justify-center gap-2">
+                            Tạo quy tắc giá
+                        </button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>
+
+<div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px]" onclick="closeDeleteModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden pointer-events-auto transform transition-all scale-95 opacity-0" id="deleteModalContent">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                <span class="material-symbols-outlined text-red-600">warning</span>
+                <h3 class="m-0 text-base font-black text-slate-900 font-headline">Xác nhận xóa quy tắc</h3>
+            </div>
+            <div class="px-5 py-4">
+                <p class="m-0 text-sm text-slate-600 leading-relaxed">
+                    Bạn có chắc muốn xóa vĩnh viễn quy tắc giá này? Sân sẽ trở về thu mức giá cơ bản cho khung giờ tương ứng.
+                </p>
+            </div>
+            <div class="px-5 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-white bg-transparent cursor-pointer">Hủy</button>
+                <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700 border-none cursor-pointer">Xác nhận Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/layout_owner.js"></script>
+<script src="/js/owner_price_rules.js"></script>
+
+</body>
+</html>

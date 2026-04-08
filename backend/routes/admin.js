@@ -66,7 +66,7 @@ router.put('/facilities/:id/status', checkLogin, checkRole('ADMIN', 'SUPER_ADMIN
 
       var notif = await notificationController.Create(
         result.facility.owner._id, type, title, message,
-        '/owner/facilities/' + req.params.id
+        '/owner/facilities/list.html'
       );
       if (io) io.sendToUser(String(result.facility.owner._id), notif);
     } catch (_) {}

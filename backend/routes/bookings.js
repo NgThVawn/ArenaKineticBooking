@@ -56,6 +56,28 @@ router.get('/:id', checkLogin, async function (req, res) {
   }
 });
 
+// GET /api/v1/bookings/code/:code  (lấy booking theo code, dùng cho trang xem chi tiết sau khi đặt thành công) 
+router.get('/code/:bookingCode', checkLogin, async function (req, res) {
+  try {
+    var booking = await bookingController.FindByCode(req.params.bookingCode);
+    if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đặt sân' });
+
+    var userRoles = req.user.roles.map(function (r) { return r.name; });
+    var isAdmin = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
+    var isOwner = booking.field && booking.field.facility &&
+      String(booking.field.facility.owner._id) === String(req.user._id);
+    var isUser = String(booking.user._id) === String(req.user._id);
+
+    if (!isAdmin && !isOwner && !isUser) {
+      return res.status(403).json({ success: false, message: 'Không có quyền xem đặt sân này' });
+    }
+
+    return res.json({ success: true, data: booking });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 // POST /api/v1/bookings/preview-price  (tính giá trước khi đặt)
 router.post('/preview-price', checkLogin, async function (req, res) {
   try {
@@ -186,7 +208,7 @@ router.post('/', checkLogin, BookingValidator, validatedResult, async function (
         req.user._id, 'BOOKING_CREATED',
         'Đặt sân thành công',
         'Đặt sân ' + bookingCode + ' đã được tạo. Vui lòng thanh toán để xác nhận.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(req.user._id), notif);
 
@@ -196,7 +218,7 @@ router.post('/', checkLogin, BookingValidator, validatedResult, async function (
           ownerId, 'NEW_BOOKING',
           'Có đặt sân mới',
           'Khách ' + req.user.fullName + ' đã đặt sân ' + bookingCode,
-          '/owner/bookings/' + booking._id
+          '/owner/bookings/list.html'
         );
         if (io) io.sendToUser(String(ownerId), ownerNotif);
       }
@@ -244,7 +266,7 @@ router.post('/:id/cancel', checkLogin, async function (req, res) {
         req.user._id, 'BOOKING_CANCELLED',
         'Đặt sân đã huỷ',
         'Đặt sân ' + booking.bookingCode + ' đã được huỷ.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(req.user._id), notif);
 
@@ -264,7 +286,7 @@ router.post('/:id/cancel', checkLogin, async function (req, res) {
           booking.field.facility.owner._id, 'BOOKING_CANCEL_REQUEST',
           'Yêu cầu huỷ đặt sân',
           'Khách ' + req.user.fullName + ' yêu cầu huỷ đặt sân ' + booking.bookingCode,
-          '/owner/bookings/' + booking._id
+          '/owner/bookings/list.html'
         );
         if (io) io.sendToUser(String(booking.field.facility.owner._id), ownerNotif);
       }
@@ -284,7 +306,7 @@ router.post('/:id/cancel', checkLogin, async function (req, res) {
           booking.field.facility.owner._id, 'BOOKING_CUSTOMER_CANCELLED',
           'Khách huỷ đặt sân',
           'Khách ' + req.user.fullName + ' đã huỷ đặt sân ' + booking.bookingCode,
-          '/owner/bookings/' + booking._id
+          '/owner/bookings/list.html'
         );
         if (io) io.sendToUser(String(booking.field.facility.owner._id), ownerCancelNotif);
       }
@@ -328,7 +350,7 @@ router.put('/owner/:id/confirm-cancel', checkLogin, checkRole('OWNER', 'ADMIN', 
         booking.user._id, 'CANCEL_APPROVED',
         'Yêu cầu huỷ được chấp thuận',
         'Yêu cầu huỷ đặt sân ' + booking.bookingCode + ' đã được chấp thuận.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(booking.user._id), notif);
       return res.json({ success: true, message: 'Đã chấp thuận huỷ đặt sân' });
@@ -338,7 +360,7 @@ router.put('/owner/:id/confirm-cancel', checkLogin, checkRole('OWNER', 'ADMIN', 
         booking.user._id, 'CANCEL_REJECTED',
         'Yêu cầu huỷ bị từ chối',
         'Yêu cầu huỷ đặt sân ' + booking.bookingCode + ' đã bị từ chối.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(booking.user._id), rejectNotif);
       return res.json({ success: true, message: 'Đã từ chối huỷ đặt sân' });
@@ -347,5 +369,47 @@ router.put('/owner/:id/confirm-cancel', checkLogin, checkRole('OWNER', 'ADMIN', 
     return res.status(400).json({ success: false, message: error.message });
   }
 });
+// PUT /api/v1/bookings/owner/:id/confirm  (Owner thủ công duyệt đơn PENDING)
+router.put('/owner/:id/confirm', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    var booking = await bookingController.FindById(req.params.id);
+    if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đặt sân' });
+    if (booking.status !== 'PENDING') return res.status(400).json({ success: false, message: 'Đơn không ở trạng thái chờ duyệt' });
+    
+    // Đổi sang CONFIRMED
+    await bookingController.UpdateStatus(booking._id, 'CONFIRMED');
+    return res.json({ success: true, message: 'Đã duyệt đơn đặt sân thành công' });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 
+// PUT /api/v1/bookings/owner/:id/cancel  (Owner thủ công hủy/từ chối đơn)
+router.put('/owner/:id/cancel', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    var booking = await bookingController.FindById(req.params.id);
+    if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đặt sân' });
+    
+    var { cancelReason } = req.body;
+    await bookingController.UpdateStatus(booking._id, 'CANCELLED', cancelReason || 'Chủ sân hủy');
+    
+    // Giải phóng dịch vụ (Trả lại kho)
+    var extraServiceController = require('../controllers/extraServices');
+    if (booking.extraServices && booking.extraServices.length > 0) {
+        for (var extra of booking.extraServices) {
+            try { 
+                if (booking.status === 'PENDING') {
+                    await extraServiceController.ReleaseReservation(extra.extraService, extra.quantity); 
+                } else {
+                    await extraServiceController.ReturnStock(extra.extraService, extra.quantity);
+                }
+            } catch (_) {}
+        }
+    }
+
+    return res.json({ success: true, message: 'Đã hủy đơn đặt sân thành công' });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 module.exports = router;

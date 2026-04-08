@@ -23,6 +23,10 @@ module.exports = {
     return await extraServiceModel.find({ facility: facilityId, isDeleted: false, isActive: true })
       .sort({ name: 1 });
   },
+  FindAllForOwner: async function (facilityId) {
+    return await extraServiceModel.find({ facility: facilityId, isDeleted: false })
+      .sort({ name: 1 });
+  },
 
   FindByFieldSportType: async function (facilityId, sportType) {
     return await extraServiceModel.find({

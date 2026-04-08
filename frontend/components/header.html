@@ -1,0 +1,105 @@
+<nav class="fixed top-0 w-full z-50 bg-zinc-100/90 backdrop-blur-xl shadow-sm transition-all duration-300 border-b border-gray-200 font-sans">
+    <div class="flex justify-between items-center px-6 h-20 w-full max-w-screen-2xl mx-auto">
+
+        <div class="flex items-center gap-8">
+            <a href="/index.html" class="text-2xl font-black text-zinc-900 tracking-tighter italic no-underline">ARENAKINETIC</a>
+
+            <div id="nav-user-links" class="hidden md:flex gap-6 items-center">
+                <a href="/facilities/list.html" class="text-zinc-600 font-medium hover:text-orange-600 transition-colors duration-200 tracking-tight no-underline">Danh sách cơ sở</a>
+                <a href="#" class="text-zinc-600 font-medium hover:text-orange-600 transition-colors duration-200 tracking-tight no-underline">Tìm đối thủ</a>
+                <a href="#" class="text-zinc-600 font-medium hover:text-orange-600 transition-colors duration-200 tracking-tight no-underline">Đội-Nhóm</a>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+
+            <div id="nav-guest-menu" class="flex items-center gap-4">
+                <a href="/auth/login.html" id="nav-btn-login" class="hidden sm:block bg-zinc-100 hover:bg-zinc-200 text-zinc-800 px-6 py-2.5 rounded-xl font-bold transition-colors no-underline border border-zinc-200 shadow-sm">
+                    Đăng nhập
+                </a>
+                <a href="/auth/register.html" id="nav-btn-register" class="bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold tracking-tight hover:shadow-lg hover:shadow-orange-600/30 transition-all no-underline active:scale-95">
+                    Đăng ký ngay
+                </a>
+            </div>
+
+            <div id="nav-user-menu" class="hidden items-center gap-2">
+                
+                <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+                <div class="relative" id="notificationWrapper">
+                    <button id="notifBtn" class="relative p-2 text-zinc-500 hover:text-primary transition-colors bg-zinc-100 hover:bg-orange-50 rounded-full border-none cursor-pointer flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px]">notifications</span>
+                        <span id="notifBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white hidden shadow-md">0</span>
+                    </button>
+
+                    <div id="notifDropdown" class="absolute right-0 mt-3 w-[360px] bg-white rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-zinc-100 hidden z-50 flex-col overflow-hidden origin-top-right transition-all duration-200 opacity-0 scale-95">
+                        <div class="p-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/80 backdrop-blur-sm">
+                            <h3 class="font-headline font-black text-zinc-900 text-sm uppercase tracking-wide m-0">Thông báo của bạn</h3>
+                            <button id="markAllReadBtn" class="text-[11px] font-bold text-primary hover:text-orange-700 bg-transparent border-none cursor-pointer p-0 m-0 transition-colors">
+                                Đánh dấu đã đọc
+                            </button>
+                        </div>
+                        
+                        <div id="notifList" class="max-h-[400px] overflow-y-auto bg-white overscroll-contain custom-scrollbar">
+                            <div class="p-6 text-center text-zinc-400">
+                                <span class="material-symbols-outlined animate-spin text-[24px]">sync</span>
+                            </div>
+                        </div>
+
+                        <a href="/notifications/list.html" class="block p-3 text-center text-xs font-bold text-zinc-500 bg-zinc-50 hover:bg-primary hover:text-white transition-colors no-underline border-t border-zinc-100">
+                            Xem tất cả thông báo
+                        </a>
+                    </div>
+                </div>
+
+                <style>
+                    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+                    
+                    /* Hiệu ứng Toast trượt ngang */
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                    .toast-enter { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                    .toast-exit { animation: slideOutRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                </style>
+
+                <div class="relative group cursor-pointer ml-2">
+                    <div class="flex items-center gap-2 no-underline">
+                        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 overflow-hidden border-2 border-gray-200 group-hover:border-orange-600 transition-colors shadow-sm">
+                            <span id="nav-avatar-initial" class="font-black text-orange-600 text-lg">U</span>
+                        </div>
+                        <span id="nav-user-name" class="hidden sm:block font-bold text-sm text-zinc-800 truncate max-w-[120px]">User</span>
+                        <span class="material-symbols-outlined text-zinc-400 text-[20px] group-hover:rotate-180 transition-transform duration-300">expand_more</span>
+                    </div>
+
+                    <div class="absolute right-0 top-full mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-3 group-hover:translate-y-0 overflow-hidden z-50">
+                        <div class="py-2">
+                            <a href="/auth/profile.html" class="px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 transition-colors no-underline flex items-center gap-3">
+                                <span class="material-symbols-outlined text-[20px]">person</span> Thông tin cá nhân
+                            </a>
+                            <a href="/bookings/history.html" class="px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 transition-colors no-underline flex items-center gap-3">
+                                <span class="material-symbols-outlined text-[20px]">history</span> Lịch sử đặt sân
+                            </a>
+                            <hr class="my-1 border-gray-100">
+                            <button onclick="handleLogout()" class="w-full text-left px-5 py-3 text-sm font-bold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-3">
+                                <span class="material-symbols-outlined text-[20px]">logout</span> Đăng xuất
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="md:hidden material-symbols-outlined text-zinc-800 bg-transparent border-none text-[28px] cursor-pointer">menu</button>
+        </div>
+
+    </div>
+</nav>
+
+<div class="h-20 w-full"></div>

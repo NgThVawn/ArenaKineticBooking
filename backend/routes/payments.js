@@ -46,19 +46,24 @@ router.get('/vnpay-return', async function (req, res) {
     try {
         var result = vnpayHandler.verifyReturnParams(req.query);
 
+        // Lấy toàn bộ query params VNPay gửi về để ném sang Frontend in hóa đơn
+        const queryString = new URLSearchParams(req.query).toString();
+        const frontendResultUrl = `${process.env.CLIENT_URL}/payment/result_vnpay.html?${queryString}`;
+
         if (!result.valid) {
-            return res.json({ success: false, message: 'Chữ ký không hợp lệ' });
+            return res.redirect(`${process.env.CLIENT_URL}/payment/result_vnpay.html?vnp_ResponseCode=99&message=invalid_signature`);
         }
 
         var payment = await paymentController.FindByTxnRef(result.txnRef);
         var booking = payment ? await bookingController.FindByCode(result.txnRef) : null;
 
         if (!booking) {
-            return res.json({ success: false, message: 'Không tìm thấy đặt sân' });
+            return res.redirect(`${process.env.CLIENT_URL}/payment/result_vnpay.html?vnp_ResponseCode=99&message=booking_not_found`);
         }
 
+        // Đã xử lý rồi → redirect luôn về Frontend
         if (payment && payment.status !== 'PENDING') {
-            return res.json({ success: true, message: 'Đã xử lý', data: { bookingCode: result.txnRef } });
+            return res.redirect(frontendResultUrl);
         }
 
         var io = req.app ? req.app.get('io') : null;
@@ -74,7 +79,6 @@ router.get('/vnpay-return', async function (req, res) {
             });
             await bookingController.UpdateStatus(booking._id, 'CONFIRMED');
 
-            // Chuyển reserved → soldCount cho từng dịch vụ
             if (booking.extraServices) {
                 for (var extra of booking.extraServices) {
                     try { await extraServiceController.ConfirmReservation(extra.extraService, extra.quantity); } catch (_) { }
@@ -86,26 +90,23 @@ router.get('/vnpay-return', async function (req, res) {
                     booking.user._id, 'PAYMENT_SUCCESS',
                     'Thanh toán thành công',
                     'Thanh toán đặt cọc cho đặt sân ' + result.txnRef + ' thành công.',
-                    '/bookings/' + booking._id
+                    '/bookings/history.html'
                 );
                 if (io) io.sendToUser(String(booking.user._id), userNotif);
 
-                var ownerId = booking.field && booking.field.facility && booking.field.facility.owner._id;
+                var ownerId = booking.field?.facility?.owner?._id;
                 if (ownerId) {
                     var ownerNotif = await notificationController.Create(
                         ownerId, 'PAYMENT_RECEIVED',
                         'Nhận thanh toán',
                         'Khách đã thanh toán đặt cọc cho đặt sân ' + result.txnRef,
-                        '/owner/bookings/' + booking._id
+                        '/owner/bookings/list.html'
                     );
                     if (io) io.sendToUser(String(ownerId), ownerNotif);
                 }
             } catch (_) { }
 
-            return res.json({
-                success: true, message: 'Thanh toán thành công',
-                data: { bookingCode: result.txnRef, transactionNo: result.transactionNo }
-            });
+            return res.redirect(frontendResultUrl);
         } else {
             await paymentController.UpdateByTxnRef(result.txnRef, {
                 status: 'FAILED',
@@ -117,15 +118,15 @@ router.get('/vnpay-return', async function (req, res) {
                     booking.user._id, 'PAYMENT_FAILED',
                     'Thanh toán thất bại',
                     'Thanh toán cho đặt sân ' + result.txnRef + ' thất bại.',
-                    '/bookings/' + booking._id
+                    '/bookings/history.html'
                 );
                 if (io) io.sendToUser(String(booking.user._id), failNotif);
             } catch (_) { }
 
-            return res.json({ success: false, message: 'Thanh toán thất bại', data: { bookingCode: result.txnRef } });
+            return res.redirect(frontendResultUrl);
         }
     } catch (error) {
-        return res.status(400).json({ success: false, message: error.message });
+        return res.redirect(`${process.env.CLIENT_URL}/payment/result_vnpay.html?vnp_ResponseCode=99&message=server_error`);
     }
 });
 
@@ -143,7 +144,9 @@ router.post('/vnpay-ipn', async function (req, res) {
             return res.json({ RspCode: '01', Message: 'Order not found' });
         }
 
-        if (payment.status !== 'PENDING') {
+        // Chỉ bỏ qua nếu đã SUCCESS — cho phép IPN override trạng thái FAILED
+        // (race condition: user nhấn back sớm → return URL mark FAILED, nhưng IPN thật sự SUCCESS)
+        if (payment.status === 'SUCCESS') {
             return res.json({ RspCode: '02', Message: 'Order already confirmed' });
         }
 
@@ -211,17 +214,21 @@ router.post('/momo/create', checkLogin, async function (req, res) {
 router.get('/momo-return', async function (req, res) {
     try {
         var result = momoHandler.verifyReturnParams(req.query);
+        const queryString = new URLSearchParams(req.query).toString();
+        const frontendResultUrl = `${process.env.CLIENT_URL}/payment/result_momo.html?${queryString}`;
 
         if (!result.valid) {
-            return res.json({ success: false, message: 'Chữ ký không hợp lệ' });
+            return res.redirect(`${process.env.CLIENT_URL}/payment/result_momo.html?resultCode=1&message=invalid_signature`);
         }
 
         var booking = await bookingController.FindByCode(result.bookingCode);
         var payment = await paymentController.FindByTxnRef(result.orderId);
 
-        if (!booking) return res.json({ success: false, message: 'Không tìm thấy đặt sân' });
+        if (!booking) {
+            return res.redirect(`${process.env.CLIENT_URL}/payment/result_momo.html?orderId=${encodeURIComponent(result.orderId || '')}&resultCode=1&message=booking_not_found`);
+        }
         if (payment && payment.status !== 'PENDING') {
-            return res.json({ success: true, message: 'Đã xử lý', data: { bookingCode: result.bookingCode } });
+            return res.redirect(frontendResultUrl);
         }
 
         var io = req.app ? req.app.get('io') : null;
@@ -245,18 +252,40 @@ router.get('/momo-return', async function (req, res) {
                     booking.user._id, 'PAYMENT_SUCCESS',
                     'Thanh toán thành công',
                     'Thanh toán đặt cọc cho đặt sân ' + result.bookingCode + ' thành công.',
-                    '/bookings/' + booking._id
+                    '/bookings/history.html'
                 );
                 if (io) io.sendToUser(String(booking.user._id), userNotif);
+
+                var ownerId = booking.field?.facility?.owner?._id;
+                if (ownerId) {
+                    var ownerNotif = await notificationController.Create(
+                        ownerId, 'PAYMENT_RECEIVED',
+                        'Nhận thanh toán',
+                        'Khách đã thanh toán đặt cọc cho đặt sân ' + result.bookingCode,
+                        '/owner/bookings/list.html'
+                    );
+                    if (io) io.sendToUser(String(ownerId), ownerNotif);
+                }
             } catch (_) { }
 
-            return res.json({ success: true, message: 'Thanh toán thành công', data: { bookingCode: result.bookingCode } });
+            return res.redirect(frontendResultUrl);
         } else {
             await paymentController.UpdateByTxnRef(result.orderId, { status: 'FAILED' });
-            return res.json({ success: false, message: 'Thanh toán thất bại', data: { bookingCode: result.bookingCode } });
+
+            try {
+                var failNotif = await notificationController.Create(
+                    booking.user._id, 'PAYMENT_FAILED',
+                    'Thanh toán thất bại',
+                    'Thanh toán cho đặt sân ' + result.bookingCode + ' thất bại.',
+                    '/bookings/history.html'
+                );
+                if (io) io.sendToUser(String(booking.user._id), failNotif);
+            } catch (_) { }
+
+            return res.redirect(frontendResultUrl);
         }
     } catch (error) {
-        return res.status(400).json({ success: false, message: error.message });
+        return res.redirect(`${process.env.CLIENT_URL}/payment/result_momo.html?resultCode=1&message=server_error`);
     }
 });
 
@@ -270,7 +299,8 @@ router.post('/momo-ipn', async function (req, res) {
         }
 
         var payment = await paymentController.FindByTxnRef(result.orderId);
-        if (!payment || payment.status !== 'PENDING') {
+        // Chỉ bỏ qua nếu đã SUCCESS — cho phép IPN override trạng thái FAILED
+        if (!payment || payment.status === 'SUCCESS') {
             return res.json({ partnerCode: req.body.partnerCode, requestId: req.body.requestId, orderId: req.body.orderId, resultCode: 0, message: 'Already processed' });
         }
 
