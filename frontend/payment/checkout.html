@@ -163,9 +163,27 @@
             // 🛑 TẠO BIẾN LƯU MÃ BK (Ví dụ: BK2026...)
             let globalBookingCode = null;
 
+            // Bfcache: khôi phục trang từ cache (back button từ cổng thanh toán) — phải đăng ký
+            // trước try/catch để đảm bảo luôn được đăng ký dù fetch có lỗi hay không.
+            const VNPAY_BTN_HTML = document.getElementById('btnVNPay').innerHTML;
+            const MOMO_BTN_HTML = document.getElementById('btnMoMo').innerHTML;
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    document.getElementById('btnVNPay').disabled = false;
+                    document.getElementById('btnVNPay').innerHTML = VNPAY_BTN_HTML;
+                    document.getElementById('btnMoMo').disabled = false;
+                    document.getElementById('btnMoMo').innerHTML = MOMO_BTN_HTML;
+                }
+            });
+
             try {
                 // 1. GỌI API LẤY CHI TIẾT BOOKING
-                const res = await fetch(`http://localhost:3000/api/v1/bookings/${identifier}`, {
+                // bookingId → GET /bookings/:id (MongoDB ObjectId)
+                // bookingCode → GET /bookings/code/:code (mã đặt sân dạng BK...)
+                const fetchUrl = bookingId
+                    ? `http://localhost:3000/api/v1/bookings/${bookingId}`
+                    : `http://localhost:3000/api/v1/bookings/code/${bookingCodeURL}`;
+                const res = await fetch(fetchUrl, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const json = await res.json();

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Quản lý Hóa đơn | Arena Kinetic Owner</title>
+
+    <link href="/css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "primary": "#b02f00",
+                    },
+                    fontFamily: { "headline": ["Epilogue"], "body": ["Inter"], "label": ["Lexend"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        @media print {
+            #sidebar-placeholder, header, #actionBar, #additionalSection { display: none !important; }
+            main { margin-left: 0 !important; }
+            #printArea { box-shadow: none !important; border: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10">
+        <div class="flex items-center gap-3">
+            <a href="/owner/bookings/list.html" class="text-slate-400 hover:text-slate-700 transition-colors no-underline">
+                <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+            </a>
+            <div>
+                <h2 class="font-headline tracking-tight font-bold text-xl text-on-surface">Hóa đơn đặt sân</h2>
+                <p class="text-[11px] text-slate-500 font-label uppercase tracking-wider">Xem, chỉnh sửa và hoàn tất hóa đơn</p>
+            </div>
+        </div>
+        <div id="statusBadge" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border bg-slate-100 text-slate-500 border-slate-200">Đang tải...</div>
+    </header>
+
+    <!-- Loading -->
+    <div id="loadingState" class="flex flex-col items-center justify-center h-96">
+        <span class="material-symbols-outlined text-[44px] animate-spin text-slate-300 mb-3">sync</span>
+        <p class="text-sm text-slate-400 font-label uppercase tracking-widest">Đang tải hóa đơn...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="errorState" class="hidden p-8">
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+            <span class="material-symbols-outlined text-5xl text-red-300 mb-3 block">error</span>
+            <h4 class="font-headline font-bold text-xl text-red-700 mb-2">Không thể tải hóa đơn</h4>
+            <p id="errorMsg" class="text-sm text-red-600"></p>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div id="mainContent" class="hidden p-8 space-y-6 max-w-4xl">
+
+        <!-- Action bar -->
+        <div id="actionBar" class="flex flex-wrap items-center gap-3">
+            <button id="btnSave" onclick="saveInvoice()"
+                    class="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition-colors border-none cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">save</span>
+                Lưu thay đổi
+            </button>
+            <button id="btnFinalize" onclick="finalizeInvoice()"
+                    class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors border-none cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">check_circle</span>
+                Hoàn tất hóa đơn
+            </button>
+            <button onclick="window.print()"
+                    class="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">print</span>
+                In hóa đơn
+            </button>
+        </div>
+
+        <!-- Invoice printable area -->
+        <div id="printArea" class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+
+            <!-- Header -->
+            <div class="bg-slate-950 px-8 py-6 text-white flex items-start justify-between">
+                <div>
+                    <h1 class="font-headline font-black text-2xl uppercase tracking-tight text-white mb-1">Hóa đơn thanh toán</h1>
+                    <p class="text-slate-400 text-sm font-label">Arena Kinetic Booking System</p>
+                </div>
+                <div class="text-right">
+                    <div id="invoiceStatus" class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-400 text-amber-900 mb-2">DRAFT</div>
+                    <p class="text-slate-400 text-xs font-label">Mã đơn: <span id="invBookingCode" class="text-orange-400 font-bold">—</span></p>
+                    <p class="text-slate-400 text-xs font-label mt-1">Ngày tạo: <span id="invCreatedAt" class="text-white">—</span></p>
+                </div>
+            </div>
+
+            <!-- Customer & field info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-0 border-b border-slate-100">
+                <div class="p-6 border-r border-slate-100">
+                    <p class="text-xs font-label font-bold text-slate-400 uppercase tracking-widest mb-3">Thông tin khách hàng</p>
+                    <p class="font-bold text-on-surface text-base" id="custName">—</p>
+                    <p class="text-sm text-slate-500 mt-1" id="custEmail">—</p>
+                    <p class="text-sm text-slate-500" id="custPhone">—</p>
+                </div>
+                <div class="p-6">
+                    <p class="text-xs font-label font-bold text-slate-400 uppercase tracking-widest mb-3">Thông tin đặt sân</p>
+                    <p class="font-bold text-on-surface" id="invFacility">—</p>
+                    <p class="text-sm text-slate-500 mt-1" id="invField">—</p>
+                    <p class="text-sm text-slate-500" id="invDate">—</p>
+                </div>
+            </div>
+
+            <!-- Editable fields -->
+            <div class="p-6 border-b border-slate-100 space-y-4">
+                <p class="text-xs font-label font-bold text-slate-400 uppercase tracking-widest">Thời gian thực tế (có thể chỉnh sửa)</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-500 mb-1 block">Giờ bắt đầu thực tế</label>
+                        <input type="time" id="actualStart"
+                               class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 font-mono">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-500 mb-1 block">Giờ kết thúc thực tế</label>
+                        <input type="time" id="actualEnd"
+                               class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 font-mono">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-booked services -->
+            <div class="p-6 border-b border-slate-100">
+                <p class="text-xs font-label font-bold text-slate-400 uppercase tracking-widest mb-4">Dịch vụ đã đặt trước</p>
+                <div id="preBookedList" class="space-y-2 text-sm text-slate-600">
+                    <p class="italic text-slate-400">Không có dịch vụ.</p>
+                </div>
+            </div>
+
+            <!-- Additional charges -->
+            <div id="additionalSection" class="p-6 border-b border-slate-100">
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-xs font-label font-bold text-slate-400 uppercase tracking-widest">Phụ phí phát sinh</p>
+                    <button onclick="addAdditionalRow()"
+                            class="inline-flex items-center gap-1 text-xs font-semibold text-orange-700 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg transition-colors border-none cursor-pointer">
+                        <span class="material-symbols-outlined text-[14px]">add</span> Thêm dòng
+                    </button>
+                </div>
+                <div id="additionalRows" class="space-y-2"></div>
+            </div>
+
+            <!-- Notes -->
+            <div class="p-6 border-b border-slate-100">
+                <label class="text-xs font-label font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ghi chú</label>
+                <textarea id="invoiceNotes" rows="2"
+                          class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 resize-none"
+                          placeholder="Ghi chú thêm cho hóa đơn (tùy chọn)..."></textarea>
+            </div>
+
+            <!-- Totals -->
+            <div class="p-6 bg-slate-50">
+                <div class="max-w-sm ml-auto space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Tiền sân</span>
+                        <span class="font-bold" id="sumField">0₫</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Dịch vụ đặt trước</span>
+                        <span class="font-bold" id="sumPreBooked">0₫</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Phụ phí phát sinh</span>
+                        <span class="font-bold text-orange-600" id="sumAdditional">0₫</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t border-slate-200">
+                        <span class="font-bold text-on-surface">Tổng cộng</span>
+                        <span class="font-black text-lg text-on-surface" id="sumGrand">0₫</span>
+                    </div>
+                    <div class="flex justify-between text-emerald-700">
+                        <span class="font-semibold">Đã cọc</span>
+                        <span class="font-bold" id="sumDeposit">0₫</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t-2 border-slate-300">
+                        <span class="font-black text-on-surface">Còn phải thu</span>
+                        <span class="font-black text-2xl text-primary" id="sumDue">0₫</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="/js/api.js"></script>
+<script src="/js/layout_owner.js"></script>
+<script>
+    const BASE_URL = 'http://localhost:3000/api/v1';
+    const token = localStorage.getItem('token');
+    const bookingId = new URLSearchParams(window.location.search).get('bookingId');
+    let invoiceData = null;
+    let isFinalized = false;
+
+    function fmt(n) {
+        return Number(n || 0).toLocaleString('vi-VN') + '₫';
+    }
+
+    function setFinalized(fin) {
+        isFinalized = fin;
+        const badge = document.getElementById('statusBadge');
+        const invBadge = document.getElementById('invoiceStatus');
+        const actionBar = document.getElementById('actionBar');
+
+        if (fin) {
+            badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border bg-emerald-50 text-emerald-700 border-emerald-200';
+            badge.textContent = 'Đã hoàn tất';
+            invBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-400 text-emerald-900 mb-2';
+            invBadge.textContent = 'FINALIZED';
+            // Hide editable controls when finalized
+            actionBar.innerHTML = `
+                <button onclick="window.print()"
+                        class="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">print</span> In hóa đơn
+                </button>`;
+            document.getElementById('additionalSection').classList.add('hidden');
+            document.getElementById('actualStart').disabled = true;
+            document.getElementById('actualEnd').disabled = true;
+            document.getElementById('invoiceNotes').disabled = true;
+        } else {
+            badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border bg-amber-50 text-amber-700 border-amber-200';
+            badge.textContent = 'Bản nháp';
+            invBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-400 text-amber-900 mb-2';
+            invBadge.textContent = 'DRAFT';
+        }
+    }
+
+    function renderTotals(inv) {
+        document.getElementById('sumField').textContent = fmt(inv.fieldCharge);
+        document.getElementById('sumPreBooked').textContent = fmt(inv.preBookedTotal);
+        document.getElementById('sumAdditional').textContent = fmt(inv.additionalTotal);
+        document.getElementById('sumGrand').textContent = fmt(inv.grandTotal);
+        document.getElementById('sumDeposit').textContent = fmt(inv.depositPaid);
+        document.getElementById('sumDue').textContent = fmt(inv.amountDue);
+    }
+
+    function renderPreBooked(extraServices) {
+        const el = document.getElementById('preBookedList');
+        if (!extraServices || !extraServices.length) {
+            el.innerHTML = '<p class="italic text-slate-400 text-sm">Không có dịch vụ.</p>';
+            return;
+        }
+        el.innerHTML = extraServices.map(s => `
+            <div class="flex justify-between items-center py-1.5 border-b border-slate-100 last:border-0">
+                <span>${escHtml(s.serviceName || 'Dịch vụ')} × ${s.quantity}</span>
+                <span class="font-semibold">${fmt(s.subtotal)}</span>
+            </div>`).join('');
+    }
+
+    function addAdditionalRow(desc = '', qty = 1, unitPrice = 0) {
+        const row = document.createElement('div');
+        row.className = 'additional-row grid grid-cols-12 gap-2 items-center';
+        row.innerHTML = `
+            <input type="text" placeholder="Mô tả phụ phí..." value="${escHtml(desc)}"
+                   class="col-span-5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-orange-500 additional-desc">
+            <input type="number" placeholder="SL" min="1" value="${qty}"
+                   class="col-span-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-orange-500 text-center additional-qty">
+            <input type="number" placeholder="Đơn giá" min="0" value="${unitPrice}"
+                   class="col-span-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-orange-500 additional-price">
+            <button onclick="this.closest('.additional-row').remove()"
+                    class="col-span-1 text-slate-300 hover:text-red-500 bg-transparent border-none cursor-pointer transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+            </button>`;
+        document.getElementById('additionalRows').appendChild(row);
+    }
+
+    function collectAdditionalItems() {
+        return Array.from(document.querySelectorAll('.additional-row')).map(row => ({
+            description: row.querySelector('.additional-desc').value.trim(),
+            quantity: parseInt(row.querySelector('.additional-qty').value) || 1,
+            unitPrice: parseFloat(row.querySelector('.additional-price').value) || 0
+        })).filter(item => item.description);
+    }
+
+    async function saveInvoice() {
+        const btn = document.getElementById('btnSave');
+        btn.disabled = true;
+        btn.textContent = 'Đang lưu...';
+        try {
+            const body = {
+                actualStartTime: document.getElementById('actualStart').value,
+                actualEndTime: document.getElementById('actualEnd').value,
+                additionalItems: collectAdditionalItems(),
+                notes: document.getElementById('invoiceNotes').value.trim()
+            };
+            const res = await fetch(`${BASE_URL}/invoices/booking/${bookingId}/save`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message);
+            renderTotals(json.data);
+            showMsg('Lưu hóa đơn thành công!', true);
+        } catch (e) {
+            showMsg('Lỗi: ' + e.message, false);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:\'FILL\' 1;">save</span> Lưu thay đổi';
+        }
+    }
+
+    async function finalizeInvoice() {
+        if (!confirm('Hoàn tất hóa đơn này? Sau khi hoàn tất, hóa đơn không thể chỉnh sửa thêm.')) return;
+        const btn = document.getElementById('btnFinalize');
+        btn.disabled = true;
+        btn.textContent = 'Đang xử lý...';
+        try {
+            const res = await fetch(`${BASE_URL}/invoices/booking/${bookingId}/finalize`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message);
+            setFinalized(true);
+            renderTotals(json.data);
+            showMsg('Hóa đơn đã được hoàn tất!', true);
+        } catch (e) {
+            showMsg('Lỗi: ' + e.message, false);
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:\'FILL\' 1;">check_circle</span> Hoàn tất hóa đơn';
+        }
+    }
+
+    function showMsg(text, success) {
+        const existing = document.getElementById('flashMsg');
+        if (existing) existing.remove();
+        const el = document.createElement('div');
+        el.id = 'flashMsg';
+        el.className = `fixed top-20 right-8 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 ${
+            success ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'
+        }`;
+        el.innerHTML = `<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">${success ? 'check_circle' : 'error'}</span>${escHtml(text)}`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+    }
+
+    function escHtml(s) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(s || ''));
+        return d.innerHTML;
+    }
+
+    async function loadInvoice() {
+        if (!bookingId) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorMsg').textContent = 'Không tìm thấy mã đơn đặt sân trong URL.';
+            return;
+        }
+        try {
+            const res = await fetch(`${BASE_URL}/invoices/booking/${bookingId}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.status === 401) { localStorage.removeItem('token'); window.location.href = '/auth/login.html'; return; }
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message);
+
+            invoiceData = json.data;
+            const inv = invoiceData;
+            const booking = inv.booking;
+
+            // Populate customer info
+            document.getElementById('custName').textContent = booking.user?.fullName || '—';
+            document.getElementById('custEmail').textContent = booking.user?.email || '—';
+            document.getElementById('custPhone').textContent = booking.user?.phone || '—';
+
+            // Populate booking info
+            document.getElementById('invFacility').textContent = booking.field?.facility?.name || '—';
+            document.getElementById('invField').textContent = booking.field?.name || '—';
+            const dp = (booking.bookingDate || '').split('T')[0].split('-');
+            document.getElementById('invDate').textContent = dp.length === 3
+                ? `${dp[2]}/${dp[1]}/${dp[0]} | ${booking.startTime} – ${booking.endTime}`
+                : '—';
+
+            document.getElementById('invBookingCode').textContent = booking.bookingCode || '—';
+            document.getElementById('invCreatedAt').textContent = inv.createdAt
+                ? new Date(inv.createdAt).toLocaleDateString('vi-VN') : '—';
+
+            // Editable times
+            document.getElementById('actualStart').value = inv.actualStartTime || booking.startTime || '';
+            document.getElementById('actualEnd').value = inv.actualEndTime || booking.endTime || '';
+            document.getElementById('invoiceNotes').value = inv.notes || '';
+
+            // Pre-booked services
+            renderPreBooked(booking.extraServices);
+
+            // Additional items
+            if (inv.additionalItems && inv.additionalItems.length) {
+                inv.additionalItems.forEach(item => addAdditionalRow(item.description, item.quantity, item.unitPrice));
+            }
+
+            // Totals
+            renderTotals(inv);
+
+            // Status
+            setFinalized(inv.status === 'FINALIZED');
+
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        } catch (e) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorMsg').textContent = e.message;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadInvoice);
+</script>
+</body>
+</html>

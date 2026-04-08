@@ -99,21 +99,8 @@ async function handleClick(id, link) {
         }
 
         if (link && link !== 'null') {
-            const path = window.location.pathname;
-            let basePath = '../'; 
-            if (path.includes('/owner/facilities/') || path.includes('/owner/services/') || 
-                path.includes('/owner/fields/') || path.includes('/owner/blocked-times/') || 
-                path.includes('/owner/price-rules/') || path.includes('/owner/bookings/') ||
-                path.includes('/owner/notifications/')) {
-                basePath = '../../';
-            }
-
-            let targetUrl = link.startsWith('/') ? link.substring(1) : link;
-            if (!targetUrl.includes('.html')) {
-                const parts = targetUrl.split('?');
-                targetUrl = parts[0] + '.html' + (parts[1] ? '?' + parts[1] : '');
-            }
-            window.location.href = basePath + targetUrl; 
+            // Link từ DB luôn là đường dẫn tuyệt đối từ root VD: /owner/bookings/list.html
+            window.location.href = link.startsWith('/') ? link : '/' + link;
         } else {
             loadNotifications(); 
         }

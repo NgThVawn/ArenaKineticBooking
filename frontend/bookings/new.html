@@ -97,17 +97,36 @@
 
                 <div class="rounded-2xl bg-slate-900 text-white p-5 space-y-2">
                     <div class="flex items-center justify-between text-sm">
-                        <span>Tiền sân</span>
+                        <span class="text-slate-300">Tiền sân</span>
                         <span class="font-bold" id="fieldPriceText">0đ</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <span>Dịch vụ đi kèm</span>
+                        <span class="text-slate-300">Dịch vụ đi kèm</span>
                         <span class="font-bold text-cyan-300" id="extraPriceText">0đ</span>
                     </div>
                     <div class="pt-2 border-t border-white/20 flex items-center justify-between">
                         <span class="text-xs uppercase tracking-widest text-slate-400">Tổng tạm tính</span>
-                        <span class="text-2xl font-black text-orange-400" id="grandTotalText">0đ</span>
+                        <span class="text-xl font-black text-white" id="grandTotalText">0đ</span>
                     </div>
+                    <div class="pt-2 border-t border-white/10 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-amber-300 font-semibold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">payments</span>
+                                Cọc ngay (50%)
+                            </span>
+                            <span class="font-black text-2xl text-orange-400" id="depositText">0đ</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Thanh toán khi kết thúc</span>
+                            <span class="font-bold text-sm text-slate-300" id="remainText">0đ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                    <span class="material-symbols-outlined text-amber-500 text-[18px] mt-0.5">info</span>
+                    <p class="text-xs text-amber-800 font-medium m-0 leading-relaxed">
+                        Bạn chỉ cần thanh toán <strong class="text-amber-700">50% tiền cọc</strong> khi đặt sân. Phần còn lại thanh toán sau khi hoàn thành buổi đấu.
+                    </p>
                 </div>
 
                 <div class="space-y-3 pt-4 border-t border-slate-100">
@@ -227,8 +246,13 @@
                     }
                 }
 
-                // Tổng tiền
-                document.getElementById('grandTotalText').innerText = (finalFieldPrice + finalExtraPrice).toLocaleString('vi-VN') + 'đ';
+                // Tổng tiền & cọc 50%
+                const grandTotal = finalFieldPrice + finalExtraPrice;
+                const deposit = Math.round(grandTotal * 0.5);
+                const remain = grandTotal - deposit;
+                document.getElementById('grandTotalText').innerText = grandTotal.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('depositText').innerText = deposit.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('remainText').innerText = remain.toLocaleString('vi-VN') + 'đ';
 
             } catch (err) {
                 console.error(err);
@@ -287,9 +311,11 @@
                     const json = await res.json();
                     
                     if (res.ok && json.success) {
-                        // Lấy mã booking từ API trả về
-                        const bId = json.data.booking ? json.data.booking._id : json.data._id;
-                        
+                        // Lấy thông tin booking từ API trả về
+                        const bookingData = json.data.booking || json.data;
+                        const bookingCode = bookingData.bookingCode;
+                        const bookingId = bookingData._id;
+
                         // 🛑 Gói thông báo "Đặt thành công" vào bì thư cho trang Checkout mở
                         localStorage.setItem('pendingToast', JSON.stringify({
                             title: 'Tạo đơn thành công',
@@ -297,8 +323,11 @@
                             type: 'SUCCESS'
                         }));
 
-                        // Đá qua trang Checkout ngay lập tức!
-                        window.location.href = `/payment/checkout.html?bookingCode=${bId}`;
+                        // Ưu tiên dùng bookingCode (BK...), fallback sang bookingId
+                        const checkoutParam = bookingCode
+                            ? `bookingCode=${encodeURIComponent(bookingCode)}`
+                            : `bookingId=${bookingId}`;
+                        window.location.href = `/payment/checkout.html?${checkoutParam}`;
                     } else {
                         // Lỗi từ server (vd: Trùng giờ, hết sân...)
                         throw new Error(json.message || "Không thể đặt sân lúc này.");

@@ -90,7 +90,7 @@ router.get('/vnpay-return', async function (req, res) {
                     booking.user._id, 'PAYMENT_SUCCESS',
                     'Thanh toán thành công',
                     'Thanh toán đặt cọc cho đặt sân ' + result.txnRef + ' thành công.',
-                    '/bookings/' + booking._id
+                    '/bookings/history.html'
                 );
                 if (io) io.sendToUser(String(booking.user._id), userNotif);
 
@@ -100,7 +100,7 @@ router.get('/vnpay-return', async function (req, res) {
                         ownerId, 'PAYMENT_RECEIVED',
                         'Nhận thanh toán',
                         'Khách đã thanh toán đặt cọc cho đặt sân ' + result.txnRef,
-                        '/owner/bookings/' + booking._id
+                        '/owner/bookings/list.html'
                     );
                     if (io) io.sendToUser(String(ownerId), ownerNotif);
                 }
@@ -118,7 +118,7 @@ router.get('/vnpay-return', async function (req, res) {
                     booking.user._id, 'PAYMENT_FAILED',
                     'Thanh toán thất bại',
                     'Thanh toán cho đặt sân ' + result.txnRef + ' thất bại.',
-                    '/bookings/' + booking._id
+                    '/bookings/history.html'
                 );
                 if (io) io.sendToUser(String(booking.user._id), failNotif);
             } catch (_) { }
@@ -144,7 +144,9 @@ router.post('/vnpay-ipn', async function (req, res) {
             return res.json({ RspCode: '01', Message: 'Order not found' });
         }
 
-        if (payment.status !== 'PENDING') {
+        // Chỉ bỏ qua nếu đã SUCCESS — cho phép IPN override trạng thái FAILED
+        // (race condition: user nhấn back sớm → return URL mark FAILED, nhưng IPN thật sự SUCCESS)
+        if (payment.status === 'SUCCESS') {
             return res.json({ RspCode: '02', Message: 'Order already confirmed' });
         }
 
@@ -250,7 +252,7 @@ router.get('/momo-return', async function (req, res) {
                     booking.user._id, 'PAYMENT_SUCCESS',
                     'Thanh toán thành công',
                     'Thanh toán đặt cọc cho đặt sân ' + result.bookingCode + ' thành công.',
-                    '/bookings/' + booking._id
+                    '/bookings/history.html'
                 );
                 if (io) io.sendToUser(String(booking.user._id), userNotif);
 
@@ -260,7 +262,7 @@ router.get('/momo-return', async function (req, res) {
                         ownerId, 'PAYMENT_RECEIVED',
                         'Nhận thanh toán',
                         'Khách đã thanh toán đặt cọc cho đặt sân ' + result.bookingCode,
-                        '/owner/bookings/' + booking._id
+                        '/owner/bookings/list.html'
                     );
                     if (io) io.sendToUser(String(ownerId), ownerNotif);
                 }
@@ -275,7 +277,7 @@ router.get('/momo-return', async function (req, res) {
                     booking.user._id, 'PAYMENT_FAILED',
                     'Thanh toán thất bại',
                     'Thanh toán cho đặt sân ' + result.bookingCode + ' thất bại.',
-                    '/bookings/' + booking._id
+                    '/bookings/history.html'
                 );
                 if (io) io.sendToUser(String(booking.user._id), failNotif);
             } catch (_) { }
@@ -297,7 +299,8 @@ router.post('/momo-ipn', async function (req, res) {
         }
 
         var payment = await paymentController.FindByTxnRef(result.orderId);
-        if (!payment || payment.status !== 'PENDING') {
+        // Chỉ bỏ qua nếu đã SUCCESS — cho phép IPN override trạng thái FAILED
+        if (!payment || payment.status === 'SUCCESS') {
             return res.json({ partnerCode: req.body.partnerCode, requestId: req.body.requestId, orderId: req.body.orderId, resultCode: 0, message: 'Already processed' });
         }
 
