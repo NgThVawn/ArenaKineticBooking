@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Lịch sử đặt sân | Arena Kinetic</title>
+
+	<link href="https://fonts.googleapis.com" rel="preconnect" />
+	<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+	<link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+	<link rel="stylesheet" href="../css/app.css" />
+	<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+	<script src="../js/tailwind-config.js"></script>
+
+	<style>
+		.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+		.no-scrollbar::-webkit-scrollbar { display: none; }
+	</style>
+</head>
+
+<body class="bg-slate-50/50 font-body text-slate-800 antialiased flex flex-col min-h-screen">
+	<div id="header-placeholder"></div>
+
+	<main class="flex-grow py-12 px-4 sm:px-6 lg:px-8 pt-28">
+		<div class="max-w-7xl mx-auto">
+			<div id="alertBox" class="hidden mb-6 px-4 py-3 rounded-xl flex items-center gap-3 shadow-sm">
+				<span id="alertIcon" class="material-symbols-outlined"></span>
+				<span id="alertText" class="font-medium text-sm"></span>
+			</div>
+
+			<header class="mb-10">
+				<h1 class="text-4xl md:text-5xl font-black font-headline tracking-tighter text-slate-900 mb-2 uppercase italic">Lịch sử đặt sân</h1>
+				<p class="text-slate-500 font-medium text-lg">Quản lý và theo dõi các hoạt động thể thao của bạn tại Arena Kinetic.</p>
+			</header>
+
+			<div class="flex gap-3 overflow-x-auto pb-6 mb-4 no-scrollbar" id="filterGroup">
+				<button onclick="filterBookings('ALL', this)" class="filter-btn bg-primary text-white px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 shadow-lg shadow-primary/30 transition-all border-none cursor-pointer">Tất cả</button>
+				<button onclick="filterBookings('CONFIRMED', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 hover:bg-slate-50 transition-all cursor-pointer">Đã xác nhận</button>
+				<button onclick="filterBookings('PENDING', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 hover:bg-slate-50 transition-all cursor-pointer">Chờ thanh toán</button>
+				<button onclick="filterBookings('CANCEL_PENDING', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 hover:bg-slate-50 transition-all cursor-pointer">Chờ duyệt hủy</button>
+				<button onclick="filterBookings('COMPLETED', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 hover:bg-slate-50 transition-all cursor-pointer">Hoàn thành</button>
+				<button onclick="filterBookings('CANCELLED', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 hover:bg-slate-50 transition-all cursor-pointer">Đã hủy</button>
+			</div>
+
+			<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+				<div class="lg:col-span-8 space-y-6">
+					<div id="bookingList" class="space-y-6">
+						<div class="text-center py-20 bg-white rounded-[2rem] border border-slate-100">
+							<span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+							<p class="mt-4 text-slate-500 font-bold">Đang tải lịch sử giao dịch...</p>
+						</div>
+					</div>
+
+					<div id="paginationContainer" class="px-2 pt-2 flex items-center justify-between hidden">
+						<span class="text-sm text-slate-500">Đang hiển thị <span id="pageInfo" class="font-bold text-slate-800"></span></span>
+						<div class="flex items-center gap-1">
+							<button id="btnPrev" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors border-none bg-transparent cursor-pointer">
+								<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+							</button>
+							<div id="pageNumbers" class="flex gap-1"></div>
+							<button id="btnNext" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors border-none bg-transparent cursor-pointer">
+								<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<aside class="lg:col-span-4 space-y-6 sticky top-28 mb-10">
+					<div class="bg-slate-950 text-white p-8 rounded-[2rem] relative overflow-hidden shadow-2xl">
+						<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/40 rounded-full blur-[60px] pointer-events-none"></div>
+						<div class="relative z-10">
+							<h4 class="font-headline font-black text-2xl mb-8 flex items-center gap-3 italic uppercase tracking-tight">
+								<span class="material-symbols-outlined text-primary text-[28px]">bar_chart</span> Thống kê cá nhân
+							</h4>
+							<div class="space-y-5 font-label text-sm font-medium">
+								<div class="flex justify-between items-center border-b border-white/10 pb-5">
+									<span class="text-slate-400">Tổng số lượt đặt</span>
+									<span class="text-3xl font-black text-white" id="statTotal">0</span>
+								</div>
+								<div class="flex justify-between items-center border-b border-white/10 pb-5">
+									<span class="text-slate-400">Chờ thanh toán</span>
+									<span class="text-lg font-black text-orange-500" id="statPending">0 đơn</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="bg-white p-8 rounded-[2rem] border border-slate-100 flex flex-col items-center text-center shadow-sm">
+						<div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-5 border border-orange-100">
+							<span class="material-symbols-outlined text-primary text-3xl">sports_and_outdoors</span>
+						</div>
+						<h4 class="font-headline font-black text-xl text-slate-900 mb-2 italic uppercase">Sẵn sàng ra sân?</h4>
+						<p class="text-sm text-slate-500 mb-6 leading-relaxed">Hãy tìm kiếm và đặt ngay sân chơi yêu thích của bạn hôm nay.</p>
+						<a href="/facilities/list.html" class="w-full bg-slate-100 text-slate-700 py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all font-label text-decoration-none">Khám phá sân ngay</a>
+					</div>
+				</aside>
+			</div>
+		</div>
+	</main>
+
+	<div id="cancelModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+		<div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-100">
+			<div class="p-6 md:p-8">
+				<h3 class="text-2xl font-black font-headline text-slate-900 uppercase italic mb-5">Xác nhận hủy sân</h3>
+				<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 flex gap-3 text-sm text-slate-600">
+					<span class="material-symbols-outlined text-amber-500">info</span>
+					<p>Nếu thời gian đá <b>dưới 24h</b>, yêu cầu cần chờ Chủ sân duyệt.</p>
+				</div>
+				<label class="block text-xs font-bold text-slate-700 uppercase mb-2">Lý do hủy (bắt buộc)</label>
+				<textarea id="cancelReason" rows="3" class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary/50 outline-none bg-slate-50" placeholder="Lý do bận công việc..."></textarea>
+			</div>
+			<div class="bg-slate-50 px-6 py-5 flex gap-3 justify-end border-t border-slate-100">
+				<button onclick="closeModal('cancelModal')" class="px-5 py-2.5 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-200 border-none cursor-pointer">Quay lại</button>
+				<button id="btnConfirmCancel" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/30 border-none cursor-pointer">Xác nhận Hủy</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="reviewModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+		<div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-100">
+			<div class="p-6 md:p-8">
+				<h3 class="text-2xl font-black font-headline text-slate-900 uppercase italic mb-5">Đánh giá sân</h3>
+				<div class="mb-4">
+					<label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Chất lượng (1-5 sao)</label>
+					<select id="reviewRating" class="w-full border border-slate-200 rounded-xl p-3 text-sm bg-slate-50 font-bold text-slate-700 cursor-pointer">
+						<option value="5">⭐⭐⭐⭐⭐ Tuyệt vời</option>
+						<option value="4">⭐⭐⭐⭐ Tốt</option>
+						<option value="3">⭐⭐⭐ Khá</option>
+						<option value="2">⭐⭐ Tệ</option>
+						<option value="1">⭐ Quá tệ</option>
+					</select>
+				</div>
+				<label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Bình luận của bạn</label>
+				<textarea id="reviewComment" rows="3" class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none bg-slate-50" placeholder="Chia sẻ cảm nhận..."></textarea>
+			</div>
+			<div class="bg-slate-50 px-6 py-5 flex gap-3 justify-end border-t border-slate-100">
+				<button onclick="closeModal('reviewModal')" class="px-5 py-2.5 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-200 border-none cursor-pointer">Hủy</button>
+				<button id="btnConfirmReview" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/30 border-none cursor-pointer">Gửi đánh giá</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="footer-placeholder"></div>
+
+	<script src="../js/api.js"></script>
+	<script src="../js/layout.js"></script>
+
+	<script>
+		let allBookings = [];
+		let filteredBookings = [];
+		let activeStatus = 'ALL';
+		const itemsPerPage = 5;
+		let currentPage = 1;
+		let currentTargetId = null;
+		let currentTargetFacilityId = null;
+
+		const token = localStorage.getItem('token');
+		const API_BASE = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : 'http://localhost:3000/api/v1';
+		const BACKEND_ORIGIN = API_BASE.replace(/\/api\/v1\/?$/, '');
+		const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=600&auto=format&fit=crop';
+
+		document.addEventListener('DOMContentLoaded', async function () {
+			if (!token) {
+				window.location.href = '/auth/login.html';
+				return;
+			}
+			await fetchBookings();
+		});
+
+		function normalizeImageUrl(rawUrl) {
+			if (!rawUrl) return FALLBACK_IMAGE;
+			if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+			return rawUrl.startsWith('/') ? BACKEND_ORIGIN + rawUrl : BACKEND_ORIGIN + '/' + rawUrl;
+		}
+
+		async function fetchBookings() {
+			try {
+				const res = await fetch(API_BASE + '/bookings', {
+					headers: { 'Authorization': `Bearer ${token}` }
+				});
+				const json = await res.json();
+				if (!json.success) {
+					showInfo(json.message || 'Không thể tải lịch sử.', 'error');
+					return;
+				}
+
+				allBookings = json.data || [];
+				updateStats();
+				applyFilter();
+			} catch (err) {
+				showInfo('Không thể kết nối máy chủ.', 'error');
+			}
+		}
+
+		function updateStats() {
+			document.getElementById('statTotal').innerText = allBookings.length;
+			const pendingCount = allBookings.filter(b => b.status === 'PENDING').length;
+			document.getElementById('statPending').innerText = pendingCount + ' đơn';
+		}
+
+		function filterBookings(status, btn) {
+			document.querySelectorAll('.filter-btn').forEach(b => {
+				b.className = 'filter-btn bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 hover:bg-slate-50 transition-all cursor-pointer';
+			});
+			btn.className = 'filter-btn bg-primary text-white px-6 py-2.5 rounded-full font-label text-sm font-bold flex-shrink-0 shadow-lg shadow-primary/30 transition-all border-none cursor-pointer';
+
+			activeStatus = status;
+			currentPage = 1;
+			applyFilter();
+		}
+
+		function applyFilter() {
+			filteredBookings = activeStatus === 'ALL'
+				? allBookings
+				: allBookings.filter(b => b.status === activeStatus);
+			renderList();
+		}
+
+		function renderList() {
+			const listCon = document.getElementById('bookingList');
+			if (filteredBookings.length === 0) {
+				listCon.innerHTML = `
+					<div class="bg-white p-12 rounded-[2rem] border border-dashed border-slate-300 flex flex-col items-center text-center">
+						<span class="material-symbols-outlined text-4xl text-slate-300 mb-3">search_off</span>
+						<h4 class="font-headline font-black text-xl text-slate-900 mb-2">Không có đơn nào</h4>
+						<p class="text-slate-500">Không tìm thấy lịch đặt sân khớp với trạng thái này.</p>
+					</div>`;
+				document.getElementById('paginationContainer').classList.add('hidden');
+				return;
+			}
+
+			const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+			const start = (currentPage - 1) * itemsPerPage;
+			const pagedItems = filteredBookings.slice(start, start + itemsPerPage);
+
+			let html = '';
+			pagedItems.forEach(b => {
+				const statusConfig = getStatusConfig(b.status);
+				const dateFormatted = b.bookingDate ? b.bookingDate.split('T')[0].split('-').reverse().join('/') : '--/--/----';
+				const isCancelled = b.status === 'CANCELLED';
+
+				const fieldName = b.field ? b.field.name : 'Sân đã xóa';
+				const fac = b.field ? b.field.facility : null;
+				const facName = fac ? fac.name : 'Cơ sở đã đóng cửa';
+				const sportType = b.field ? b.field.sportType : 'SPORT';
+
+				const rawImg = fac ? (fac.primaryImageUrl || fac.mainImage || fac.image || fac.imageUrl || fac.avatar || fac.facilityImageUrl) : null;
+				const finalImageUrl = normalizeImageUrl(rawImg);
+
+				let extraInfoHtml = '';
+				if (b.extraServices && b.extraServices.length > 0) {
+					const servicesText = b.extraServices.map(s => `${s.serviceName} x${s.quantity}`).join(', ');
+					extraInfoHtml = `
+						<div class="mb-2">
+							<p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Dịch vụ thêm</p>
+							<p class="text-xs text-slate-500">${servicesText}</p>
+						</div>`;
+				}
+
+				html += `
+				<article class="bg-white rounded-[1.5rem] overflow-hidden group hover:shadow-lg transition-all border border-slate-100 ${isCancelled ? 'opacity-80' : ''}">
+					<div class="flex flex-col md:flex-row p-6 gap-6">
+						<div class="w-full md:w-48 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 relative">
+							<div class="absolute top-2 left-2 bg-black/50 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded font-label uppercase tracking-widest z-10">${sportType}</div>
+							<img class="w-full h-full object-cover"
+								 src="${finalImageUrl}"
+								 alt="San"
+								 onerror="this.src='${FALLBACK_IMAGE}'"/>
+						</div>
+						<div class="flex-grow">
+							<div class="flex justify-between items-start gap-4">
+								<div>
+									<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mã GD: ${b.bookingCode}</p>
+									<h3 class="text-xl md:text-2xl font-black font-headline text-slate-900">${facName}</h3>
+									<div class="flex items-center flex-wrap gap-2 text-slate-500 text-xs font-medium">
+										<span>${fieldName}</span> • <span>${dateFormatted}</span> • <span class="text-primary">${b.startTime} - ${b.endTime}</span>
+									</div>
+								</div>
+								<span class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 ${statusConfig.class}">
+									<span class="w-1.5 h-1.5 rounded-full ${statusConfig.dotClass}"></span>
+									${statusConfig.text}
+								</span>
+							</div>
+							<div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-end gap-4">
+								<div>
+									${extraInfoHtml}
+									<p class="text-[10px] text-slate-400 uppercase font-bold mb-0.5">${isCancelled ? 'Đã hủy đơn' : 'Tổng cộng'}</p>
+									<p class="text-2xl font-black text-slate-900 ${isCancelled ? 'line-through text-slate-400' : ''}">${Number(b.totalPrice || 0).toLocaleString('vi-VN')}đ</p>
+								</div>
+								<div class="flex gap-2">
+									${renderButtons(b)}
+								</div>
+							</div>
+						</div>
+					</div>
+				</article>`;
+			});
+
+			listCon.innerHTML = html;
+			renderPagination(totalPages);
+		}
+
+		function getStatusConfig(status) {
+			switch(status) {
+				case 'CONFIRMED': return { text: 'Đã xác nhận', class: 'bg-emerald-50 text-emerald-600 border border-emerald-100', dotClass: 'bg-emerald-500' };
+				case 'PENDING': return { text: 'Chờ thanh toán', class: 'bg-amber-50 text-amber-600 border border-amber-100', dotClass: 'bg-amber-500 animate-pulse' };
+				case 'CANCEL_PENDING': return { text: 'Đang xin hủy', class: 'bg-sky-50 text-sky-600 border border-sky-100', dotClass: 'bg-sky-500 animate-pulse' };
+				case 'CANCELLED': return { text: 'Đã hủy', class: 'bg-red-50 text-red-600 border border-red-100', dotClass: 'bg-red-500' };
+				case 'COMPLETED': return { text: 'Hoàn thành', class: 'bg-slate-50 text-slate-600 border border-slate-200', dotClass: 'bg-slate-500' };
+				default: return { text: status, class: 'bg-slate-50', dotClass: 'bg-slate-400' };
+			}
+		}
+
+		function renderButtons(b) {
+			const facilityIdValue = (b.field && b.field.facility) ? b.field.facility._id : '';
+
+			if (b.status === 'CONFIRMED') return `<button onclick="openCancelModal('${b._id}')" class="px-4 py-3 text-xs font-bold text-slate-500 border border-slate-200 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer border-none bg-white font-label uppercase tracking-widest">Hủy sân</button>`;
+
+			if (b.status === 'PENDING') return `<a href="/payment/checkout.html?bookingCode=${encodeURIComponent(b.bookingCode || '')}" class="px-6 py-3 text-xs font-bold bg-[#005BAA] text-white rounded-xl hover:bg-[#004785] transition-colors shadow-lg text-decoration-none font-label uppercase tracking-widest">Thanh toán</a>`;
+
+			if (b.status === 'COMPLETED' && !b.isReviewed) {
+				return `<button onclick="openReviewModal('${b._id}','${facilityIdValue}')" class="px-6 py-3 text-xs font-bold bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors shadow-lg border-none cursor-pointer flex items-center gap-1 font-label uppercase tracking-widest"><span class="material-symbols-outlined text-[16px]">star</span> Đánh giá</button>`;
+			}
+
+			if (b.status === 'COMPLETED' && b.isReviewed) return `<span class="px-4 py-3 text-xs font-bold text-emerald-600 bg-emerald-50 rounded-xl flex items-center gap-1 font-label uppercase tracking-widest"><span class="material-symbols-outlined text-[16px]">check_circle</span> Đã đánh giá</span>`;
+
+			return `<a href="/facilities/detail.html?id=${facilityIdValue}" class="px-6 py-3 text-xs font-bold bg-primary text-white rounded-xl text-decoration-none font-label uppercase tracking-widest">Đặt lại</a>`;
+		}
+
+		function renderPagination(totalPages) {
+			const container = document.getElementById('paginationContainer');
+			const pageNumbers = document.getElementById('pageNumbers');
+			const pageInfo = document.getElementById('pageInfo');
+
+			if (totalPages <= 1) {
+				container.classList.add('hidden');
+				return;
+			}
+
+			container.classList.remove('hidden');
+			pageInfo.innerText = `${(currentPage-1)*itemsPerPage + 1} - ${Math.min(currentPage*itemsPerPage, filteredBookings.length)} trong số ${filteredBookings.length} đơn`;
+
+			let html = '';
+			for(let i=1; i<=totalPages; i++) {
+				html += `<button onclick="goToPage(${i})" class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm border-none cursor-pointer ${i === currentPage ? 'bg-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-200 bg-transparent'}">${i}</button>`;
+			}
+			pageNumbers.innerHTML = html;
+
+			document.getElementById('btnPrev').onclick = () => { if(currentPage > 1) { currentPage--; renderList(); }};
+			document.getElementById('btnNext').onclick = () => { if(currentPage < totalPages) { currentPage++; renderList(); }};
+		}
+
+		function goToPage(n) {
+			currentPage = n;
+			renderList();
+			window.scrollTo({top: 0, behavior: 'smooth'});
+		}
+
+		function openCancelModal(id) {
+			currentTargetId = id;
+			document.getElementById('cancelReason').value = '';
+			document.getElementById('cancelModal').classList.remove('hidden');
+		}
+
+		document.getElementById('btnConfirmCancel').onclick = async () => {
+			const reason = document.getElementById('cancelReason').value;
+			if(!reason) return alert('Vui lòng nhập lý do');
+
+			try {
+				const res = await fetch(`${API_BASE}/bookings/${currentTargetId}/cancel`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+					body: JSON.stringify({ cancelReason: reason })
+				});
+				const json = await res.json();
+				if(json.success) {
+					showInfo('Gửi yêu cầu hủy thành công!', 'success');
+					closeModal('cancelModal');
+					fetchBookings();
+				} else {
+					showInfo(json.message || 'Không thể hủy đơn.', 'error');
+				}
+			} catch(e) {
+				showInfo('Lỗi kết nối.', 'error');
+			}
+		};
+
+		function openReviewModal(id, facilityId) {
+			currentTargetId = id;
+			currentTargetFacilityId = facilityId;
+			document.getElementById('reviewComment').value = '';
+			document.getElementById('reviewModal').classList.remove('hidden');
+		}
+
+		document.getElementById('btnConfirmReview').onclick = async () => {
+			const rating = document.getElementById('reviewRating').value;
+			const comment = document.getElementById('reviewComment').value;
+			if(!comment) return alert('Vui lòng nhập bình luận');
+
+			try {
+				const res = await fetch(`${API_BASE}/reviews`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+					body: JSON.stringify({ facilityId: currentTargetFacilityId, bookingId: currentTargetId, rating, comment })
+				});
+				const json = await res.json();
+				if(json.success) {
+					showInfo('Đánh giá thành công!', 'success');
+					closeModal('reviewModal');
+					fetchBookings();
+				} else {
+					showInfo(json.message || 'Không thể gửi đánh giá.', 'error');
+				}
+			} catch(e) {
+				showInfo('Lỗi kết nối.', 'error');
+			}
+		};
+
+		function closeModal(id) {
+			document.getElementById(id).classList.add('hidden');
+		}
+
+		function showInfo(msg, type) {
+            // type của trang cũ truyền vào là 'success' hoặc 'error'
+            if (type === 'success') {
+                window.showToast('Thành công', msg, 'SUCCESS');
+            } else {
+                window.showToast('Thông báo', msg, 'ERROR');
+            }
+        }	setTimeout(() => box.classList.add('hidden'), 5000);
+
+	</script>
+</body>
+</html>

@@ -5,7 +5,7 @@
             <a href="/index.html" class="text-2xl font-black text-zinc-900 tracking-tighter italic no-underline">ARENAKINETIC</a>
 
             <div id="nav-user-links" class="hidden md:flex gap-6 items-center">
-                <a href="/facilities/index.html" class="text-zinc-600 font-medium hover:text-orange-600 transition-colors duration-200 tracking-tight no-underline">Danh sách cơ sở</a>
+                <a href="/facilities/list.html" class="text-zinc-600 font-medium hover:text-orange-600 transition-colors duration-200 tracking-tight no-underline">Danh sách cơ sở</a>
                 <a href="#" class="text-zinc-600 font-medium hover:text-orange-600 transition-colors duration-200 tracking-tight no-underline">Tìm đối thủ</a>
                 <a href="#" class="text-zinc-600 font-medium hover:text-orange-600 transition-colors duration-200 tracking-tight no-underline">Đội-Nhóm</a>
             </div>
@@ -24,24 +24,50 @@
 
             <div id="nav-user-menu" class="hidden items-center gap-2">
                 
-                <div class="relative group flex items-center justify-center mr-2">
-                    <a href="#" class="relative no-underline flex items-center justify-center cursor-pointer" title="Thông báo">
-                        <span class="material-symbols-outlined text-zinc-600 group-hover:text-orange-600 transition-colors text-[28px]">notifications</span>
-                        <span id="notif-badge" class="hidden absolute -top-1 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] items-center justify-center px-1">0</span>
-                    </a>
+                <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-                    <div class="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden flex flex-col">
-                        <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <span class="font-bold text-sm text-gray-800">Mới nhất</span>
-                            <a href="#" class="text-xs font-semibold text-orange-600 hover:underline no-underline">Xem tất cả</a>
+                <div class="relative" id="notificationWrapper">
+                    <button id="notifBtn" class="relative p-2 text-zinc-500 hover:text-primary transition-colors bg-zinc-100 hover:bg-orange-50 rounded-full border-none cursor-pointer flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px]">notifications</span>
+                        <span id="notifBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white hidden shadow-md">0</span>
+                    </button>
+
+                    <div id="notifDropdown" class="absolute right-0 mt-3 w-[360px] bg-white rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-zinc-100 hidden z-50 flex-col overflow-hidden origin-top-right transition-all duration-200 opacity-0 scale-95">
+                        <div class="p-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/80 backdrop-blur-sm">
+                            <h3 class="font-headline font-black text-zinc-900 text-sm uppercase tracking-wide m-0">Thông báo của bạn</h3>
+                            <button id="markAllReadBtn" class="text-[11px] font-bold text-primary hover:text-orange-700 bg-transparent border-none cursor-pointer p-0 m-0 transition-colors">
+                                Đánh dấu đã đọc
+                            </button>
                         </div>
-                        <div id="hover-notif-list" class="flex flex-col max-h-[350px] overflow-y-auto">
-                            <div class="p-4 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined animate-spin text-[16px]">sync</span> Đang tải...
+                        
+                        <div id="notifList" class="max-h-[400px] overflow-y-auto bg-white overscroll-contain custom-scrollbar">
+                            <div class="p-6 text-center text-zinc-400">
+                                <span class="material-symbols-outlined animate-spin text-[24px]">sync</span>
                             </div>
                         </div>
+
+                        <a href="/notifications/list.html" class="block p-3 text-center text-xs font-bold text-zinc-500 bg-zinc-50 hover:bg-primary hover:text-white transition-colors no-underline border-t border-zinc-100">
+                            Xem tất cả thông báo
+                        </a>
                     </div>
                 </div>
+
+                <style>
+                    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+                    
+                    /* Hiệu ứng Toast trượt ngang */
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                    .toast-enter { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                    .toast-exit { animation: slideOutRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                </style>
 
                 <div class="relative group cursor-pointer ml-2">
                     <div class="flex items-center gap-2 no-underline">
@@ -54,10 +80,10 @@
 
                     <div class="absolute right-0 top-full mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-3 group-hover:translate-y-0 overflow-hidden z-50">
                         <div class="py-2">
-                            <a href="#" class="px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 transition-colors no-underline flex items-center gap-3">
+                            <a href="/auth/profile.html" class="px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 transition-colors no-underline flex items-center gap-3">
                                 <span class="material-symbols-outlined text-[20px]">person</span> Thông tin cá nhân
                             </a>
-                            <a href="#" class="px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 transition-colors no-underline flex items-center gap-3">
+                            <a href="/bookings/history.html" class="px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-orange-50 hover:text-orange-600 transition-colors no-underline flex items-center gap-3">
                                 <span class="material-symbols-outlined text-[20px]">history</span> Lịch sử đặt sân
                             </a>
                             <hr class="my-1 border-gray-100">

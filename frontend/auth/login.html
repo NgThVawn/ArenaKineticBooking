@@ -90,8 +90,7 @@
                                 id="remember-me" name="remember-me" type="checkbox" />
                             <label class="ml-2 block text-on-surface-variant" for="remember-me">Ghi nhớ tôi</label>
                         </div>
-                        <a class="font-semibold text-primary hover:text-orange-500 transition-colors no-underline"
-                            href="#">Quên mật khẩu?</a>
+                        <a class="font-semibold text-primary hover:text-orange-500 transition-colors no-underline" href="forgot-password.html">Quên mật khẩu?</a>
                     </div>
 
                     <button
@@ -181,7 +180,7 @@
         });
 
         // JS BẮN API ĐĂNG NHẬP
-        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+       document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const data = {
                 email: document.getElementById('email').value,
@@ -192,25 +191,22 @@
 
             try {
                 const result = await apiLogin(data);
-                if (result.success || result.token || result.data?.token) { 
-                    errorDiv.style.display = 'none'; // Ẩn lỗi nếu có
-                    alert("🎉 Đăng nhập thành công!");
-                    const token = result.data?.token || result.token;
-                    if (!token) {
-                        throw new Error('Không nhận được token đăng nhập từ server.');
-                    }
-
-                    const userData = result.data?.user || result.data || {};
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('user', JSON.stringify(userData));
-
+                if (result.success || result.token) { 
+                    errorDiv.style.display = 'none'; 
+                    localStorage.setItem('token', result.data?.token || result.token || 'fake-token');
+                    localStorage.setItem('user', JSON.stringify(result.data || {}));
+                    
+                    localStorage.setItem('pendingToast', JSON.stringify({
+                        title: 'Đăng nhập thành công',
+                        message: 'Chào mừng bạn quay trở lại Arena Kinetic!',
+                        type: 'SUCCESS'
+                    }));
                     const roles = Array.isArray(userData.roles)
                         ? userData.roles.map(r => (typeof r === 'string' ? r : r?.name)).filter(Boolean)
                         : [];
                     const isAdmin = roles.includes('ADMIN') || roles.includes('SUPER_ADMIN');
+                    window.location.href = isAdmin ? '../admin/index.html' : '../index.html'; 
 
-                    // Admin vào dashboard quản trị, user thường về trang chủ.
-                    window.location.href = isAdmin ? '../admin/index.html' : '../index.html';
                 } else {
                     errorText.innerText = result.message || 'Email hoặc mật khẩu không chính xác.';
                     errorDiv.style.display = 'block'; // Hiện bảng lỗi màu đỏ

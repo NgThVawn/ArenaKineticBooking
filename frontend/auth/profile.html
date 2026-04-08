@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân | Arena Kinetic</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,700;0,800;0,900;1,700;1,900&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/app.css">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../js/tailwind-config.js"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-body">
+
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto w-full">
+        <section class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <aside class="lg:col-span-4 bg-surface-container-lowest rounded-3xl shadow-[0_20px_40px_rgba(25,28,29,0.06)] p-8 border border-outline-variant/20 h-fit">
+                <div class="flex flex-col items-center text-center">
+                    <div id="avatarBox" class="w-28 h-28 rounded-full bg-orange-100 border-4 border-orange-200 overflow-hidden flex items-center justify-center">
+                        <span id="avatarInitial" class="text-4xl font-black text-orange-600">U</span>
+                    </div>
+                    <h1 id="fullName" class="mt-5 text-2xl font-headline font-black tracking-tight text-on-surface">Người dùng</h1>
+                    <p id="email" class="mt-1 text-sm text-on-surface-variant">-</p>
+                </div>
+
+                <div class="mt-7 pt-6 border-t border-outline-variant/20 space-y-3">
+                    <a href="change-password.html" class="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-white font-headline font-bold no-underline hover:bg-orange-700 transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">lock_reset</span>
+                        Đổi mật khẩu
+                    </a>
+                    <a href="/bookings/history.html" class="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-surface-container text-on-surface font-headline font-semibold border border-outline-variant/30 no-underline hover:bg-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">history</span>
+                        Lịch sử đặt sân
+                    </a>
+                </div>
+            </aside>
+
+            <section class="lg:col-span-8 bg-surface-container-lowest rounded-3xl shadow-[0_20px_40px_rgba(25,28,29,0.06)] p-8 sm:p-10 border border-outline-variant/20">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight">Thông tin cá nhân</h2>
+                        <p class="text-on-surface-variant mt-1">Dữ liệu được đồng bộ từ tài khoản đăng nhập hiện tại.</p>
+                    </div>
+                    <span id="roleBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">USER</span>
+                </div>
+
+                <div id="errorBox" class="hidden mt-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm"></div>
+
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-2xl bg-surface-container p-5 border border-outline-variant/20">
+                        <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Họ và tên</p>
+                        <p id="infoFullName" class="mt-2 text-lg font-bold text-on-surface">-</p>
+                    </div>
+
+                    <div class="rounded-2xl bg-surface-container p-5 border border-outline-variant/20">
+                        <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Email</p>
+                        <p id="infoEmail" class="mt-2 text-lg font-bold text-on-surface break-all">-</p>
+                    </div>
+
+                    <div class="rounded-2xl bg-surface-container p-5 border border-outline-variant/20">
+                        <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Số điện thoại</p>
+                        <p id="infoPhone" class="mt-2 text-lg font-bold text-on-surface">-</p>
+                    </div>
+
+                    <div class="rounded-2xl bg-surface-container p-5 border border-outline-variant/20">
+                        <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Email đã xác thực</p>
+                        <p id="infoEmailVerified" class="mt-2 text-lg font-bold text-on-surface">-</p>
+                    </div>
+
+                    <div class="rounded-2xl bg-surface-container p-5 border border-outline-variant/20 md:col-span-2">
+                        <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Vai trò</p>
+                        <p id="infoRoles" class="mt-2 text-lg font-bold text-on-surface">-</p>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+
+    <script>
+        (function () {
+            var token = localStorage.getItem('token');
+            var errorBox = document.getElementById('errorBox');
+
+            function setText(id, value) {
+                var el = document.getElementById(id);
+                if (el) el.innerText = value || '-';
+            }
+
+            function showError(message) {
+                errorBox.innerText = message;
+                errorBox.classList.remove('hidden');
+            }
+
+            function applyUserData(user) {
+                if (!user) return;
+
+                var fullName = user.fullName || 'Người dùng';
+                var email = user.email || '-';
+                var phone = user.phone || 'Chưa cập nhật';
+                var roles = Array.isArray(user.roles) ? user.roles : [];
+                var rolesText = roles.length ? roles.join(', ') : 'USER';
+                var emailVerified = user.emailVerified ? 'Đã xác thực' : 'Chưa xác thực';
+
+                setText('fullName', fullName);
+                setText('email', email);
+                setText('infoFullName', fullName);
+                setText('infoEmail', email);
+                setText('infoPhone', phone);
+                setText('infoRoles', rolesText);
+                setText('infoEmailVerified', emailVerified);
+                setText('roleBadge', roles[0] || 'USER');
+
+                var avatarInitial = document.getElementById('avatarInitial');
+                var avatarBox = document.getElementById('avatarBox');
+                if (user.avatarUrl) {
+                    avatarBox.innerHTML = '<img src="' + user.avatarUrl + '" alt="Avatar" class="w-full h-full object-cover">';
+                } else if (avatarInitial) {
+                    avatarInitial.innerText = fullName.charAt(0).toUpperCase();
+                }
+            }
+
+            async function loadProfile() {
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                var raw = JSON.parse(localStorage.getItem('user') || '{}');
+                var localUser = raw.user || raw;
+                if (localUser && (localUser.fullName || localUser.email)) {
+                    applyUserData(localUser);
+                }
+
+                try {
+                    var apiBaseUrl = (typeof BASE_URL !== 'undefined' && BASE_URL) ? BASE_URL : 'http://localhost:3000/api/v1';
+                    var response = await fetch(apiBaseUrl + '/auth/me', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    var result = await response.json();
+
+                    if (response.ok && result.success && result.data) {
+                        applyUserData(result.data);
+
+                        var oldRaw = JSON.parse(localStorage.getItem('user') || '{}');
+                        var merged = Object.assign({}, oldRaw.user || oldRaw, result.data);
+                        localStorage.setItem('user', JSON.stringify(merged));
+                        return;
+                    }
+
+                    showError(result.message || 'Không thể tải thông tin hồ sơ.');
+                } catch (error) {
+                    showError('Không thể kết nối máy chủ để lấy hồ sơ cá nhân.');
+                }
+            }
+
+            loadProfile();
+        })();
+    </script>
+</body>
+</html>

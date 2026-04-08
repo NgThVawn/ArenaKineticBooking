@@ -182,7 +182,8 @@ router.post('/forgot-password', async function (req, res) {
 
     if (user) {
       var token = await userController.GenerateForgotPasswordToken(user._id);
-      var resetUrl = (process.env.CLIENT_URL || 'http://localhost:5173') + '/reset-password/' + token;
+      var clientBaseUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');
+      var resetUrl = clientBaseUrl + '/auth/reset-password.html?token=' + encodeURIComponent(token);
       try {
         await mailHandler.sendPasswordResetMail(user.email, resetUrl);
       } catch (mailErr) {
