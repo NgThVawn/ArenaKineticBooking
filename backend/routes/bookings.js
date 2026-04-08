@@ -56,6 +56,28 @@ router.get('/:id', checkLogin, async function (req, res) {
   }
 });
 
+// GET /api/v1/bookings/code/:code  (lấy booking theo code, dùng cho trang xem chi tiết sau khi đặt thành công) 
+router.get('/code/:bookingCode', checkLogin, async function (req, res) {
+  try {
+    var booking = await bookingController.FindByCode(req.params.bookingCode);
+    if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đặt sân' });
+
+    var userRoles = req.user.roles.map(function (r) { return r.name; });
+    var isAdmin = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
+    var isOwner = booking.field && booking.field.facility &&
+      String(booking.field.facility.owner._id) === String(req.user._id);
+    var isUser = String(booking.user._id) === String(req.user._id);
+
+    if (!isAdmin && !isOwner && !isUser) {
+      return res.status(403).json({ success: false, message: 'Không có quyền xem đặt sân này' });
+    }
+
+    return res.json({ success: true, data: booking });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 // POST /api/v1/bookings/preview-price  (tính giá trước khi đặt)
 router.post('/preview-price', checkLogin, async function (req, res) {
   try {

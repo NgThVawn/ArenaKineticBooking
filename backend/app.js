@@ -14,11 +14,10 @@ var app = express();
 var server = http.createServer(app);
 var io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL ,
     credentials: true
   }
 });
-
 // Middleware
 // app.use(cors({
 //   origin: process.env.CLIENT_URL || 'http://localhost:5173',

@@ -36,7 +36,7 @@
                     </p>
 
                     <div class="flex flex-wrap items-center gap-4 mt-8">
-                        <a href="/facilities/index.html" class="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-xl font-black font-headline text-lg hover:bg-orange-700 hover:shadow-[0_0_20px_rgba(211,58,17,0.4)] transition-all duration-300 uppercase tracking-widest no-underline group">
+                        <a href="/facilities/list.html" class="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-xl font-black font-headline text-lg hover:bg-orange-700 hover:shadow-[0_0_20px_rgba(211,58,17,0.4)] transition-all duration-300 uppercase tracking-widest no-underline group">
                             <span>ĐẶT SÂN NGAY</span>
                             <span class="material-symbols-outlined text-[24px] group-hover:translate-x-1.5 transition-transform">arrow_forward</span>
                         </a>
@@ -46,7 +46,7 @@
         </section>
 
         <section class="relative z-20 -mt-12 px-6">
-            <form action="/facilities/index.html" method="get" class="max-w-screen-xl mx-auto bg-surface-container-lowest p-4 rounded-2xl shadow-2xl flex flex-wrap lg:flex-nowrap items-center gap-4 border border-outline-variant/30">
+            <form action="/facilities/list.html" method="get" class="max-w-screen-xl mx-auto bg-surface-container-lowest p-4 rounded-2xl shadow-2xl flex flex-wrap lg:flex-nowrap items-center gap-4 border border-outline-variant/30">
 
                 <div class="flex-1 min-w-[200px] flex items-center gap-3 px-4 py-3 bg-surface-container rounded-xl relative" id="city-search-wrapper">
                     <span class="material-symbols-outlined text-zinc-400 text-[20px]">location_on</span>
@@ -309,11 +309,12 @@
                             const statusColor = f.status === 'OPEN' ? 'bg-green-500 animate-pulse' : 'bg-red-500';
                             const statusText = f.status === 'OPEN' ? 'ĐANG MỞ CỬA' : 'ĐÓNG CỬA';
 
+                            // BỎ CÁI ONCLICK Ở THẺ DIV BÊN NGOÀI
                             html += `
-                            <div onclick="window.location.href='/facilities/detail.html?id=${f._id}'" class="${spanClass} group relative h-[500px] rounded-3xl overflow-hidden shadow-xl bg-white cursor-pointer transition-transform duration-300 hover:-translate-y-2">
+                            <div class="${spanClass} group relative h-[500px] rounded-3xl overflow-hidden shadow-xl bg-white transition-transform duration-300 hover:-translate-y-2">
                                 <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${imgUrl}" alt="${f.name}">
                                 
-                                <div class="absolute top-6 left-6 flex flex-wrap gap-2 pr-6 z-10">
+                                <div class="absolute top-6 left-6 flex flex-wrap gap-2 pr-6 z-10 pointer-events-none">
                                     ${isFirst ? `<span class="bg-primary text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest font-label flex items-center gap-1 shadow-lg"><span class="material-symbols-outlined text-sm">star</span> CAO CẤP</span>` : ''}
                                     <span class="bg-white/90 backdrop-blur-md text-zinc-900 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest font-label shadow-md flex items-center gap-2">
                                         <span class="w-2 h-2 rounded-full ${statusColor}"></span> ${statusText}
@@ -324,26 +325,30 @@
                                     ${isFirst ? `
                                     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                         <div>
-                                            <h3 class="text-3xl md:text-4xl font-black text-white mb-2 font-headline italic uppercase">${f.name}</h3>
+                                            <a href="/facilities/detail.html?id=${f._id}" class="text-decoration-none hover:text-primary transition-colors">
+                                                <h3 class="text-3xl md:text-4xl font-black text-white mb-2 font-headline italic uppercase">${f.name}</h3>
+                                            </a>
                                             <div class="flex items-center gap-4 text-zinc-300 text-sm font-label">
                                                 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> ${f.city}</span>
                                                 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-yellow-400">star</span> ${rating}</span>
                                             </div>
                                         </div>
                                         <div class="bg-white p-4 rounded-2xl flex items-center gap-6 shadow-2xl shrink-0">
-                                            <button class="bg-primary text-white px-8 py-3 rounded-xl font-bold font-headline hover:bg-orange-700 transition-all border-none cursor-pointer">ĐẶT SÂN</button>
+                                            <button onclick="window.location.href='/facilities/detail.html?id=${f._id}'" class="bg-primary text-white px-8 py-3 rounded-xl font-bold font-headline hover:bg-orange-700 transition-all border-none cursor-pointer">ĐẶT SÂN</button>
                                         </div>
                                     </div>
                                     ` : `
                                     <div class="flex items-end justify-between gap-4">
                                         <div class="flex-1">
-                                            <h3 class="text-2xl font-black text-white mb-2 font-headline italic uppercase truncate">${f.name}</h3>
+                                            <a href="/facilities/detail.html?id=${f._id}" class="text-decoration-none hover:text-primary transition-colors">
+                                                <h3 class="text-2xl font-black text-white mb-2 font-headline italic uppercase truncate">${f.name}</h3>
+                                            </a>
                                             <div class="flex items-center gap-4 text-zinc-300 text-sm font-label">
                                                 <span class="flex items-center gap-1 truncate"><span class="material-symbols-outlined text-sm">location_on</span> ${f.city}</span>
                                             </div>
                                         </div>
-                                        <button class="bg-white text-zinc-900 w-12 h-12 rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg shrink-0 border-none cursor-pointer" title="Xem tất cả sân đấu">
-                                            <span class="material-symbols-outlined font-bold text-2xl">arrow_forward</span>
+                                        <button onclick="window.location.href='/facilities/list.html'" class="bg-white text-zinc-900 w-12 h-12 rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg shrink-0 border-none cursor-pointer" title="Xem tất cả sân đấu">
+                                            <span class="material-symbols-outlined font-bold text-2xl">add</span>
                                         </button>
                                     </div>
                                     `}
