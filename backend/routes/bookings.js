@@ -347,5 +347,47 @@ router.put('/owner/:id/confirm-cancel', checkLogin, checkRole('OWNER', 'ADMIN', 
     return res.status(400).json({ success: false, message: error.message });
   }
 });
+// PUT /api/v1/bookings/owner/:id/confirm  (Owner thủ công duyệt đơn PENDING)
+router.put('/owner/:id/confirm', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    var booking = await bookingController.FindById(req.params.id);
+    if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đặt sân' });
+    if (booking.status !== 'PENDING') return res.status(400).json({ success: false, message: 'Đơn không ở trạng thái chờ duyệt' });
+    
+    // Đổi sang CONFIRMED
+    await bookingController.UpdateStatus(booking._id, 'CONFIRMED');
+    return res.json({ success: true, message: 'Đã duyệt đơn đặt sân thành công' });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 
+// PUT /api/v1/bookings/owner/:id/cancel  (Owner thủ công hủy/từ chối đơn)
+router.put('/owner/:id/cancel', checkLogin, checkRole('OWNER', 'ADMIN', 'SUPER_ADMIN'), async function (req, res) {
+  try {
+    var booking = await bookingController.FindById(req.params.id);
+    if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đặt sân' });
+    
+    var { cancelReason } = req.body;
+    await bookingController.UpdateStatus(booking._id, 'CANCELLED', cancelReason || 'Chủ sân hủy');
+    
+    // Giải phóng dịch vụ (Trả lại kho)
+    var extraServiceController = require('../controllers/extraServices');
+    if (booking.extraServices && booking.extraServices.length > 0) {
+        for (var extra of booking.extraServices) {
+            try { 
+                if (booking.status === 'PENDING') {
+                    await extraServiceController.ReleaseReservation(extra.extraService, extra.quantity); 
+                } else {
+                    await extraServiceController.ReturnStock(extra.extraService, extra.quantity);
+                }
+            } catch (_) {}
+        }
+    }
+
+    return res.json({ success: true, message: 'Đã hủy đơn đặt sân thành công' });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+});
 module.exports = router;

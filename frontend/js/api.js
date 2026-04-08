@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000/api/v1';
+window.BASE_URL = 'http://localhost:3000/api/v1';
 
 async function apiRegister(data) {
     const response = await fetch(`${BASE_URL}/auth/register`, {

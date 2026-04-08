@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Quản lý dịch vụ đi kèm | Arena Kinetic Owner</title>
+
+    <link href="/css/app.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Inter:wght@100..900&family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "primary": "#b02f00",
+                        "surface": "#f8f9fa"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Inter"],
+                        "label": ["Lexend"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        /* Fix dropdown visibility in dark form */
+        #svcSport {
+            color-scheme: light;
+            accent-color: #06b6d4;
+            color: #0891b2 !important;
+            background-color: rgba(255, 255, 255, 0.92) !important;
+            font-weight: 600;
+        }
+        
+        #svcSport option {
+            color: #0f766e;
+            background-color: #ffffff;
+            padding: 4px;
+        }
+        
+        #svcSport option:checked {
+            background: linear-gradient(#06b6d4, #06b6d4);
+            background-color: #06b6d4 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<div id="sidebar-placeholder"></div>
+
+<main class="ml-64 min-h-screen relative flex flex-col">
+    <header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 shadow-sm border-b border-slate-200/10 shrink-0">
+        <div class="flex items-center gap-2 text-sm font-medium">
+            <span class="text-slate-400">Arena Manager</span>
+            <span class="text-slate-300">/</span>
+            <a href="../facilities/list.html" class="text-slate-500 hover:text-orange-600 transition-colors text-decoration-none">Cơ sở</a>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-800 font-bold" id="breadcrumbFacilityName">Đang tải...</span>
+            <span class="text-slate-300">/</span>
+            <span class="text-slate-800 font-bold">Dịch vụ đi kèm</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="../facilities/list.html" class="text-sm text-orange-600 font-bold hover:underline flex items-center gap-1 text-decoration-none">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Quay lại cơ sở
+            </a>
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+                <div class="text-right">
+                    <p id="header-email" class="text-sm font-bold text-on-surface leading-none">...</p>
+                </div>
+                <div id="header-avatar-wrap" class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 font-bold font-headline overflow-hidden ring-2 ring-orange-500/20">
+                    <span id="header-initial">O</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 flex-1">
+        <div id="alertToast" class="fixed top-20 right-8 z-50 mb-6 p-4 rounded-xl shadow-lg transition-all duration-500 opacity-0 translate-y-[-20px] hidden" style="min-width: 300px;">
+            <div class="flex items-center gap-3">
+                <span id="toastIcon" class="material-symbols-outlined"></span>
+                <span id="toastText" class="font-bold text-sm"></span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+
+            <section class="xl:col-span-2 space-y-6">
+                <div class="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 bg-cyan-50 rounded-bl-[100px] pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        <h2 class="font-headline font-black text-3xl text-slate-900 tracking-tight flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-cyan-600 text-3xl">local_cafe</span> Dịch vụ đi kèm
+                        </h2>
+                        <p class="text-slate-500 text-sm m-0">Quản lý tiện ích bán thêm cho khách khi đặt sân.</p>
+                    </div>
+
+                    <div class="bg-cyan-50 border border-cyan-100 px-5 py-3 rounded-2xl relative z-10 text-right">
+                        <p class="text-[10px] font-label font-bold uppercase tracking-widest text-cyan-700/70 mb-0.5">Số dịch vụ</p>
+                        <p id="totalServicesCount" class="font-black font-headline text-2xl text-cyan-700 m-0">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[1.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                            <tr class="bg-slate-50/80 border-b border-slate-100 text-[10px] uppercase tracking-widest text-slate-400 font-bold font-label">
+                                <th class="px-6 py-4">Dịch vụ</th>
+                                <th class="px-6 py-4">Giá</th>
+                                <th class="px-6 py-4">Đơn vị</th>
+                                <th class="px-6 py-4">Phạm vi áp dụng</th>
+                                <th class="px-6 py-4">Tồn kho</th>
+                                <th class="px-6 py-4">Trạng thái</th>
+                                <th class="px-6 py-4 text-right">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody id="servicesTableBody" class="text-sm font-medium text-slate-700 divide-y divide-slate-50">
+                                <tr><td colspan="7" class="py-10 text-center"><span class="material-symbols-outlined animate-spin text-slate-400">sync</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="space-y-4 sticky top-24">
+                <div class="bg-slate-900 p-6 md:p-8 rounded-[1.5rem] shadow-xl border border-slate-800 text-white relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-cyan-500/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+                    <h3 class="font-headline font-black text-xl text-white mb-6 uppercase tracking-wider flex items-center gap-2 border-b border-white/10 pb-4">
+                        <span class="material-symbols-outlined text-cyan-400">add_box</span> Thêm dịch vụ
+                    </h3>
+
+                    <form id="createServiceForm" class="space-y-5">
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Tên dịch vụ</label>
+                            <input type="text" id="svcName" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:bg-white/10 focus:ring-2 focus:ring-cyan-400 outline-none placeholder:text-slate-500 font-medium" placeholder="VD: Thuê áo bib" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Mô tả</label>
+                            <textarea id="svcDesc" rows="3" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:bg-white/10 focus:ring-2 focus:ring-cyan-400 outline-none placeholder:text-slate-500 font-medium" placeholder="Mô tả ngắn cho khách hàng"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Giá (₫)</label>
+                                <input type="number" id="svcPrice" min="1000" class="w-full bg-white/5 border border-white/10 text-cyan-300 rounded-xl px-4 py-3 text-lg font-black focus:bg-white/10 focus:ring-2 focus:ring-cyan-400 outline-none" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Tồn kho</label>
+                                <input type="number" id="svcStock" min="0" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm font-bold focus:bg-white/10 focus:ring-2 focus:ring-cyan-400 outline-none" placeholder="Không giới hạn">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Đơn vị hiển thị</label>
+                            <input type="text" id="svcUnit" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm font-bold focus:bg-white/10 focus:ring-2 focus:ring-cyan-400 outline-none" placeholder="VD: lon, phần, bộ" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-label font-bold uppercase text-slate-400 mb-1.5 tracking-widest">Áp dụng cho (Môn thể thao)</label>
+                            <select id="svcSport" class="w-full border border-white/20 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-cyan-400 outline-none">
+                                <option value="">Tất cả môn thể thao</option>
+                            </select>
+                        </div>
+
+                        <label class="flex items-center gap-2 text-sm text-slate-200">
+                            <input type="checkbox" id="svcActive" checked class="rounded border-white/20 bg-white/5 text-cyan-500 focus:ring-cyan-400">
+                            Bật ngay sau khi tạo
+                        </label>
+
+                        <button type="submit" id="btnSubmitForm" class="w-full py-4 mt-2 bg-cyan-600 text-white font-black font-headline uppercase tracking-widest text-sm rounded-xl hover:bg-cyan-500 shadow-lg shadow-cyan-600/30 transition-all border-none cursor-pointer flex justify-center items-center gap-2">
+                            Tạo dịch vụ
+                        </button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px]" onclick="closeDeleteModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden pointer-events-auto transform transition-all scale-95 opacity-0" id="deleteModalContent">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-red-600">warning</span>
+                    <h3 class="m-0 text-base font-black text-slate-900 font-headline">Xác nhận xóa dịch vụ</h3>
+                </div>
+                <div class="px-5 py-4">
+                    <p class="m-0 text-sm text-slate-600 leading-relaxed">
+                        Bạn có chắc muốn xóa dịch vụ <span id="deleteServiceName" class="font-bold text-slate-900"></span>?
+                    </p>
+                </div>
+                <div class="px-5 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-white bg-transparent cursor-pointer">Hủy</button>
+                    <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700 border-none cursor-pointer">Xác nhận Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="/js/api.js"></script>
+<script src="/js/layout_owner.js"></script>
+<script src="/js/owner_service.js"></script>
+
+</body>
+</html>
