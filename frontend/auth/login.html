@@ -194,18 +194,21 @@
                 if (result.success || result.token) { 
                     errorDiv.style.display = 'none'; 
                     localStorage.setItem('token', result.data?.token || result.token || 'fake-token');
-                    localStorage.setItem('user', JSON.stringify(result.data || {}));
-                    
+                    localStorage.setItem('user', JSON.stringify(result.data?.user || {}));
+
                     localStorage.setItem('pendingToast', JSON.stringify({
                         title: 'Đăng nhập thành công',
                         message: 'Chào mừng bạn quay trở lại Arena Kinetic!',
                         type: 'SUCCESS'
                     }));
-                    const roles = Array.isArray(userData.roles)
-                        ? userData.roles.map(r => (typeof r === 'string' ? r : r?.name)).filter(Boolean)
+                    const roles = Array.isArray(result.data?.user?.roles)
+                        ? result.data.user.roles
                         : [];
                     const isAdmin = roles.includes('ADMIN') || roles.includes('SUPER_ADMIN');
-                    window.location.href = isAdmin ? '../admin/index.html' : '../index.html'; 
+                    const isOwner = roles.includes('OWNER');
+                    window.location.href = isAdmin
+                        ? '../admin/index.html'
+                        : (isOwner ? '../owner/dashboard.html' : '../index.html');
 
                 } else {
                     errorText.innerText = result.message || 'Email hoặc mật khẩu không chính xác.';

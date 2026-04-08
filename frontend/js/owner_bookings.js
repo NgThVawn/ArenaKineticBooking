@@ -147,6 +147,9 @@ function renderTable() {
             statusText = 'Đã duyệt';
             statusBadge = 'bg-emerald-50 text-emerald-700 border-emerald-100';
             actionButtons = `
+                <a href="/owner/invoices/detail.html?bookingId=${b._id}" class="inline-flex items-center gap-1 rounded-xl bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 border border-blue-200 hover:bg-blue-100 cursor-pointer transition-colors no-underline">
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">receipt</span> Hóa đơn
+                </a>
                 <button onclick="openCancelModal('${b._id}', 'CONFIRMED')" class="inline-flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 cursor-pointer transition-colors">
                     <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">cancel</span> Hủy đơn
                 </button>
@@ -165,7 +168,11 @@ function renderTable() {
         } else if (b.status === 'COMPLETED') {
             statusText = 'Hoàn thành';
             statusBadge = 'bg-slate-100 text-slate-600 border-slate-200';
-            actionButtons = `<span class="text-slate-400 text-sm italic px-2 py-2">Không có thao tác</span>`;
+            actionButtons = `
+                <a href="/owner/invoices/detail.html?bookingId=${b._id}" class="inline-flex items-center gap-1 rounded-xl bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 border border-blue-200 hover:bg-blue-100 cursor-pointer transition-colors no-underline">
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">receipt</span> Hóa đơn
+                </a>
+            `;
         } else {
             statusText = 'Đã hủy';
             statusBadge = 'bg-red-50 text-red-700 border-red-100';

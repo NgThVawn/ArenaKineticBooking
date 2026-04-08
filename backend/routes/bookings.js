@@ -208,7 +208,7 @@ router.post('/', checkLogin, BookingValidator, validatedResult, async function (
         req.user._id, 'BOOKING_CREATED',
         'Đặt sân thành công',
         'Đặt sân ' + bookingCode + ' đã được tạo. Vui lòng thanh toán để xác nhận.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(req.user._id), notif);
 
@@ -218,7 +218,7 @@ router.post('/', checkLogin, BookingValidator, validatedResult, async function (
           ownerId, 'NEW_BOOKING',
           'Có đặt sân mới',
           'Khách ' + req.user.fullName + ' đã đặt sân ' + bookingCode,
-          '/owner/bookings/' + booking._id
+          '/owner/bookings/list.html'
         );
         if (io) io.sendToUser(String(ownerId), ownerNotif);
       }
@@ -266,7 +266,7 @@ router.post('/:id/cancel', checkLogin, async function (req, res) {
         req.user._id, 'BOOKING_CANCELLED',
         'Đặt sân đã huỷ',
         'Đặt sân ' + booking.bookingCode + ' đã được huỷ.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(req.user._id), notif);
 
@@ -286,7 +286,7 @@ router.post('/:id/cancel', checkLogin, async function (req, res) {
           booking.field.facility.owner._id, 'BOOKING_CANCEL_REQUEST',
           'Yêu cầu huỷ đặt sân',
           'Khách ' + req.user.fullName + ' yêu cầu huỷ đặt sân ' + booking.bookingCode,
-          '/owner/bookings/' + booking._id
+          '/owner/bookings/list.html'
         );
         if (io) io.sendToUser(String(booking.field.facility.owner._id), ownerNotif);
       }
@@ -306,7 +306,7 @@ router.post('/:id/cancel', checkLogin, async function (req, res) {
           booking.field.facility.owner._id, 'BOOKING_CUSTOMER_CANCELLED',
           'Khách huỷ đặt sân',
           'Khách ' + req.user.fullName + ' đã huỷ đặt sân ' + booking.bookingCode,
-          '/owner/bookings/' + booking._id
+          '/owner/bookings/list.html'
         );
         if (io) io.sendToUser(String(booking.field.facility.owner._id), ownerCancelNotif);
       }
@@ -350,7 +350,7 @@ router.put('/owner/:id/confirm-cancel', checkLogin, checkRole('OWNER', 'ADMIN', 
         booking.user._id, 'CANCEL_APPROVED',
         'Yêu cầu huỷ được chấp thuận',
         'Yêu cầu huỷ đặt sân ' + booking.bookingCode + ' đã được chấp thuận.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(booking.user._id), notif);
       return res.json({ success: true, message: 'Đã chấp thuận huỷ đặt sân' });
@@ -360,7 +360,7 @@ router.put('/owner/:id/confirm-cancel', checkLogin, checkRole('OWNER', 'ADMIN', 
         booking.user._id, 'CANCEL_REJECTED',
         'Yêu cầu huỷ bị từ chối',
         'Yêu cầu huỷ đặt sân ' + booking.bookingCode + ' đã bị từ chối.',
-        '/bookings/' + booking._id
+        '/bookings/history.html'
       );
       if (io) io.sendToUser(String(booking.user._id), rejectNotif);
       return res.json({ success: true, message: 'Đã từ chối huỷ đặt sân' });
